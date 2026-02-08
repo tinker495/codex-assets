@@ -8,6 +8,7 @@ SKILLS_SOURCE_DIR="${CODEX_SKILLS_SOURCE:-$DEFAULT_SKILLS_SOURCE}"
 AUTOMATIONS_SOURCE_DIR="${CODEX_AUTOMATIONS_SOURCE:-$DEFAULT_AUTOMATIONS_SOURCE}"
 SYNC_SKILLS=true
 SYNC_AUTOMATIONS=true
+SYNC_MODE="${CODEX_SYNC_MODE:-merge}"
 REPO_SPEC="${GITHUB_REPO:-}"
 VISIBILITY="${GITHUB_VISIBILITY:-private}"
 COMMIT_PREFIX="${COMMIT_PREFIX:-chore(sync): codex assets update}"
@@ -22,6 +23,9 @@ Options:
   --source <path>              Backward-compatible alias of --skills-source
   --skills-only                Sync only skills
   --automations-only           Sync only automations
+  --mode <merge|mirror>        Sync mode (default: merge)
+  --merge                      Alias of --mode merge
+  --mirror                     Alias of --mode mirror (deletes missing files)
   --repo <owner/name>          GitHub repository to create/use as origin
   --public                     Create repo as public when origin is missing
   --private                    Create repo as private when origin is missing (default)
@@ -30,7 +34,7 @@ Options:
 
 Environment variables:
   CODEX_SKILLS_SOURCE, CODEX_AUTOMATIONS_SOURCE, GITHUB_REPO,
-  GITHUB_VISIBILITY, COMMIT_PREFIX
+  GITHUB_VISIBILITY, COMMIT_PREFIX, CODEX_SYNC_MODE
 HELP
 }
 
@@ -54,6 +58,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --automations-only)
       SYNC_SKILLS=false
+      shift
+      ;;
+    --mode)
+      SYNC_MODE="$2"
+      shift 2
+      ;;
+    --merge)
+      SYNC_MODE="merge"
+      shift
+      ;;
+    --mirror)
+      SYNC_MODE="mirror"
       shift
       ;;
     --repo)
@@ -89,6 +105,15 @@ if [[ "$SYNC_SKILLS" == "false" && "$SYNC_AUTOMATIONS" == "false" ]]; then
   exit 1
 fi
 
+case "$SYNC_MODE" in
+  merge|mirror)
+    ;;
+  *)
+    echo "Invalid --mode value: $SYNC_MODE (expected: merge or mirror)" >&2
+    exit 1
+    ;;
+esac
+
 if [[ "$SYNC_SKILLS" == "true" && ! -d "$SKILLS_SOURCE_DIR" ]]; then
   echo "Skills source directory not found: $SKILLS_SOURCE_DIR" >&2
   exit 1
@@ -123,9 +148,14 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   fi
 fi
 
+RSYNC_DELETE_FLAGS=()
+if [[ "$SYNC_MODE" == "mirror" ]]; then
+  RSYNC_DELETE_FLAGS=(--delete --delete-excluded)
+fi
+
 if [[ "$SYNC_SKILLS" == "true" ]]; then
   mkdir -p "$ROOT_DIR/skills"
-  rsync -a --delete --delete-excluded \
+  rsync -a "${RSYNC_DELETE_FLAGS[@]}" \
     --exclude='.DS_Store' \
     --exclude='.git' \
     --exclude='__pycache__/' \
@@ -135,7 +165,7 @@ fi
 
 if [[ "$SYNC_AUTOMATIONS" == "true" ]]; then
   mkdir -p "$ROOT_DIR/automations"
-  rsync -a --delete --delete-excluded \
+  rsync -a "${RSYNC_DELETE_FLAGS[@]}" \
     --exclude='.DS_Store' \
     --exclude='.git' \
     "$AUTOMATIONS_SOURCE_DIR"/ "$ROOT_DIR/automations"/

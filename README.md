@@ -7,6 +7,19 @@ This repository mirrors local Codex assets from:
 
 and pushes updates to GitHub.
 
+## Sync mode (important)
+
+Default mode is `merge`.
+
+- `merge` (default): copy/update from local source into this repo, but do **not** delete files that are missing locally.
+- `mirror`: strict mirror mode that deletes files in this repo when they are missing from local source.
+
+Use strict mirror mode only when needed:
+
+```bash
+./scripts/sync_and_push.sh --mode mirror --repo tinker495/codex-assets
+```
+
 ## One-time setup + sync
 
 ```bash
@@ -16,6 +29,7 @@ and pushes updates to GitHub.
 - Creates/uses `origin` GitHub repository.
 - Syncs `~/.codex/skills` -> `./skills`.
 - Syncs `~/.codex/automations` -> `./automations`.
+- Keeps repo-only files in default `merge` mode.
 - Commits and pushes when changes exist.
 
 ## Custom source paths
