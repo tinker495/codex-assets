@@ -25,3 +25,23 @@ INTERVAL_MINUTES=30 ./scripts/auto_sync_loop.sh --repo tinker495/codex-skills
 ```
 
 Stop with `Ctrl+C`.
+
+## Persistent background sync on macOS (recommended)
+
+Install a `launchd` agent (runs on login and every N minutes):
+
+```bash
+INTERVAL_MINUTES=30 ./scripts/install_launch_agent.sh
+```
+
+Check status:
+
+```bash
+./scripts/launch_agent_status.sh
+```
+
+Remove agent:
+
+```bash
+./scripts/uninstall_launch_agent.sh
+```
