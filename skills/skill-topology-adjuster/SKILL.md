@@ -16,7 +16,7 @@ Detect topology drift across all installed skills and apply minimal corrective e
 - Installed skills root path (default: `$CODEX_HOME/skills`)
 - Target skill name and path
 - Target skill responsibilities (from request + SKILL.md)
-- Current topology document (default: `skill-creator/references/skill_topology.md`)
+- Current topology document (default: `skill-topology-adjuster/references/skill_topology.md`)
 - Existing delegation edges touching the target skill
 - Change context (new/updated/removed skills, or explicit drift-check request)
 
@@ -31,7 +31,7 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - declared delegation targets
    - delegation evidence in context (explicit skill references and delegation/handoff wording)
    - responsibility-evidence snippets from each SKILL body (`Objective`/`Purpose`/`Workflow`/trigger sections)
-4. Read `skill-creator/references/skill_topology.md`.
+4. Read `skill-topology-adjuster/references/skill_topology.md`.
 5. Run consistency checks across all skills:
    - every installed skill appears in role map
    - role map/layers/graph/tree stay synchronized
@@ -156,4 +156,4 @@ python3 scripts/audit_topology.py --json
 skill-creator/scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-If topology changed, verify role map + graph + tree are synchronized in `skill-creator/references/skill_topology.md`.
+If topology changed, verify role map + graph + tree are synchronized in `skill-topology-adjuster/references/skill_topology.md`.

@@ -138,7 +138,7 @@ def parse_args() -> argparse.Namespace:
     codex_home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
     default_skills_root = codex_home / "skills"
     default_topology = (
-        default_skills_root / ".system" / "skill-creator" / "references" / "skill_topology.md"
+        default_skills_root / "skill-topology-adjuster" / "references" / "skill_topology.md"
     )
     parser = argparse.ArgumentParser(
         description=(

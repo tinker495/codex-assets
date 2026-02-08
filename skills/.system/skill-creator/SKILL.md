@@ -290,7 +290,7 @@ For every new, updated, or removed skill, delegate topology adjustment to `skill
    - what this skill must delegate
 6. Apply returned one-hop delegation edges.
 7. If drift is detected, apply returned corrective edits immediately (topology docs first, then affected delegation wording).
-8. If the graph changed, apply the returned update to `references/skill_topology.md` in the same change, and update source-skill delegation wording for all changed edges in the same commit.
+8. If the graph changed, apply the returned update to `skill-topology-adjuster/references/skill_topology.md` in the same change, and update source-skill delegation wording for all changed edges in the same commit.
 9. Enforce explicit global meta-tool access semantics for `codex-exec-sub-agent` in topology artifacts (for example, `ANY --> CESA` or equivalent wording that means "any skill role can delegate").
 10. Enforce edge parity: every runtime edge in Delegation Graph must also appear in Delegation Tree.
 
@@ -426,7 +426,7 @@ Also validate topology consistency for new/updated skills:
 - Confirm ownership boundaries are explicit in the skill body.
 - Confirm delegation targets use existing skill names.
 - Confirm topology decisions came from `skill-topology-adjuster` when topology changed.
-- Confirm `references/skill_topology.md` role map + graph + tree are updated when edges changed.
+- Confirm `skill-topology-adjuster/references/skill_topology.md` role map + graph + tree are updated when edges changed.
 - Confirm `codex-exec-sub-agent` remains explicitly reusable by any skill role in topology docs.
 - Confirm Delegation Graph edges are mirrored in Delegation Tree for runtime handoff consistency.
 - Confirm every graph-declared `source -> target` edge has explicit `target` skill reference in `source/SKILL.md`.

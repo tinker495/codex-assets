@@ -48,7 +48,7 @@ Provide a compact handoff packet:
 
 5. Adjust skill orchestration topology.
 If role map or edges changed, update:
-- `skill-creator/references/skill_topology.md` role map
+- `skill-topology-adjuster/references/skill_topology.md` role map
 - delegation graph
 - delegation tree
 Reject designs that duplicate specialist internals instead of delegating.
