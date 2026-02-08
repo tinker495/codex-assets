@@ -30,7 +30,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `agents-md-builder` | specialist | AGENTS.md authoring and quality rewrite workflow |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
-| `grepai-deep-analysis` | specialist | deep code analysis protocol |
+| `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with dual-view augmentation gating |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
 | `gh-address-comments` | specialist | PR comment retrieval and response workflow |
@@ -43,7 +43,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `notion-meeting-intelligence` | specialist | Notion-backed meeting preparation and agenda intelligence |
 | `notion-research-documentation` | specialist | multi-source Notion research synthesis and documentation |
 | `notion-spec-to-implementation` | specialist | convert Notion specs into implementation plans and tracking |
-| `rpg-loop-reasoning` | specialist-orchestrator | dual-view closed-loop repository reasoning and incremental RPG evolution |
+| `rpg-loop-reasoning` | specialist | dual-view loop primitives and incremental RPG evolution packs for augmentation |
 | `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent-compression and bloat reduction |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
@@ -61,13 +61,13 @@ Layer 0: Meta/Meta-Tool/Utility
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder,
-  branch-onboarding-brief, code-health, grepai-deep-analysis, gh-fix-ci,
+  branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
   notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation
 
-Layer 2: Specialist-Orchestrators (dual-view or doc-impact composition)
-  rpg-loop-reasoning, refresh-branch-docs, non-test-bloat-reduction
+Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
+  grepai-deep-analysis, refresh-branch-docs, non-test-bloat-reduction
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
@@ -100,11 +100,9 @@ flowchart LR
   BHRW["branch-health-remediation-workflow"] --> BOB["branch-onboarding-brief"]
   BHRW --> CH["code-health"]
   BHRW --> GDA["grepai-deep-analysis"]
-  BHRW --> RLR["rpg-loop-reasoning"]
 
   NTBR["non-test-bloat-reduction"] --> CH
   NTBR --> GDA
-  NTBR --> RLR
 
   CLB["complexity-loc-balancer"] --> NTBR
   CLB --> CH
@@ -113,19 +111,15 @@ flowchart LR
   MM --> RBD["refresh-branch-docs"]
   MM --> GDA
   MM --> CH
-  MM --> RLR
 
   RBD --> BOB
   RBD --> GDA
 
-  RLR["rpg-loop-reasoning"] --> BOB
-  RLR --> GDA
-  RLR --> CH
-  RLR --> RBD
+  GDA --> RLR["rpg-loop-reasoning"]
 
   PR["pr-workflow"] --> BOB
   PR --> CH
-  PR --> RLR
+  PR --> GDA
 
   CRL["codex-ralph-loop"]
 
@@ -177,18 +171,16 @@ flowchart TD
   ORCH --> SWU["session-wrap-up"]
 
   ROOT --> HYB["Specialist-Orchestrators"]
-  HYB --> RLR["rpg-loop-reasoning"]
+  HYB --> GDA["grepai-deep-analysis"]
   HYB --> RBD["refresh-branch-docs"]
   HYB --> NTBR["non-test-bloat-reduction"]
 
   BHRW --> BOB["branch-onboarding-brief"]
   BHRW --> CH["code-health"]
   BHRW --> GDA["grepai-deep-analysis"]
-  BHRW --> RLR
 
   NTBR --> CH
   NTBR --> GDA
-  NTBR --> RLR
 
   CLB --> NTBR
   CLB --> CH
@@ -197,23 +189,19 @@ flowchart TD
   MM --> RBD
   MM --> GDA
   MM --> CH
-  MM --> RLR
 
   RBD --> GDA
   RBD --> BOB
 
   PR --> BOB
   PR --> CH
-  PR --> RLR
+  PR --> GDA
 
   SWU --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
   SC --> STA["skill-topology-adjuster"]
 
-  RLR --> BOB
-  RLR --> GDA
-  RLR --> CH
-  RLR --> RBD
+  GDA --> RLR["rpg-loop-reasoning"]
 
   ROOT --> DOCOPS["Document/Data Specialists"]
   DOCOPS --> DOC["doc"]

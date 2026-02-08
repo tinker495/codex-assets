@@ -67,7 +67,8 @@ Look for:
 - Changed function signatures
 - Removed configuration options
 
-When change impact spans multiple modules or naming drift is ambiguous, delegate impact localization to `rpg-loop-reasoning` in `understanding` mode before finalizing breaking-change notes.
+Delegate first-pass impact localization to `grepai-deep-analysis` before finalizing breaking-change notes.
+When change impact still spans multiple modules or naming drift remains ambiguous after that pass, use `rpg-loop-reasoning` in `understanding` mode as a bounded augmentation lane.
 
 ### 6) Draft PR Description
 
@@ -198,7 +199,8 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 
 - `branch-onboarding-brief`: owns branch diff collection and onboarding metrics.
 - `code-health`: owns health pipeline execution and metric extraction.
-- `rpg-loop-reasoning`: owns dual-view localization for cross-module impact and breaking-change traceability.
+- `grepai-deep-analysis`: owns deep evidence protocol and first-pass impact localization for breaking-change analysis.
+- `rpg-loop-reasoning`: owns dual-view augmentation when `grepai-deep-analysis` indicates unresolved cross-module ambiguity.
 - This skill owns change categorization, PR narrative, approval gating, and PR creation.
 
 ## Output Expectations

@@ -117,6 +117,15 @@ flowchart LR
 - Re-run Pass 2/3 until the model stops changing (stability check).
 - Include a confidence note in synthesis (high/medium/low with rationale).
 
+### RPG Augmentation Lane (Scenario-Bound)
+- `grepai-deep-analysis` keeps ownership of evidence gating, confidence policy, and final synthesis.
+- Optionally delegate a bounded dual-view pass to `rpg-loop-reasoning` when one of these holds:
+  - cross-module drift keeps reopening the same boundary assumptions
+  - analysis requires synchronized understanding + generation constraints on the same node set
+  - Pass 2/3 retries stabilize locally but topology intent is still ambiguous
+- Treat `rpg-loop-reasoning` output as candidate semantic/topology anchors only; re-validate them with this skill's evidence gate before final claims.
+- Do not invert ownership: this skill is the primary owner, and `rpg-loop-reasoning` is augmentation.
+
 ## Sub-Agent Delegation (Scenario-Bound)
 - If grep/search remains noisy after one constrained retry cycle, optionally delegate an isolated fresh-context pass to `codex-exec-sub-agent`.
 - Keep delegation bounded and reproducible: pass a prompt file, set timeout, and preserve JSONL evidence path.

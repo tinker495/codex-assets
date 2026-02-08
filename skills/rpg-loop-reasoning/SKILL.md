@@ -95,8 +95,9 @@ python /Users/mrx-ksjung/.codex/skills/rpg-loop-reasoning/scripts/rpg_query_pack
 - `grepai-deep-analysis` owns deep evidence protocol and noise control.
 - `code-health` owns quality metric pipeline.
 - `refresh-branch-docs` owns documentation rewrite workflow.
-- This skill owns closed-loop orchestration, dual-view alignment, and incremental evolution strategy.
-- Upper orchestrators (`branch-health-remediation-workflow`, `non-test-bloat-reduction`, `main-merge`, `pr-workflow`) may delegate dual-view localization here; this skill does not take over their approval gates or final delivery ownership.
+- This skill owns dual-view loop primitives, alignment mechanics, and incremental evolution strategy.
+- Primary activation path is augmentation from `grepai-deep-analysis`; this skill does not replace grepai evidence gating or final synthesis ownership.
+- Upper orchestrators (`branch-health-remediation-workflow`, `non-test-bloat-reduction`, `main-merge`, `pr-workflow`) should prefer `grepai-deep-analysis` as the first handoff and use this skill through that lane unless a direct dual-view spike is explicitly required.
 
 ## Resources
 
