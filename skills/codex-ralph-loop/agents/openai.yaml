@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codex Ralph Loop"
-  short_description: "Run Ralph-style one-story PRD iterations in Codex"
-  default_prompt: "Execute one Codex Ralph iteration: load/create plan via plan-save-load, validate prd.json, implement only next pending story, run checks, update prd.json/progress.txt, save plan updates."
