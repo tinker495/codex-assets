@@ -280,7 +280,7 @@ To establish the skill's contents, analyze each concrete example to create a lis
 For every new, updated, or removed skill, delegate topology adjustment to `skill-topology-adjuster` in real-time before initialization or major edits.
 
 1. Run strict topology audit first:
-   - `python3 $CODEX_HOME/skills/.system/skill-topology-adjuster/scripts/audit_topology.py`
+   - `python3 $CODEX_HOME/skills/skill-topology-adjuster/scripts/audit_topology.py`
    - stop and fix all `needs-fix` items before continuing when exit code is `1`
 2. Pass installed-skills root path (`$CODEX_HOME/skills`) and target skill scope/responsibilities to `skill-topology-adjuster`.
 3. Require a full installed-skill scan result from `skill-topology-adjuster` (no partial checks).
@@ -410,7 +410,7 @@ python3 -m pip install pyyaml
 
 ```bash
 rg "^---$|^name:|^description:" <path/to/skill-folder>/SKILL.md
-python3 $CODEX_HOME/skills/.system/skill-topology-adjuster/scripts/audit_topology.py --json
+python3 $CODEX_HOME/skills/skill-topology-adjuster/scripts/audit_topology.py --json
 ```
 
 After dependency recovery (or in normal environments), run:
