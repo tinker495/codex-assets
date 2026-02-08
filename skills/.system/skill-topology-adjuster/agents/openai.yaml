@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Topology Adjuster"
+  short_description: "Adjust skill topology ownership and delegation edges"
+  default_prompt: "Analyze skill ownership boundaries and update delegation topology with one-hop rules."

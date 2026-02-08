@@ -218,10 +218,11 @@ Skill creation involves these steps:
 
 1. Understand the skill with concrete examples
 2. Plan reusable skill contents (scripts, references, assets)
-3. Initialize the skill (run init_skill.py)
-4. Edit the skill (implement resources and write SKILL.md)
-5. Validate the skill (run quick_validate.py)
-6. Iterate based on real usage
+3. Delegate topology impact and orchestration boundaries
+4. Initialize the skill (run init_skill.py)
+5. Edit the skill (implement resources and write SKILL.md)
+6. Validate the skill (run quick_validate.py)
+7. Iterate based on real usage
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -274,7 +275,26 @@ Example: When building a `big-query` skill to handle queries like "How many user
 
 To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
 
-### Step 3: Initializing the Skill
+### Step 3: Delegating Topology Impact and Orchestration Boundaries
+
+For every new, updated, or removed skill, delegate topology adjustment to `skill-topology-adjuster` in real-time before initialization or major edits.
+
+1. Run strict topology audit first:
+   - `python3 $CODEX_HOME/skills/.system/skill-topology-adjuster/scripts/audit_topology.py`
+   - stop and fix all `needs-fix` items before continuing when exit code is `1`
+2. Pass installed-skills root path (`$CODEX_HOME/skills`) and target skill scope/responsibilities to `skill-topology-adjuster`.
+3. Require a full installed-skill scan result from `skill-topology-adjuster` (no partial checks).
+4. Apply the returned role classification (`specialist`, `orchestrator`, `utility`, `meta`).
+5. Apply returned ownership boundaries:
+   - what this skill owns
+   - what this skill must delegate
+6. Apply returned one-hop delegation edges.
+7. If drift is detected, apply returned corrective edits immediately (topology docs first, then affected delegation wording).
+8. If the graph changed, apply the returned update to `references/skill_topology.md` in the same change.
+
+Reject a design when `skill-topology-adjuster` flags duplicated specialist internals.
+
+### Step 4: Initializing the Skill
 
 At this point, it is time to actually create the skill.
 
@@ -314,7 +334,7 @@ scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 
 Only include other optional interface fields when the user explicitly provides them. For full field descriptions and examples, see references/openai_yaml.md.
 
-### Step 4: Edit the Skill
+### Step 5: Edit the Skill
 
 When editing the (newly-generated or existing) skill, remember that the skill is being created for another instance of Codex to use. Include information that would be beneficial and non-obvious to Codex. Consider what procedural knowledge, domain-specific details, or reusable assets would help another Codex instance execute these tasks more effectively.
 
@@ -326,6 +346,16 @@ Consult these helpful guides based on your skill's needs:
 - **Specific output formats or quality standards**: See references/output-patterns.md for template and example patterns
 
 These files contain established best practices for effective skill design.
+
+#### Apply Ownership and Delegation Boundaries
+
+Before adding workflow steps, identify whether the behavior is owned by another specialist skill.
+
+- Use `skill-topology-adjuster` output as the source of truth for ownership mapping.
+- Keep orchestrator skills focused on ordering and handoff; do not duplicate specialist internals.
+- Move repeated procedural details (protocols, quality gates, command packs) into the owning skill.
+- In non-owning skills, replace duplicated details with short delegation instructions that reference the owning skill by name.
+- Keep ownership one-hop deep: orchestrator -> specialist. Avoid long delegation chains.
 
 #### Start with Reusable Skill Contents
 
@@ -355,7 +385,7 @@ Do not include any other fields in YAML frontmatter.
 
 Write instructions for using the skill and its bundled resources.
 
-### Step 5: Validate the Skill
+### Step 6: Validate the Skill
 
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
@@ -365,7 +395,14 @@ scripts/quick_validate.py <path/to/skill-folder>
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
 
-### Step 6: Iterate
+Also validate topology consistency for new/updated skills:
+
+- Confirm ownership boundaries are explicit in the skill body.
+- Confirm delegation targets use existing skill names.
+- Confirm topology decisions came from `skill-topology-adjuster` when topology changed.
+- Confirm `references/skill_topology.md` role map + graph + tree are updated when edges changed.
+
+### Step 7: Iterate
 
 After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
 

@@ -9,7 +9,7 @@ description: "Use when a user asks to debug or fix failing GitHub PR checks that
 ## Overview
 
 Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.
-- If a plan-oriented skill (for example `create-plan`) is available, use it; otherwise draft a concise plan inline and request approval before implementing.
+- Draft the fix plan inline in this skill and request approval before implementing.
 
 Prereq: authenticate with the standard GitHub CLI once (for example, run `gh auth login`), then confirm with `gh auth status` (repo + workflow scopes are typically required).
 
@@ -51,11 +51,17 @@ Prereq: authenticate with the standard GitHub CLI once (for example, run `gh aut
    - Provide the failing check name, run URL (if any), and a concise log snippet.
    - Call out missing logs explicitly.
 6. Create a plan.
-   - Use the `create-plan` skill to draft a concise plan and request approval.
+   - Draft a concise inline plan with: failure cause, proposed fix, tests to run, rollback note.
+   - Request explicit approval before implementation.
 7. Implement after approval.
    - Apply the approved plan, summarize diffs/tests, and ask about opening a PR.
 8. Recheck status.
    - After changes, suggest re-running the relevant tests and `gh pr checks` to confirm.
+
+## Delegation Boundaries
+
+- This skill owns GitHub Actions failure inspection, log analysis, and fix-plan gating.
+- `gh-address-comments` owns PR review comment response workflows.
 
 ## Bundled Resources
 

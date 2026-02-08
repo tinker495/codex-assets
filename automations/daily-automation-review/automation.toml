@@ -4,6 +4,6 @@ name = "Daily automation review"
 prompt = "Analyze yesterday's ~/.codex/sessions and existing ~/.codex/automations, detect recurring operational noise in workflows driven by skills or automations, and prioritize update actions that automatically trigger context refinement when noise is high. Prefer updating existing automations over creating new ones, define explicit noise triggers and guardrails, include exact prompt deltas, and avoid duplicates. Open an inbox item with ranked update recommendations and implementation rationale, or provide no-change evidence when signals are weak."
 status = "ACTIVE"
 rrule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10;BYMINUTE=50"
-cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization"]
+cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization", "/Users/mrx-ksjung/project/codex-skills"]
 created_at = 1770271727938
-updated_at = 1770552559202
+updated_at = 1770564920176

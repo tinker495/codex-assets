@@ -148,27 +148,38 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   fi
 fi
 
-RSYNC_DELETE_FLAGS=()
-if [[ "$SYNC_MODE" == "mirror" ]]; then
-  RSYNC_DELETE_FLAGS=(--delete --delete-excluded)
-fi
-
 if [[ "$SYNC_SKILLS" == "true" ]]; then
   mkdir -p "$ROOT_DIR/skills"
-  rsync -a "${RSYNC_DELETE_FLAGS[@]}" \
-    --exclude='.DS_Store' \
-    --exclude='.git' \
-    --exclude='__pycache__/' \
-    --exclude='*.pyc' \
-    "$SKILLS_SOURCE_DIR"/ "$ROOT_DIR/skills"/
+  if [[ "$SYNC_MODE" == "mirror" ]]; then
+    rsync -a --delete --delete-excluded \
+      --exclude='.DS_Store' \
+      --exclude='.git' \
+      --exclude='__pycache__/' \
+      --exclude='*.pyc' \
+      "$SKILLS_SOURCE_DIR"/ "$ROOT_DIR/skills"/
+  else
+    rsync -a \
+      --exclude='.DS_Store' \
+      --exclude='.git' \
+      --exclude='__pycache__/' \
+      --exclude='*.pyc' \
+      "$SKILLS_SOURCE_DIR"/ "$ROOT_DIR/skills"/
+  fi
 fi
 
 if [[ "$SYNC_AUTOMATIONS" == "true" ]]; then
   mkdir -p "$ROOT_DIR/automations"
-  rsync -a "${RSYNC_DELETE_FLAGS[@]}" \
-    --exclude='.DS_Store' \
-    --exclude='.git' \
-    "$AUTOMATIONS_SOURCE_DIR"/ "$ROOT_DIR/automations"/
+  if [[ "$SYNC_MODE" == "mirror" ]]; then
+    rsync -a --delete --delete-excluded \
+      --exclude='.DS_Store' \
+      --exclude='.git' \
+      "$AUTOMATIONS_SOURCE_DIR"/ "$ROOT_DIR/automations"/
+  else
+    rsync -a \
+      --exclude='.DS_Store' \
+      --exclude='.git' \
+      "$AUTOMATIONS_SOURCE_DIR"/ "$ROOT_DIR/automations"/
+  fi
 fi
 
 if [[ ! -f "$ROOT_DIR/.gitignore" ]]; then
