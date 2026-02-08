@@ -1,27 +1,38 @@
-# codex-skills mirror
+# codex-assets mirror
 
-This repository mirrors local Codex skills from `~/.codex/skills` into `./skills` and pushes updates to GitHub.
+This repository mirrors local Codex assets from:
+
+- `~/.codex/skills` -> `./skills`
+- `~/.codex/automations` -> `./automations`
+
+and pushes updates to GitHub.
 
 ## One-time setup + sync
 
 ```bash
-./scripts/sync_and_push.sh --repo tinker495/codex-skills --private
+./scripts/sync_and_push.sh --repo tinker495/codex-assets --private
 ```
 
 - Creates/uses `origin` GitHub repository.
 - Syncs `~/.codex/skills` -> `./skills`.
+- Syncs `~/.codex/automations` -> `./automations`.
 - Commits and pushes when changes exist.
 
-## Custom source path
+## Custom source paths
 
 ```bash
-./scripts/sync_and_push.sh --source /path/to/codex-skill --repo tinker495/codex-skills
+./scripts/sync_and_push.sh \
+  --skills-source /path/to/codex-skill \
+  --automations-source /path/to/codex-automations \
+  --repo tinker495/codex-assets
 ```
+
+`--source` is still supported as an alias of `--skills-source`.
 
 ## Continuous sync loop (optional)
 
 ```bash
-INTERVAL_MINUTES=30 ./scripts/auto_sync_loop.sh --repo tinker495/codex-skills
+INTERVAL_MINUTES=30 ./scripts/auto_sync_loop.sh --repo tinker495/codex-assets
 ```
 
 Stop with `Ctrl+C`.
@@ -33,6 +44,8 @@ Install a `launchd` agent (runs on login and every N minutes):
 ```bash
 INTERVAL_MINUTES=30 ./scripts/install_launch_agent.sh
 ```
+
+The launch agent runs both skills and automations sync jobs.
 
 Check status:
 

@@ -1,0 +1,20 @@
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 `vessel.py`, `vessel_define.py`의 side profile 설명 문자열을 점검.
+- 버그: 최근 변경에서 tiers 방향 설명이 실제 렌더 순서(상단→하단)와 불일치.
+- 수정: side profile 설명을 `tiers top->bottom`으로 정정 (`src/stowage/dataclasses/vessel_define/render/vessel.py`, `src/tui/dataclass_widgets/vessel_define.py`).
+- 검증: 로직 변경 없음; 테스트 미실행.
+- Run time: 2026-02-05 01:35:24 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 side profile 표시 문자열을 점검.
+- 버그: 최근 bay/tiers 순서 반전 변경 후에도 side profile 제목에 `tiers bottom->top`이 남아 실제 렌더링(top->bottom)과 불일치.
+- 수정: side profile 제목을 `tiers top->bottom`으로 정정 (`src/stowage/dataclasses/vessel_define/render/vessel.py`, `src/tui/dataclass_widgets/vessel_define.py`).
+- 검증: 문자열 변경으로 테스트 미실행.
+- Run time: 2026-02-06 01:31:22 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 bay zone header 표시 경로(BayOverlayWidget/render_bay_grid_table)를 점검.
+- 버그: deck_row가 없는 hold-only bay에서도 zone 헤더/컬럼 스타일이 비어 보임(기본 deck zone map 사용으로 col_to_zone이 비어짐).
+- 수정: deck_row 존재 여부에 따라 hold/deck zone map을 선택하고, zone 헤더 길이를 hold_row 기준으로 계산하도록 보정.
+- 검증: `PYTHONPATH=./src python` 스니펫으로 hold-only bay에서 zone 헤더 길이/zone map 정상 확인.
+- Run time: 2026-02-07 01:34:07 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 BayOverlayWidget 관련 변경과 테스트를 점검.
+- 결과: `pytest tests/tui/test_overlay_rules.py -q` 실행 결과 25 passed; 최신 변경과 직접 연관된 실패/재현 가능한 버그 미발견.
+- 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
+- 검증: `pytest tests/tui/test_overlay_rules.py -q`.
+- Run time: 2026-02-08 02:25:50 UTC

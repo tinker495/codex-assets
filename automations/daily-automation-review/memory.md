@@ -1,0 +1,5 @@
+- Summary: Implemented recommended automation updates. Edited `automatically-create-new-skills` prompt to add explicit missing-path noise triggers (`No such file or directory`, missing `collect_branch_info.py`, missing `/shared/code-health`) plus pre-check/fallback guardrails (`test -f/-d`, `rg --files`, `git log --since=1.week --name-only`, `git diff --stat`). Edited `update-agents-md` prompt to require AGENTS discovery before edits, skip missing paths without `sed`, and stop with no-change evidence when no AGENTS files exist.
+- Run time: 2026-02-08T21:08:14+0900
+
+- Summary: Reviewed 2026-02-07 sessions and automations. Found recurring operational noise: missing repo script `scripts/collect_branch_info.py`, missing shared path `/shared/code-health`, and sed on non-existent AGENTS paths. Proposed prompt-delta recommendations to add existence checks, rg-based discovery, and fallback branch info collection in relevant automations (especially Automatically create new skills and Update AGENTS.md). No automation files changed.
+- Run time: 2026-02-08T11:16:26+0900

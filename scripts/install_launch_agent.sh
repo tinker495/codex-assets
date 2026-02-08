@@ -2,12 +2,15 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LABEL="${LAUNCH_AGENT_LABEL:-com.tinker495.codexskills.sync}"
+LABEL="${LAUNCH_AGENT_LABEL:-com.tinker495.codexassets.sync}"
+OLD_LABEL="${OLD_LAUNCH_AGENT_LABEL:-com.tinker495.codexskills.sync}"
 INTERVAL_MINUTES="${INTERVAL_MINUTES:-30}"
-SOURCE_DIR="${CODEX_SKILLS_SOURCE:-${HOME}/.codex/skills}"
+SKILLS_SOURCE_DIR="${CODEX_SKILLS_SOURCE:-${HOME}/.codex/skills}"
+AUTOMATIONS_SOURCE_DIR="${CODEX_AUTOMATIONS_SOURCE:-${HOME}/.codex/automations}"
 REPO_SPEC="${GITHUB_REPO:-}"
 USER_ID="$(id -u)"
 PLIST_PATH="${HOME}/Library/LaunchAgents/${LABEL}.plist"
+OLD_PLIST_PATH="${HOME}/Library/LaunchAgents/${OLD_LABEL}.plist"
 LOG_DIR="${ROOT_DIR}/.logs"
 
 if ! [[ "$INTERVAL_MINUTES" =~ ^[0-9]+$ ]] || [[ "$INTERVAL_MINUTES" -lt 1 ]]; then
@@ -15,8 +18,13 @@ if ! [[ "$INTERVAL_MINUTES" =~ ^[0-9]+$ ]] || [[ "$INTERVAL_MINUTES" -lt 1 ]]; t
   exit 1
 fi
 
-if [[ ! -d "$SOURCE_DIR" ]]; then
-  echo "Source directory not found: $SOURCE_DIR" >&2
+if [[ ! -d "$SKILLS_SOURCE_DIR" ]]; then
+  echo "Skills source directory not found: $SKILLS_SOURCE_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -d "$AUTOMATIONS_SOURCE_DIR" ]]; then
+  echo "Automations source directory not found: $AUTOMATIONS_SOURCE_DIR" >&2
   exit 1
 fi
 
@@ -43,8 +51,10 @@ cat > "$PLIST_PATH" <<EOF_PLIST
   <key>ProgramArguments</key>
   <array>
     <string>${ROOT_DIR}/scripts/sync_and_push.sh</string>
-    <string>--source</string>
-    <string>${SOURCE_DIR}</string>
+    <string>--skills-source</string>
+    <string>${SKILLS_SOURCE_DIR}</string>
+    <string>--automations-source</string>
+    <string>${AUTOMATIONS_SOURCE_DIR}</string>
     <string>--repo</string>
     <string>${REPO_SPEC}</string>
   </array>
@@ -74,6 +84,12 @@ cat > "$PLIST_PATH" <<EOF_PLIST
 </dict>
 </plist>
 EOF_PLIST
+
+if [[ "$OLD_LABEL" != "$LABEL" ]]; then
+  launchctl bootout "gui/${USER_ID}" "$OLD_PLIST_PATH" >/dev/null 2>&1 || true
+  launchctl disable "gui/${USER_ID}/${OLD_LABEL}" >/dev/null 2>&1 || true
+  rm -f "$OLD_PLIST_PATH"
+fi
 
 launchctl bootout "gui/${USER_ID}" "$PLIST_PATH" >/dev/null 2>&1 || true
 launchctl bootstrap "gui/${USER_ID}" "$PLIST_PATH"

@@ -1,0 +1,2 @@
+- Updated AGENTS.md quick-start with Makefile targets: sync, git-lfs, editable, install-hooks, code-health-diff, clean; bumped last-updated date.
+- Runtime: 2026-02-08 10:43:24 +0900

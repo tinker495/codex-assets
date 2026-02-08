@@ -2,34 +2,59 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DEFAULT_SOURCE="${HOME}/.codex/skills"
-SOURCE_DIR="${CODEX_SKILLS_SOURCE:-$DEFAULT_SOURCE}"
+DEFAULT_SKILLS_SOURCE="${HOME}/.codex/skills"
+DEFAULT_AUTOMATIONS_SOURCE="${HOME}/.codex/automations"
+SKILLS_SOURCE_DIR="${CODEX_SKILLS_SOURCE:-$DEFAULT_SKILLS_SOURCE}"
+AUTOMATIONS_SOURCE_DIR="${CODEX_AUTOMATIONS_SOURCE:-$DEFAULT_AUTOMATIONS_SOURCE}"
+SYNC_SKILLS=true
+SYNC_AUTOMATIONS=true
 REPO_SPEC="${GITHUB_REPO:-}"
 VISIBILITY="${GITHUB_VISIBILITY:-private}"
-COMMIT_PREFIX="${COMMIT_PREFIX:-chore(sync): codex skills update}"
+COMMIT_PREFIX="${COMMIT_PREFIX:-chore(sync): codex assets update}"
 
 print_help() {
   cat <<'HELP'
 Usage: ./scripts/sync_and_push.sh [options]
 
 Options:
-  --source <path>        Source folder to sync (default: ~/.codex/skills)
-  --repo <owner/name>    GitHub repository to create/use as origin
-  --public               Create repo as public when origin is missing
-  --private              Create repo as private when origin is missing (default)
-  --message <text>       Commit message prefix
-  -h, --help             Show this help
+  --skills-source <path>       Skills source folder (default: ~/.codex/skills)
+  --automations-source <path>  Automations source folder (default: ~/.codex/automations)
+  --source <path>              Backward-compatible alias of --skills-source
+  --skills-only                Sync only skills
+  --automations-only           Sync only automations
+  --repo <owner/name>          GitHub repository to create/use as origin
+  --public                     Create repo as public when origin is missing
+  --private                    Create repo as private when origin is missing (default)
+  --message <text>             Commit message prefix
+  -h, --help                   Show this help
 
 Environment variables:
-  CODEX_SKILLS_SOURCE, GITHUB_REPO, GITHUB_VISIBILITY, COMMIT_PREFIX
+  CODEX_SKILLS_SOURCE, CODEX_AUTOMATIONS_SOURCE, GITHUB_REPO,
+  GITHUB_VISIBILITY, COMMIT_PREFIX
 HELP
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --source)
-      SOURCE_DIR="$2"
+    --skills-source)
+      SKILLS_SOURCE_DIR="$2"
       shift 2
+      ;;
+    --automations-source)
+      AUTOMATIONS_SOURCE_DIR="$2"
+      shift 2
+      ;;
+    --source)
+      SKILLS_SOURCE_DIR="$2"
+      shift 2
+      ;;
+    --skills-only)
+      SYNC_AUTOMATIONS=false
+      shift
+      ;;
+    --automations-only)
+      SYNC_SKILLS=false
+      shift
       ;;
     --repo)
       REPO_SPEC="$2"
@@ -59,8 +84,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! -d "$SOURCE_DIR" ]]; then
-  echo "Source directory not found: $SOURCE_DIR" >&2
+if [[ "$SYNC_SKILLS" == "false" && "$SYNC_AUTOMATIONS" == "false" ]]; then
+  echo "Nothing to sync: both skills and automations are disabled." >&2
+  exit 1
+fi
+
+if [[ "$SYNC_SKILLS" == "true" && ! -d "$SKILLS_SOURCE_DIR" ]]; then
+  echo "Skills source directory not found: $SKILLS_SOURCE_DIR" >&2
+  exit 1
+fi
+
+if [[ "$SYNC_AUTOMATIONS" == "true" && ! -d "$AUTOMATIONS_SOURCE_DIR" ]]; then
+  echo "Automations source directory not found: $AUTOMATIONS_SOURCE_DIR" >&2
   exit 1
 fi
 
@@ -84,23 +119,34 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   if gh repo view "$REPO_SPEC" >/dev/null 2>&1; then
     git remote add origin "https://github.com/${REPO_SPEC}.git"
   else
-    gh repo create "$REPO_SPEC" "--$VISIBILITY" --source "$ROOT_DIR" --remote origin --description "Synced Codex skills backup"
+    gh repo create "$REPO_SPEC" "--$VISIBILITY" --source "$ROOT_DIR" --remote origin --description "Synced Codex skills and automations backup"
   fi
 fi
 
-mkdir -p "$ROOT_DIR/skills"
-rsync -a --delete --delete-excluded \
-  --exclude='.DS_Store' \
-  --exclude='.git' \
-  --exclude='__pycache__/' \
-  --exclude='*.pyc' \
-  "$SOURCE_DIR"/ "$ROOT_DIR/skills"/
+if [[ "$SYNC_SKILLS" == "true" ]]; then
+  mkdir -p "$ROOT_DIR/skills"
+  rsync -a --delete --delete-excluded \
+    --exclude='.DS_Store' \
+    --exclude='.git' \
+    --exclude='__pycache__/' \
+    --exclude='*.pyc' \
+    "$SKILLS_SOURCE_DIR"/ "$ROOT_DIR/skills"/
+fi
+
+if [[ "$SYNC_AUTOMATIONS" == "true" ]]; then
+  mkdir -p "$ROOT_DIR/automations"
+  rsync -a --delete --delete-excluded \
+    --exclude='.DS_Store' \
+    --exclude='.git' \
+    "$AUTOMATIONS_SOURCE_DIR"/ "$ROOT_DIR/automations"/
+fi
 
 if [[ ! -f "$ROOT_DIR/.gitignore" ]]; then
   cat > "$ROOT_DIR/.gitignore" <<'IGNORE'
 .DS_Store
 __pycache__/
 *.pyc
+.logs/
 IGNORE
 fi
 

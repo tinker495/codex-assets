@@ -1,0 +1,9 @@
+version = 1
+id = "update-agents-md"
+name = "Update AGENTS.md"
+prompt = "Update AGENTS.md with newly discovered workflows and commands.\n\nExecution scope:\n- Work only in /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization.\n- Do not use or generate a worktree path for this automation run.\n\nConstraints:\n- Keep edits minimal, accurate, and grounded in repo usage.\n- Do not touch unrelated sections or auto-generated files.\n- Before editing, discover candidate files with `rg --files -g 'AGENTS.md'` and edit only discovered paths.\n- If an expected path is missing, do not run sed on it; skip and report the skip reason.\n- If no AGENTS.md files are discovered, report no-change evidence and stop.\n- If you are unsure, prefer adding a TODO with a short note rather than inventing."
+status = "ACTIVE"
+rrule = "RRULE:FREQ=WEEKLY;BYHOUR=10;BYMINUTE=35;BYDAY=MO,TU,WE,TH,FR"
+cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization"]
+created_at = 1770210765702
+updated_at = 1770552545920

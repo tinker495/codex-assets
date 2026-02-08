@@ -1,0 +1,9 @@
+version = 1
+id = "automation"
+name = "저녁 코드 의도 정렬 점검"
+prompt = "로컬 날짜 기준 오늘의 코드 변경을 검토하세요. 변경 의도(요구사항/대화 맥락)와 실제 구현이 어긋난 것으로 보이는 지점을 찾으면 근거를 정리하고 사용자에게 1~3개의 구체적 챌린지 질문을 남기세요. 각 질문에는 관련 파일 경로와 왜 의심되는지 포함하세요. 어긋남이 없으면 정렬 이슈 없음과 잔여 리스크만 짧게 보고하세요."
+status = "ACTIVE"
+rrule = "RRULE:FREQ=WEEKLY;BYHOUR=19;BYMINUTE=0;BYDAY=MO,TU,WE,TH,FR"
+cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization"]
+created_at = 1770362911300
+updated_at = 1770559432708
