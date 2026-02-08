@@ -89,11 +89,18 @@ if ! git remote get-url origin >/dev/null 2>&1; then
 fi
 
 mkdir -p "$ROOT_DIR/skills"
-rsync -a --delete --exclude='.DS_Store' --exclude='.git' "$SOURCE_DIR"/ "$ROOT_DIR/skills"/
+rsync -a --delete --delete-excluded \
+  --exclude='.DS_Store' \
+  --exclude='.git' \
+  --exclude='__pycache__/' \
+  --exclude='*.pyc' \
+  "$SOURCE_DIR"/ "$ROOT_DIR/skills"/
 
 if [[ ! -f "$ROOT_DIR/.gitignore" ]]; then
   cat > "$ROOT_DIR/.gitignore" <<'IGNORE'
 .DS_Store
+__pycache__/
+*.pyc
 IGNORE
 fi
 
