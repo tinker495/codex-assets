@@ -22,7 +22,8 @@ Detect topology drift across all installed skills and apply minimal corrective e
 
 ## Workflow
 
-1. Enumerate all installed skills under `$CODEX_HOME/skills`.
+1. Enumerate all installed skills under `$CODEX_HOME/skills`, including hidden namespaces (for example `.system`).
+   - If using `rg`, prefer `rg --files -uu "$CODEX_HOME/skills" -g 'SKILL.md'` so hidden directories are not skipped.
 2. Read every discovered `SKILL.md` once to build a full inventory.
 3. Normalize inventory into a topology view:
    - skill name
@@ -141,6 +142,7 @@ Do not ask the caller to re-derive role/edge logic after handoff; return final t
 - Keep scope to topology and orchestration boundaries only.
 - Do not rewrite specialist internals.
 - Do not skip full installed-skill scan; topology decisions are invalid without it.
+- Do not rely on default file globs that skip hidden directories; include hidden skill namespaces in full scans.
 - Keep delegation chains short and explicit.
 - Prefer minimal diffs to existing topology docs.
 - Apply smallest safe correction set; avoid speculative refactors.
