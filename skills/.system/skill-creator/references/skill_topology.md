@@ -21,6 +21,8 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `skill-installer` | meta | install/list external skills |
 | `automation-creator` | utility | Codex automation directives |
 | `codex-session-recall` | utility | session log recall and filtering |
+| `codex-exec-sub-agent` | utility | isolated sub-agent execution and JSONL run capture |
+| `agents-md-builder` | specialist | AGENTS.md authoring and quality rewrite workflow |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
 | `grepai-deep-analysis` | specialist | deep code analysis protocol |
@@ -38,10 +40,11 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `notion-spec-to-implementation` | specialist | convert Notion specs into implementation plans and tracking |
 | `rpg-loop-reasoning` | specialist-orchestrator | dual-view closed-loop repository reasoning and incremental RPG evolution |
 | `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
-| `non-test-bloat-reduction` | orchestrator | per-commit non-test intent-compression and bloat reduction |
+| `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent-compression and bloat reduction |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
+| `codex-ralph-loop` | orchestrator | one-story PRD delivery loop with stateful plan/progress gating |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
 
 ## Orchestration Layers
@@ -49,20 +52,22 @@ Define ownership and delegation boundaries across installed skills so specialist
 ```text
 Layer 0: Meta/Utility
   skill-creator, skill-topology-adjuster, skill-installer, automation-creator,
-  codex-session-recall
+  codex-session-recall, codex-exec-sub-agent
 
 Layer 1: Specialists (single-domain ownership)
+  agents-md-builder,
   branch-onboarding-brief, code-health, grepai-deep-analysis, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
   notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation
 
 Layer 2: Specialist-Orchestrators (dual-view or doc-impact composition)
-  rpg-loop-reasoning, refresh-branch-docs
+  rpg-loop-reasoning, refresh-branch-docs, non-test-bloat-reduction
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
-  branch-health-remediation-workflow, non-test-bloat-reduction,
-  complexity-loc-balancer, main-merge, pr-workflow, session-wrap-up
+  branch-health-remediation-workflow, complexity-loc-balancer,
+  main-merge, pr-workflow, codex-ralph-loop,
+  session-wrap-up
 ```
 
 ## Delegation Graph
@@ -99,6 +104,12 @@ flowchart LR
   PR --> CH
   PR --> RLR
 
+  CRL["codex-ralph-loop"] --> BOB
+  CRL --> CH
+  CRL --> GDA
+  CRL --> CESA["codex-exec-sub-agent"]
+  CRL --> AMB["agents-md-builder"]
+
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
 
@@ -127,15 +138,16 @@ flowchart TD
 
   ROOT --> ORCH["Primary Orchestrators"]
   ORCH --> BHRW["branch-health-remediation-workflow"]
-  ORCH --> NTBR["non-test-bloat-reduction"]
   ORCH --> CLB["complexity-loc-balancer"]
   ORCH --> MM["main-merge"]
   ORCH --> PR["pr-workflow"]
+  ORCH --> CRL["codex-ralph-loop"]
   ORCH --> SWU["session-wrap-up"]
 
   ROOT --> HYB["Specialist-Orchestrators"]
   HYB --> RLR["rpg-loop-reasoning"]
   HYB --> RBD["refresh-branch-docs"]
+  HYB --> NTBR["non-test-bloat-reduction"]
 
   BHRW --> BOB["branch-onboarding-brief"]
   BHRW --> CH["code-health"]
@@ -162,6 +174,12 @@ flowchart TD
   PR --> CH
   PR --> RLR
 
+  CRL --> BOB
+  CRL --> CH
+  CRL --> GDA
+  CRL --> CESA["codex-exec-sub-agent"]
+  CRL --> AMB["agents-md-builder"]
+
   SWU --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
   SC --> STA["skill-topology-adjuster"]
@@ -173,6 +191,7 @@ flowchart TD
 
   ROOT --> DOCOPS["Document/Data Specialists"]
   DOCOPS --> DOC["doc"]
+  DOCOPS --> AMB["agents-md-builder"]
   DOCOPS --> PDF["pdf"]
   DOCOPS --> SS["spreadsheet"]
   DOCOPS --> JNB["jupyter-notebook"]
@@ -193,6 +212,7 @@ flowchart TD
   META --> SI["skill-installer"]
   META --> AC["automation-creator"]
   META --> CSR["codex-session-recall"]
+  META --> CESA["codex-exec-sub-agent"]
   META --> GHF["gh-fix-ci"]
   META --> GHC["gh-address-comments"]
 ```

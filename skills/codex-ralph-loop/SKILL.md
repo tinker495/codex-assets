@@ -7,6 +7,17 @@ description: Run a Ralph-style PRD-driven delivery loop in Codex with fresh-cont
 
 Execute a Ralph-style loop inside Codex. Treat this document as an execution contract for one iteration.
 
+## Ownership and Delegation
+
+This skill owns one-story iteration sequencing, pass/block gating, and state updates in `prd.json` and `progress.txt`.
+Delegate adjacent responsibilities to specialized skills instead of duplicating their playbooks:
+
+1. Delegate repository baseline and diff onboarding to `branch-onboarding-brief` when scope is unclear at iteration start.
+2. Delegate deep code-path uncertainty resolution to `grepai-deep-analysis` before implementing risky stories.
+3. Delegate hotspot/risk scans to `code-health` when selecting or splitting the next story.
+4. Delegate isolated long-running or fresh-context execution to `codex-exec-sub-agent` when direct execution may pollute local context.
+5. Delegate AGENTS policy drafting or rewrite tasks to `agents-md-builder` when the iteration includes instruction-document maintenance.
+
 ## Invocation Contract
 
 Assume these files exist in repository root unless user overrides paths:
