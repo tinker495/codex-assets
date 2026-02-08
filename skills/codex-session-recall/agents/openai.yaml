@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Recall"
+  short_description: "Load recent Codex sessions and reuse context"
+  default_prompt: "Use $codex-session-recall to load the latest N Codex sessions (default 4) and find reusable context."

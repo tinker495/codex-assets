@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grepai Deep Analysis"
+  short_description: "Analyze/어널라이즈/분석 요청을 노이즈 제어 + 증거 게이트 기반으로 수행하는 grepai 심층 분석"
+  default_prompt: "Use noise-aware multi-pass grepai analysis. Treat search as discovery, enforce trace+rg evidence gates, and apply retry budgets with stability stop rules."

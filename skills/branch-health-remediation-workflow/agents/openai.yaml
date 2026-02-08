@@ -1,0 +1,4 @@
+interface:
+  display_name: "Branch Health Remediation Workflow"
+  short_description: "Onboard branch, run health+grepai, propose plan."
+  default_prompt: "Run onboarding, code health, non-test grepai, then propose remediation plan."
