@@ -1,4 +1,0 @@
-interface:
-  display_name: "Automation Creator"
-  short_description: "Create/update/view Codex automations"
-  default_prompt: "Use $automation-creator to schedule a weekly automation that summarizes CI failures."

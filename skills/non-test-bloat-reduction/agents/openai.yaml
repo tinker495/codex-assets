@@ -1,4 +1,0 @@
-interface:
-  display_name: "Non-Test Bloat Reduction"
-  short_description: "Intent-first per-commit non-test code compression."
-  default_prompt: "Run one per-commit non-test bloat reduction cycle focused on abstraction and concept alignment. Focus on core runtime modules and exclude script/CLI glue paths (such as src/scripts, scripts, tools, and bin) unless explicitly requested. First output an intent-cluster table (intent_id, symbols/call_forms, shared_rule, projected_removable_loc, behavioral_gate, conceptual_gate, physical_gate, risk) before proposing edits. Then execute deletion-first structural refactors (including justified medium/high-risk merges) and iterate until non-test net reduction is at least 200 lines (target 300) while preserving behavior. Do not count comment/docstring-only churn toward the quota."

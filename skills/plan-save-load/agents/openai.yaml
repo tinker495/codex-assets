@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Save Load"
+  short_description: "Ticketed branch plan memory in /tmp"
+  default_prompt: "Use $plan-save-load to create, resume, complete-and-archive, inspect status, reopen archived plans, and clean branch-aware plans in /tmp with ticket discipline."

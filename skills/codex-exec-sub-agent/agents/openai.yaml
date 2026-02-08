@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Exec Sub-Agent"
+  short_description: "Run codex exec and capture JSONL logs"
+  default_prompt: "Use $codex-exec-sub-agent to delegate a task to codex exec --json, store the full JSONL event stream in a timestamped run folder, and return the run.jsonl path."

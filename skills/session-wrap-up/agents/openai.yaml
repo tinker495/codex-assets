@@ -1,4 +1,0 @@
-interface:
-  display_name: "Session Wrap-Up"
-  short_description: "Summarize sessions and orchestrate skill evolution"
-  default_prompt: "Use $session-wrap-up to close this session, capture reusable insights, and prepare skill/topology updates."

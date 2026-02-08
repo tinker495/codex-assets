@@ -1,4 +1,0 @@
-interface:
-  display_name: "Complexity LOC Balancer"
-  short_description: "Balance complexity drops with LOC guardrails."
-  default_prompt: "Use $complexity-loc-balancer to reduce complexity without net non-test code growth."

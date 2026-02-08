@@ -1,0 +1,4 @@
+interface:
+  display_name: "AGENTS.md Builder"
+  short_description: "Draft and refine AGENTS.md files"
+  default_prompt: "Use $agents-md-builder to draft an AGENTS.md for this repository."
