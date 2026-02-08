@@ -12,6 +12,9 @@ Use the bundled runner script to avoid manually picking filenames/paths for the 
 - Script: `~/.codex/skills/codex-exec-sub-agent/scripts/run.sh`
 - Default runs dir: `~/.codex/sub_agent_runs/` (override with `CODEX_SUBAGENT_RUNS_DIR`)
 - Print: the full path to `run.jsonl` as the last line on stdout
+- Options:
+  - `--prompt-file <path>`: read prompt from file (recommended for long/complex prompts)
+  - `--timeout-sec <n>`: hard timeout in seconds (returns exit code `124` on timeout)
 
 ## How to call
 
@@ -23,10 +26,22 @@ Pass the prompt via stdin (recommended for long prompts):
 cat prompt.txt | ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh
 ```
 
+Pass prompt file path explicitly (best for shell-quoting safety):
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --prompt-file /full/path/prompt.txt
+```
+
 Or pass it as an argument (fine for short prompts):
 
 ```bash
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh "Do X, then write results to /full/path/output.md"
+```
+
+Apply timeout when you want deterministic failure instead of hanging:
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
 ```
 
 ## How to write the prompt
@@ -37,8 +52,11 @@ Treat the sub-agent prompt as a mini-brief:
 - Limit scope: include what to do and what to ignore.
 - Set output rules: format, length, tone, and structure.
 - Prefer deterministic artifacts: if you want file edits, specify full paths.
+- Avoid shell-fragile inline quoting for multi-line prompts; use `--prompt-file` or stdin.
 
 ## Notes
 
 - Prefer full paths for files the sub-agent should create or update.
+- Avoid `/tmp`/`/var/tmp` output paths when sandbox policies may block writes; prefer workspace paths or `~/.codex/sub_agent_runs`.
 - Use the JSONL log for inspection/debugging; treat file outputs requested in the prompt as the real deliverable.
+- The runner always prints the JSONL path last, even on failures/timeouts, so callers can inspect logs reliably.

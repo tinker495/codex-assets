@@ -26,6 +26,10 @@ Provide:
 - `resources`: scripts/references/assets needs.
 - `validation`: quick_validate + topology consistency.
 
+If sub-agent execution is part of the proposed workflow, include:
+- `sub-agent invocation`: `--prompt-file` + `--timeout-sec` standard.
+- `output path policy`: avoid `/tmp`/`/var/tmp`; prefer workspace or `~/.codex/sub_agent_runs`.
+
 ## Topology Change Gate
 
 Update topology only when one of these changed:
@@ -35,3 +39,9 @@ Update topology only when one of these changed:
 - ownership transfer between skills
 
 If none changed, record: `no topology change`.
+
+## Sub-Agent Stability Gate
+
+1. If `codex-exec-sub-agent` is involved, verify quoting-safe call examples use `--prompt-file`.
+2. Require bounded execution (`--timeout-sec`) for long-running or uncertain scans.
+3. Ensure failure handling keeps JSONL run path discoverable for postmortem.

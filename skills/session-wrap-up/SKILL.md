@@ -56,6 +56,14 @@ Reject designs that duplicate specialist internals instead of delegating.
 6. Publish a session wrap-up report.
 Follow the output contract below and keep recommendations executable in the next session.
 
+Optional (heavy evidence scans): delegate bounded background analysis to `codex-exec-sub-agent` using quoting-safe invocation.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
+Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets; avoid `/tmp`/`/var/tmp` paths when sandbox policies may block writes.
+
 ## Output Contract (chat)
 
 Always return, in order:
@@ -91,6 +99,7 @@ ASCII flow format:
 - `session-wrap-up` owns end-of-session synthesis, prioritization, and orchestration decisions.
 - `skill-creator` owns skill initialization/editing/validation procedures.
 - `codex-session-recall` owns historical session retrieval when prior-session evidence is required.
+- `codex-exec-sub-agent` is optional execution utility for long-running or fresh-context scans; keep delegation one-hop and bounded by timeout.
 - This skill must not duplicate `skill-creator` internals; delegate instead.
 
 ## Naming Rules

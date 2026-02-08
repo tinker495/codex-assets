@@ -24,6 +24,8 @@ DELEGATION_KEYWORDS = (
 )
 STANDALONE_MARKERS = ("standalone", "delegation optional")
 ORCHESTRATOR_ROLES = {"orchestrator", "specialist-orchestrator"}
+META_ORCHESTRATOR_ROLES = {"meta-orchestrator"}
+UTILITY_LIKE_ROLES = {"utility", "meta-tool"}
 RESPONSIBILITY_SECTION_HINTS = (
     "objective",
     "purpose",
@@ -106,6 +108,10 @@ RESPONSIBILITY_STOPWORDS = {
     "workflows",
 }
 TOKEN_PATTERN = re.compile(r"[a-zA-Z][a-zA-Z0-9-]{2,}")
+MERMAID_NODE_PATTERN = re.compile(r'([A-Za-z0-9_]+)\["([^"]+)"\]')
+MERMAID_EDGE_PATTERN = re.compile(
+    r"([A-Za-z0-9_]+)(?:\[[^\]]*\])?\s*-->\s*([A-Za-z0-9_]+)(?:\[[^\]]*\])?"
+)
 OVERLAP_MIN_SHARED_TOKENS = 7
 OVERLAP_MIN_SIMILARITY = 0.34
 OVERLAP_UTILITY_MIN_SIMILARITY = 0.42
@@ -256,6 +262,19 @@ def extract_section(text: str, heading: str) -> str:
     return match.group(1) if match else ""
 
 
+def parse_mermaid_aliases_and_edges(section_text: str) -> tuple[dict[str, str], set[tuple[str, str]]]:
+    alias_to_label: dict[str, str] = {}
+    edges: set[tuple[str, str]] = set()
+    for raw in section_text.splitlines():
+        line = raw.strip()
+        for alias, label in MERMAID_NODE_PATTERN.findall(line):
+            alias_to_label.setdefault(alias, label)
+        match = MERMAID_EDGE_PATTERN.search(line)
+        if match:
+            edges.add((match.group(1), match.group(2)))
+    return alias_to_label, edges
+
+
 def detect_responsibility_overlaps(
     names: list[str],
     name_to_skill: dict[str, SkillRecord],
@@ -295,7 +314,7 @@ def detect_responsibility_overlaps(
         right_role = role_map.get(right, "missing")
 
         min_similarity = OVERLAP_MIN_SIMILARITY
-        if "utility" in {left_role, right_role}:
+        if UTILITY_LIKE_ROLES & {left_role, right_role}:
             min_similarity = OVERLAP_UTILITY_MIN_SIMILARITY
         if similarity < min_similarity:
             continue
@@ -321,6 +340,20 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
     layers_section = extract_section(topology_text, "Orchestration Layers")
     graph_section = extract_section(topology_text, "Delegation Graph")
     tree_section = extract_section(topology_text, "Delegation Tree (Operational View)")
+    graph_alias_to_label, graph_edges = parse_mermaid_aliases_and_edges(graph_section)
+    tree_alias_to_label, tree_edges = parse_mermaid_aliases_and_edges(tree_section)
+    missing_graph_edges_in_tree = sorted(graph_edges - tree_edges)
+    edge_sync_impacted_skills: set[str] = set()
+    for left_alias, right_alias in missing_graph_edges_in_tree:
+        for alias in (left_alias, right_alias):
+            resolved = graph_alias_to_label.get(alias) or tree_alias_to_label.get(alias) or alias
+            if resolved in installed_names:
+                edge_sync_impacted_skills.add(resolved)
+
+    meta_tool_any_skill_access = bool(
+        re.search(r"codex-exec-sub-agent", topology_text, flags=re.I)
+        and re.search(r"any skill", topology_text, flags=re.I)
+    )
     overlap_candidates = detect_responsibility_overlaps(
         names=installed_names,
         name_to_skill=name_to_skill,
@@ -344,7 +377,7 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
 
         if role == "missing":
             issues.append("missing from role map")
-        elif role in ORCHESTRATOR_ROLES:
+        elif role in (ORCHESTRATOR_ROLES | META_ORCHESTRATOR_ROLES):
             if not refs:
                 issues.append("no explicit cross-skill references")
             if not delegation_hits:
@@ -360,6 +393,10 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
                 issues.append("missing from delegation graph section")
             if name not in tree_section:
                 issues.append("missing from delegation tree section")
+        if name in edge_sync_impacted_skills:
+            issues.append("delegation graph edge not mirrored in delegation tree section")
+        if name == "codex-exec-sub-agent" and not meta_tool_any_skill_access:
+            issues.append("topology missing explicit any-skill meta-tool access statement")
         for candidate in overlap_index.get(name, []):
             peer = candidate["skills"][0] if candidate["skills"][1] == name else candidate["skills"][1]
             issues.append(
@@ -398,6 +435,15 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
         global_findings.append(f"role-map skills missing in graph: {', '.join(missing_in_graph)}")
     if missing_in_tree:
         global_findings.append(f"role-map skills missing in tree: {', '.join(missing_in_tree)}")
+    if missing_graph_edges_in_tree:
+        global_findings.append(
+            "delegation graph edges missing in tree: "
+            + ", ".join(f"{left}->{right}" for left, right in missing_graph_edges_in_tree)
+        )
+    if not meta_tool_any_skill_access:
+        global_findings.append(
+            "topology missing explicit any-skill reusable meta-tool statement for codex-exec-sub-agent"
+        )
     if overlap_candidates:
         global_findings.append(
             (
@@ -417,7 +463,11 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             "missing_in_layers": missing_in_layers,
             "missing_in_graph": missing_in_graph,
             "missing_in_tree": missing_in_tree,
+            "missing_graph_edges_in_tree": [
+                f"{left}->{right}" for left, right in missing_graph_edges_in_tree
+            ],
         },
+        "meta_tool_any_skill_access": meta_tool_any_skill_access,
         "responsibility_overlap_candidates": overlap_candidates,
         "needs_fix_count": len(needs_fix),
         "needs_fix_skills": needs_fix,

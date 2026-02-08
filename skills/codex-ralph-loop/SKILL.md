@@ -10,13 +10,22 @@ Execute a Ralph-style loop inside Codex. Treat this document as an execution con
 ## Ownership and Delegation
 
 This skill owns one-story iteration sequencing, pass/block gating, and state updates in `prd.json` and `progress.txt`.
-Delegate adjacent responsibilities to specialized skills instead of duplicating their playbooks:
+As a top-level loop policy owner, it may delegate to any relevant specialist or utility skill when needed.
+Do not treat any single downstream skill as a fixed dependency unless the scenario explicitly requires it.
 
 1. Delegate repository baseline and diff onboarding to `branch-onboarding-brief` when scope is unclear at iteration start.
 2. Delegate deep code-path uncertainty resolution to `grepai-deep-analysis` before implementing risky stories.
 3. Delegate hotspot/risk scans to `code-health` when selecting or splitting the next story.
-4. Delegate isolated long-running or fresh-context execution to `codex-exec-sub-agent` when direct execution may pollute local context.
-5. Delegate AGENTS policy drafting or rewrite tasks to `agents-md-builder` when the iteration includes instruction-document maintenance.
+4. Optionally delegate isolated long-running or fresh-context execution to `codex-exec-sub-agent`.
+5. Optionally delegate AGENTS policy drafting or rewrite tasks to `agents-md-builder`.
+
+When using `codex-exec-sub-agent`, prefer quoting-safe and bounded calls:
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
+Use workspace paths or `~/.codex/sub_agent_runs` for outputs; avoid `/tmp`/`/var/tmp` paths in prompts when sandbox rules may block writes.
 
 ## Invocation Contract
 

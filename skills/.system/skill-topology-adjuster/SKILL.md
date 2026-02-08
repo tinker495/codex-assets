@@ -1,6 +1,6 @@
 ---
 name: skill-topology-adjuster
-description: Continuously reconcile Codex skill topology so all installed skills are structured and delegation to specialized skills stays consistent. Use when a skill is created/updated/removed, when topology drift is suspected, or when role classification (`specialist`, `orchestrator`, `utility`, `meta`) and delegation edges must be corrected in real time.
+description: Continuously reconcile Codex skill topology so all installed skills are structured and delegation to specialized skills stays consistent. Use when a skill is created/updated/removed, when topology drift is suspected, or when role classification (`specialist`, `orchestrator`, `specialist-orchestrator`, `meta`, `meta-orchestrator`, `utility`, `meta-tool`) and delegation edges must be corrected in real time.
 ---
 
 # Skill Topology Adjuster
@@ -41,10 +41,10 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - detect responsibility-overlap candidates across skills by directly reading SKILL text, then check explicit delegation/reference exists between the pair
    - every skill has a per-skill audit status (`pass`/`needs-fix`) with reason
    - apply strict role checks:
-     - `orchestrator` or `specialist-orchestrator`: require explicit cross-skill references and delegation/handoff wording
+     - `orchestrator`, `specialist-orchestrator`, or `meta-orchestrator`: require explicit cross-skill references and delegation/handoff wording
      - `meta`: require explicit delegation signal or explicit standalone note (`standalone`, `delegation optional`)
-     - `specialist`/`utility`: no mandatory delegation, but must not claim foreign ownership
-6. For the target skill, classify role as exactly one: `specialist`, `orchestrator`, `utility`, `meta`.
+     - `specialist`/`utility`/`meta-tool`: no mandatory delegation, but must not claim foreign ownership
+6. For the target skill, classify role as exactly one: `specialist`, `orchestrator`, `specialist-orchestrator`, `meta`, `meta-orchestrator`, `utility`, `meta-tool`.
 7. Define ownership boundaries:
    - Owned here (what this skill owns)
    - Delegated out (which existing skill must own the rest)

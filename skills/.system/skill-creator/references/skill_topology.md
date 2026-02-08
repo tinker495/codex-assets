@@ -12,6 +12,11 @@ Define ownership and delegation boundaries across installed skills so specialist
 4. Keep delegation shallow by default: orchestrator -> specialist.
 5. Allow one composed handoff only through designated `specialist-orchestrator` nodes when it replaces duplicated internals.
 
+## Role Definitions
+
+- `meta-orchestrator`: top-level orchestrator that can freely coordinate any role (`meta`, `meta-tool`, `utility`, `orchestrator`, `specialist-orchestrator`, `specialist`) based on scenario needs.
+- `meta-tool`: cross-cutting tool role that can be reused by any skill role (`specialist`, `orchestrator`, `specialist-orchestrator`, `meta`, `meta-orchestrator`, `utility`) without fixed hard-coded delegation edges.
+
 ## Role Map
 
 | Skill | Role | Primary Ownership |
@@ -21,7 +26,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `skill-installer` | meta | install/list external skills |
 | `automation-creator` | utility | Codex automation directives |
 | `codex-session-recall` | utility | session log recall and filtering |
-| `codex-exec-sub-agent` | utility | isolated sub-agent execution and JSONL run capture |
+| `codex-exec-sub-agent` | meta-tool | isolated sub-agent execution and JSONL run capture |
 | `agents-md-builder` | specialist | AGENTS.md authoring and quality rewrite workflow |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
@@ -44,15 +49,15 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
-| `codex-ralph-loop` | orchestrator | one-story PRD delivery loop with stateful plan/progress gating |
+| `codex-ralph-loop` | meta-orchestrator | top-level Ralph loop policy and cross-skill orchestration governance |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
 
 ## Orchestration Layers
 
 ```text
-Layer 0: Meta/Utility
+Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, automation-creator,
-  codex-session-recall, codex-exec-sub-agent
+  codex-session-recall, codex-exec-sub-agent, codex-ralph-loop
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder,
@@ -66,7 +71,7 @@ Layer 2: Specialist-Orchestrators (dual-view or doc-impact composition)
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
-  main-merge, pr-workflow, codex-ralph-loop,
+  main-merge, pr-workflow,
   session-wrap-up
 ```
 
@@ -104,11 +109,7 @@ flowchart LR
   PR --> CH
   PR --> RLR
 
-  CRL["codex-ralph-loop"] --> BOB
-  CRL --> CH
-  CRL --> GDA
-  CRL --> CESA["codex-exec-sub-agent"]
-  CRL --> AMB["agents-md-builder"]
+  CRL["codex-ralph-loop"]
 
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
@@ -128,7 +129,11 @@ flowchart LR
 
   DOC["doc"] --> PDF["pdf"]
   SS["spreadsheet"] --> PDF
+  ANY["any-skill (*)"] --> CESA["codex-exec-sub-agent"]
 ```
+
+`codex-exec-sub-agent` is a cross-cutting meta-tool and `agents-md-builder` is an elemental specialist.
+`ANY --> CESA` denotes optional runtime delegation capability from any skill role.
 
 ## Delegation Tree (Operational View)
 
@@ -141,7 +146,6 @@ flowchart TD
   ORCH --> CLB["complexity-loc-balancer"]
   ORCH --> MM["main-merge"]
   ORCH --> PR["pr-workflow"]
-  ORCH --> CRL["codex-ralph-loop"]
   ORCH --> SWU["session-wrap-up"]
 
   ROOT --> HYB["Specialist-Orchestrators"]
@@ -174,12 +178,6 @@ flowchart TD
   PR --> CH
   PR --> RLR
 
-  CRL --> BOB
-  CRL --> CH
-  CRL --> GDA
-  CRL --> CESA["codex-exec-sub-agent"]
-  CRL --> AMB["agents-md-builder"]
-
   SWU --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
   SC --> STA["skill-topology-adjuster"]
@@ -206,15 +204,18 @@ flowchart TD
   DOC --> PDF
   SS --> PDF
 
-  ROOT --> META["Meta and Utility"]
+  ROOT --> META["Meta / Meta-Tool / Utility"]
   META --> SC["skill-creator"]
   META --> STA["skill-topology-adjuster"]
   META --> SI["skill-installer"]
   META --> AC["automation-creator"]
   META --> CSR["codex-session-recall"]
+  META --> CRL["codex-ralph-loop"]
   META --> CESA["codex-exec-sub-agent"]
   META --> GHF["gh-fix-ci"]
   META --> GHC["gh-address-comments"]
+
+  ANY["Any Skill (Universal Access)"] --> CESA
 ```
 
 ## Refactor Checklist
@@ -226,7 +227,7 @@ flowchart TD
 
 ## New Skill Onboarding Checklist
 
-1. Classify the new skill role: `specialist`, `orchestrator`, `utility`, or `meta`.
+1. Classify the new skill role: `specialist`, `orchestrator`, `specialist-orchestrator`, `meta`, `meta-orchestrator`, `utility`, or `meta-tool`.
 2. Add the skill to the role map.
 3. Add delegation edges to the graph only when they are real runtime handoffs.
 4. Keep delegation depth to one hop by default; allow one composed handoff only via listed specialist-orchestrators.
