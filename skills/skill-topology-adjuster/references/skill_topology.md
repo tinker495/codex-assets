@@ -49,7 +49,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
-| `codex-ralph-loop` | meta-orchestrator | top-level Ralph loop policy and cross-skill orchestration governance |
+| `ralph-driven-development` | meta-orchestrator | unified Ralph loop policy across PRD iterations and ordered spec-runner delivery |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
 
 ## Orchestration Layers
@@ -57,7 +57,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 ```text
 Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, automation-creator,
-  codex-session-recall, codex-exec-sub-agent, codex-ralph-loop
+  codex-session-recall, codex-exec-sub-agent, ralph-driven-development
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder,
@@ -77,7 +77,7 @@ Layer 3: Primary Orchestrators (task-level delivery ownership)
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
   grepai-deep-analysis, branch-health-remediation-workflow,
   non-test-bloat-reduction, rpg-loop-reasoning,
-  skill-topology-adjuster, codex-ralph-loop, session-wrap-up, gh-fix-ci
+  skill-topology-adjuster, ralph-driven-development, session-wrap-up, gh-fix-ci
 ```
 
 ## Sub-Agent Activation Scenarios
@@ -89,7 +89,7 @@ Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
 | non-test-bloat-reduction | repeated candidate-cluster sweeps are needed over broad code areas | bounded long-running passes with traceable JSONL logs |
 | rpg-loop-reasoning | dual-view loop needs independent semantic/topology verification passes | reduce coupled reasoning errors between passes |
 | skill-topology-adjuster | strict parity checks or O(N^2) overlap validation is requested | independent verification lane for drift adjudication |
-| codex-ralph-loop | story execution needs fresh-context implementation bursts | avoid state bleed between story iterations |
+| ralph-driven-development | story/spec execution needs fresh-context implementation bursts | avoid state bleed between iterations |
 | session-wrap-up | retrospective requires broad evidence mining before synthesis | offload heavy background scans while preserving main summary flow |
 | gh-fix-ci | Actions logs are large, multi-run, or require repeated forensic extraction | isolate log-heavy analysis with reproducible artifacts |
 
@@ -121,7 +121,7 @@ flowchart LR
   PR --> CH
   PR --> GDA
 
-  CRL["codex-ralph-loop"]
+  RDD["ralph-driven-development"]
 
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
@@ -148,7 +148,7 @@ flowchart LR
   NTBR --> CESA
   RLR --> CESA
   STA --> CESA
-  CRL --> CESA
+  RDD --> CESA
   SWU --> CESA
   GHF --> CESA
 ```
@@ -226,7 +226,7 @@ flowchart TD
   META --> SI["skill-installer"]
   META --> AC["automation-creator"]
   META --> CSR["codex-session-recall"]
-  META --> CRL["codex-ralph-loop"]
+  META --> RDD["ralph-driven-development"]
   META --> CESA["codex-exec-sub-agent"]
   META --> GHF["gh-fix-ci"]
   META --> GHC["gh-address-comments"]
@@ -238,7 +238,7 @@ flowchart TD
   NTBR --> CESA
   RLR --> CESA
   STA --> CESA
-  CRL --> CESA
+  RDD --> CESA
   SWU --> CESA
   GHF --> CESA
 ```

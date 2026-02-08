@@ -8,7 +8,7 @@ Use this file to select the right Ralph-style iteration pattern before writing `
 - Execute one story per invocation unless user explicitly asks for multiple iterations.
 - Use `brief` output as source of truth for next story selection.
 - Keep repository-agnostic defaults; load specialization profiles only when they match the repo.
-- Persist iteration plan state with `plan-save-load` (`load/create/save/complete`).
+- Persist iteration state in repository artifacts (`prd.json`, `progress.txt`, `docs/done.md`, `docs/logs/agent-run.log`) based on active mode.
 
 ## 1) Feature Delivery
 

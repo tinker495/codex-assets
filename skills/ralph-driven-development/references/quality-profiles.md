@@ -54,5 +54,5 @@ make test
 ## Helper Command
 
 ```bash
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py quality-plan --repo-root . --json
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py quality-plan --repo-root . --json
 ```

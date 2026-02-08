@@ -16,7 +16,7 @@ def resolve_repo_path(path: str, repo_root: Path) -> Path:
     return candidate if candidate.is_absolute() else (repo_root / candidate)
 
 
-def get_spec_list(specs_dir: Path) -> list[str]:
+def get_spec_list(specs_dir: Path, repo_root: Path) -> list[str]:
     if not specs_dir.exists():
         raise FileNotFoundError(f"Specs directory not found: {specs_dir}")
     specs: list[str] = []
@@ -24,7 +24,7 @@ def get_spec_list(specs_dir: Path) -> list[str]:
         if path.name in {"README.md", "done.md"}:
             continue
         if re.match(r"^\d{4}-.*\.md$", path.name):
-            specs.append(str(path.as_posix()))
+            specs.append(path.relative_to(repo_root).as_posix())
     if not specs:
         raise ValueError(f"No specs found in {specs_dir}")
     return specs
@@ -118,17 +118,18 @@ def main() -> int:
     parser.add_argument("--max-attempts-per-spec", type=int, default=5)
     parser.add_argument("--log-path", default="docs/logs/agent-run.log")
     parser.add_argument("--done-path", default="docs/done.md")
+    parser.add_argument("--repo-root", default=".", help="Repository root to run specs in")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parent
+    repo_root = Path(args.repo_root).resolve()
     os.chdir(repo_root)
 
     specs_dir = resolve_repo_path(args.specs_dir, repo_root)
     log_path = resolve_repo_path(args.log_path, repo_root)
     done_path = resolve_repo_path(args.done_path, repo_root)
 
-    specs = get_spec_list(specs_dir)
+    specs = get_spec_list(specs_dir, repo_root)
     done_set = load_done(done_path)
 
     codex_args = args.codex_args.split()

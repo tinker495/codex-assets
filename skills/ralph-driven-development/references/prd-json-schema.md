@@ -49,20 +49,20 @@ Use this schema for Ralph-style execution backlogs in Codex.
 ## Validation Command
 
 ```bash
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py validate --prd prd.json --strict-warnings
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py validate --prd prd.json --strict-warnings
 ```
 
 ## Iteration State Commands
 
 ```bash
 # One-shot summary for agent decision logic
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py brief --prd prd.json
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py brief --prd prd.json
 
 # Suggest quality-check command set for this repo
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py quality-plan --repo-root . --json
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py quality-plan --repo-root . --json
 
 # Record blocked story without flipping passes=true
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py mark-blocked \
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py mark-blocked \
   --prd prd.json \
   --story-id US-001 \
   --reason "failed quality gate" \

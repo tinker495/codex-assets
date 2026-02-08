@@ -1,81 +1,86 @@
 ---
-name: codex-ralph-loop
-description: Run a Ralph-style PRD-driven delivery loop in Codex with fresh-context iterations, one-story-at-a-time implementation, and persistent memory in `prd.json` plus `progress.txt`. Use when asked to "run Ralph", "work story-by-story from a PRD", "convert PRD to execution backlog", or "autonomously iterate until all stories pass". Korean trigger intents include "반복", "반복 실행", "계속 반복", "다음 반복", "다음 스토리 반복 처리", and "반복 루프".
+name: ralph-driven-development
+description: Unified Ralph execution skill that combines one-story PRD loop delivery in Codex with an external ordered-spec runner workflow. Use when asked to run Ralph loops, execute one story at a time from `prd.json`, continue iterative delivery, or run sequential spec files until a completion phrase is emitted.
 ---
 
-# Codex Ralph Loop
+# Ralph Driven Development
 
-Execute a Ralph-style loop inside Codex. Treat this document as an execution contract for one iteration.
+Run Ralph-style iterative delivery with one unified skill.
+This skill merges the former Codex in-session loop and external spec-runner workflow.
 
 ## Ownership and Delegation
 
-This skill owns one-story iteration sequencing, pass/block gating, and state updates in `prd.json` and `progress.txt`.
-As a top-level loop policy owner, it may delegate to any relevant specialist or utility skill when needed.
-Do not treat any single downstream skill as a fixed dependency unless the scenario explicitly requires it.
+This skill owns:
 
-1. Delegate repository baseline and diff onboarding to `branch-onboarding-brief` when scope is unclear at iteration start.
-2. Delegate deep code-path uncertainty resolution to `grepai-deep-analysis` before implementing risky stories.
-3. Delegate hotspot/risk scans to `code-health` when selecting or splitting the next story.
-4. Optionally delegate isolated long-running or fresh-context execution to `codex-exec-sub-agent`.
-5. Optionally delegate AGENTS policy drafting or rewrite tasks to `agents-md-builder`.
+- Ralph loop sequencing and stop conditions.
+- State updates for iterative progress artifacts (`prd.json`, `progress.txt`, `docs/done.md`, `docs/logs/agent-run.log`).
+- Story/spec pass-block gating.
 
-When using `codex-exec-sub-agent`, prefer quoting-safe and bounded calls:
+This skill may delegate specialist work as needed:
+
+1. Delegate branch baseline/diff onboarding to `branch-onboarding-brief` when scope is unclear.
+2. Delegate deep implementation-path uncertainty to `grepai-deep-analysis` before risky changes.
+3. Delegate hotspot/risk scans to `code-health` for sizing or prioritization.
+4. Delegate AGENTS policy rewrite tasks to `agents-md-builder` when requested.
+5. Optionally delegate long-running isolated execution to `codex-exec-sub-agent` when fresh context or retry isolation is useful.
+
+When using `codex-exec-sub-agent`, prefer bounded calls:
 
 ```bash
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
 ```
 
-Use workspace paths or `~/.codex/sub_agent_runs` for outputs; avoid `/tmp`/`/var/tmp` paths in prompts when sandbox rules may block writes.
+## Execution Modes
 
-## Invocation Contract
+Choose exactly one mode per invocation.
 
-Assume these files exist in repository root unless user overrides paths:
+### Mode A: In-Codex PRD Loop (default)
+
+Use this mode when `prd.json` exists or user asks for one-story iterative implementation.
+
+Expected files:
 
 - `prd.json`
 - `progress.txt`
 - `AGENTS.md` (repo or nearest parent)
 
-Start each invocation by reading:
+Workflow:
 
-1. `references/scenario-catalog.md`
-2. `references/prd-json-schema.md`
-3. repo-local `AGENTS.md`
-4. `references/quality-profiles.md`
-5. Optional repo-specific profile only if it matches target repo (example: `references/jaxtar-quality-profile.md`)
-6. `references/plan-save-load-integration.md`
-
-## Plan Lifecycle (Required)
-
-Manage iteration plans with `plan-save-load` skill assets:
-`python ~/.codex/skills/plan-save-load/scripts/plan_save_load.py ...`
-
-1. Resume latest plan for this repo/branch/group:
-   `load --repo-dir . --plan-group ralph-loop --latest`
-2. If missing, create it:
-   `create --repo-dir . --plan-group ralph-loop`
-3. At iteration start/end, append plan updates:
-   `save --repo-dir . --plan-group ralph-loop --latest --stdin --append`
-4. When all stories pass, archive completion:
-   `complete --repo-dir . --plan-group ralph-loop --latest --summary "all stories passed" --move`
-
-## One-Iteration Procedure
-
-1. Run `validate` on `prd.json`.
-2. Run `brief` and pick `nextStory`.
-3. If no pending story exists, return `<promise>COMPLETE</promise>`.
-4. Implement exactly one story.
-5. Select quality checks with `quality-plan` and run them.
-6. If checks pass:
+1. Read `references/scenario-catalog.md`, `references/prd-json-schema.md`, `references/quality-profiles.md`, and repo-local `AGENTS.md`.
+2. Validate `prd.json`.
+3. Read `brief` output and pick `nextStory`.
+4. If no pending story exists, return `<promise>COMPLETE</promise>`.
+5. Implement exactly one story.
+6. Run quality checks from repo `AGENTS.md` or `quality-plan` fallback.
+7. If checks pass:
    1. Commit with `feat: [Story ID] - [Story Title]`.
    2. Mark story passed.
-   3. Append structured progress entry.
-   4. Append success note to plan via `plan_save_load.py save --append`.
-7. If checks fail:
+   3. Append one structured progress entry.
+8. If checks fail:
    1. Keep `passes: false`.
    2. Mark story blocked with reason and next action.
-   3. Append structured failure progress entry.
-   4. Append failure note to plan via `plan_save_load.py save --append`.
-8. Stop after one story unless user explicitly requests multiple iterations.
+   3. Append one structured failure progress entry.
+9. Stop after one story unless user explicitly asks for multiple iterations.
+
+### Mode B: Ordered Spec Runner (external loop)
+
+Use this mode when user asks to drive a `docs/tasks/*.md` sequence with a magic completion phrase.
+
+Expected files:
+
+- `docs/specifications.md` (plan)
+- `docs/tasks/*.md` (ordered spec units like `0001-...md`)
+- `docs/done.md` (completed specs)
+- `docs/logs/agent-run.log` (run transcript)
+
+Workflow:
+
+1. Run `scripts/ralph.py` against the repository root.
+2. For each pending spec, invoke Codex with the spec prompt contract.
+3. Mark completion only when magic phrase appears after implementation/commit.
+4. Append full run output to `docs/logs/agent-run.log`.
+5. Append finished spec paths to `docs/done.md`.
+6. Resume safely by rerunning; completed specs are skipped.
 
 ## PRD Preparation
 
@@ -90,7 +95,7 @@ If user provides only an idea and no backlog:
 
 - Keep stories dependency-safe and ordered: schema -> backend -> UI -> polish.
 - Reject vague acceptance criteria like "works well".
-- Require concrete checks (commands, observable UI behavior, test expectations).
+- Require concrete checks (commands, observable behavior, test expectations).
 - For UI stories, include browser verification in acceptance criteria.
 
 ## Definition of Done
@@ -105,103 +110,83 @@ Mark a story done only when all conditions hold:
 
 If any condition fails, keep `passes: false` and record blockers in story `notes`.
 
-## Failure Handling
-
-When iteration checks fail:
-
-1. Do not mark story passed.
-2. Use `mark-blocked` to append blocker reason and next action in `notes`.
-3. Add a concise progress entry describing failure, evidence, and recovery plan.
-4. If scope is too large, split story and re-prioritize.
-
 ## Completion Rule
 
 When all stories in `prd.json` have `passes: true`, return:
 `<promise>COMPLETE</promise>`
 
-## Helper Script
-
-Use `scripts/ralph_state.py` for deterministic state operations:
+## Commands
 
 ```bash
-# Show progress summary
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py status --prd prd.json
+# PRD state summary
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py status --prd prd.json
 
-# Print machine-readable iteration brief (includes nextStory and complete flag)
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py brief --prd prd.json
+# Machine-readable brief with next story
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py brief --prd prd.json
 
-# Suggest quality checks for current repository
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py quality-plan --repo-root . --json
+# Suggested quality checks
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py quality-plan --repo-root . --json
 
-# Try to load latest plan (create if missing)
-python ~/.codex/skills/plan-save-load/scripts/plan_save_load.py load --repo-dir . --plan-group ralph-loop --latest
-python ~/.codex/skills/plan-save-load/scripts/plan_save_load.py create --repo-dir . --plan-group ralph-loop
+# Print next pending story
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py next --prd prd.json
 
-# Print the next story to execute
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py next --prd prd.json
+# Mark pass
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py mark-pass --prd prd.json --story-id US-003
 
-# Mark a story complete
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py mark-pass --prd prd.json --story-id US-003
-
-# Mark a story blocked after failed checks
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py mark-blocked \
+# Mark blocked
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py mark-blocked \
   --prd prd.json \
   --story-id US-003 \
   --reason "pytest failed in tests/test_diffusion_drop_analysis.py" \
   --next-action "fix failing assertion and rerun focused test"
 
-# Validate schema + criteria quality gates
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py validate --prd prd.json --strict-warnings
+# Validate PRD contract + quality gates
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py validate --prd prd.json --strict-warnings
 
-# Append one structured progress entry
-python ~/.codex/skills/codex-ralph-loop/scripts/ralph_state.py append-progress \
+# Append structured progress
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py append-progress \
   --progress progress.txt \
   --story-id US-003 \
   --summary "Implemented queue reuse optimization in search expansion." \
   --file src/search/engine.py \
   --learning "Keep loop state immutable to avoid trace divergence."
 
-# Append iteration summary to plan markdown (pipe text)
-cat <<'EOF' | python ~/.codex/skills/plan-save-load/scripts/plan_save_load.py save \
-  --repo-dir . \
-  --plan-group ralph-loop \
-  --latest \
-  --stdin \
-  --append
-## Iteration: US-003
-- Result: success
-- Checks: pytest -q, pre-commit run --all-files
-- Next: pick next pending story
-EOF
-
-# Archive finished plan when backlog is complete
-python ~/.codex/skills/plan-save-load/scripts/plan_save_load.py complete \
-  --repo-dir . \
-  --plan-group ralph-loop \
-  --latest \
-  --summary "all stories passed" \
-  --move
+# Run ordered spec loop from repository root
+python ~/.codex/skills/ralph-driven-development/scripts/ralph.py --repo-root .
 ```
 
 ## Guardrails
 
-- Never mark a story passed unless quality checks for that story pass.
-- Never implement multiple stories silently in one iteration.
-- Keep `progress.txt` append-only; do not delete prior entries.
+- Never mark a story passed unless required checks pass.
+- Never silently implement multiple stories in one iteration.
+- Keep `progress.txt` append-only.
 - Preserve user-authored changes outside the current story scope.
-- Prefer small commits to keep iteration rollback cheap.
+- In spec-runner mode, do not mark spec done without the magic phrase.
 
 ## Output Contract
 
 At end of invocation:
 
 1. If backlog complete, include `<promise>COMPLETE</promise>`.
-2. Otherwise report completed story id, checks run, and updated pending count.
+2. Otherwise report completed story/spec, checks run, and remaining pending count.
+
+## Trigger Phrases
+
+- "run Ralph"
+- "Ralph loop"
+- "ralph-driven-development"
+- "work story-by-story from prd.json"
+- "continue iterative delivery"
+- "반복"
+- "반복 실행"
+- "계속 반복"
+- "다음 반복"
+- "다음 스토리 반복 처리"
+- "반복 루프"
 
 ## References
 
-- `references/prd-json-schema.md`: JSON contract and quality checklist for conversion.
 - `references/scenario-catalog.md`: recommended use cases, anti-patterns, trigger phrases.
+- `references/prd-json-schema.md`: JSON contract and quality checklist.
 - `references/quality-profiles.md`: stack-based fallback quality checks when AGENTS.md is incomplete.
-- `references/plan-save-load-integration.md`: plan create/load/save/complete playbook for ralph-loop iterations.
 - `references/jaxtar-quality-profile.md`: optional specialization example for one repository.

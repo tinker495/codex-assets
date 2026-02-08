@@ -1,4 +1,4 @@
 interface:
-  display_name: "Codex Ralph Loop"
-  short_description: "Run Ralph-style one-story PRD iterations in Codex"
-  default_prompt: "Execute one Codex Ralph iteration: load/create plan via plan-save-load, validate prd.json, implement only next pending story, run checks, update prd.json/progress.txt, save plan updates."
+  display_name: "Ralph Driven Development"
+  short_description: "Run Ralph-style one-story PRD loops or ordered spec-runner iterations"
+  default_prompt: "Execute Ralph Driven Development for one iteration: validate prd.json, implement only next pending story or next pending spec, run quality checks, and update progress artifacts."
