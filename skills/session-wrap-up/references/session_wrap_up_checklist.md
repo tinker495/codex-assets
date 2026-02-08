@@ -5,6 +5,7 @@
 1. Confirm the session has a clear end boundary.
 2. Confirm at least one reusable insight exists.
 3. Confirm ownership can be assigned without overlap.
+4. If any action retires/removes skill assets, require `mirror` sync mode.
 
 ## Insight Extraction Grid
 
@@ -39,6 +40,16 @@ Update topology only when one of these changed:
 - ownership transfer between skills
 
 If none changed, record: `no topology change`.
+
+## Retirement and Sync Mode Gate
+
+When an action includes skill retirement, rename, or removal:
+
+1. Move retired skill out of active root first:
+   - `~/.codex/skills/<skill-name>` -> `~/.codex/archived-skills/<skill-name>`
+2. Require mirror sync for deletion reflection:
+   - `cd <mirror-repo> && ./scripts/sync_and_push.sh --mirror --repo <owner/name>`
+3. Use default merge sync only for additive/non-deleting changes.
 
 ## Sub-Agent Stability Gate
 

@@ -34,6 +34,15 @@ When using `codex-exec-sub-agent`, prefer bounded calls:
 
 Choose exactly one mode per invocation.
 
+### Mode Selection Gate (required)
+
+Use this decision order before execution:
+
+1. If user explicitly asks for story-by-story PRD execution, choose Mode A.
+2. If user explicitly asks to run ordered `docs/tasks/*.md` specs with a completion phrase, choose Mode B.
+3. If both contexts exist but user intent is ambiguous, default to Mode A and state that assumption.
+4. Do not run both modes in one invocation unless user explicitly requests it.
+
 ### Mode A: In-Codex PRD Loop (default)
 
 Use this mode when `prd.json` exists or user asks for one-story iterative implementation.
@@ -172,6 +181,7 @@ At end of invocation:
 
 ## Trigger Phrases
 
+- Mode A (PRD loop):
 - "run Ralph"
 - "Ralph loop"
 - "ralph-driven-development"
@@ -183,6 +193,12 @@ At end of invocation:
 - "다음 반복"
 - "다음 스토리 반복 처리"
 - "반복 루프"
+
+- Mode B (ordered spec runner):
+- "run specs in docs/tasks"
+- "process 0001, 0002... specs"
+- "use magic phrase completion"
+- "resume from docs/done.md"
 
 ## References
 

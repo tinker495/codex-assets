@@ -56,6 +56,12 @@ Reject designs that duplicate specialist internals instead of delegating.
 6. Publish a session wrap-up report.
 Follow the output contract below and keep recommendations executable in the next session.
 
+7. Emit sync-mode and retirement guidance when asset removal is involved.
+If proposed actions remove/retire/rename skill folders or files, include:
+- retirement path move first (`~/.codex/skills/<name>` -> `~/.codex/archived-skills/<name>`)
+- mirror sync mode requirement (`./scripts/sync_and_push.sh --mirror ...`) so deletions are reflected in mirror/GitHub
+- non-removal changes may use default merge sync
+
 Optional (heavy evidence scans): delegate bounded background analysis to `codex-exec-sub-agent` using quoting-safe invocation.
 
 ```bash
@@ -72,7 +78,7 @@ Always return, in order:
 3. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`).
 4. Delegation plan (`orchestrator -> specialist`) for each action.
 5. Topology delta summary (if no change, say "no topology change").
-6. Immediate next command/task for handoff.
+6. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
 
 ASCII flow format:
 
