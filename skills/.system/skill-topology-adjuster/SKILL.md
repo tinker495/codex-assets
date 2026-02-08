@@ -35,7 +35,12 @@ Detect topology drift across all installed skills and apply minimal corrective e
 5. Run consistency checks across all skills:
    - every installed skill appears in role map
    - role map/layers/graph/tree stay synchronized
+   - every runtime edge declared in Delegation Graph also appears in Delegation Tree
    - delegation targets exist and reflect specialization boundaries
+   - `codex-exec-sub-agent` is explicitly represented as reusable by any skill role
+   - for every graph-declared `source -> target` edge between installed skills, the source skill `SKILL.md` must contain an explicit reference to the target skill
+   - for every graph-declared `skill -> codex-exec-sub-agent` preferred edge, that source skill `SKILL.md` must also contain scenario-bound `codex-exec-sub-agent` delegation guidance
+   - sub-agent preferred activators are explicitly documented in hierarchy/scenario form for high-cost scans (for example grep/search-heavy, O(N^2) parity checks, large log forensics)
    - orchestrators delegate specialist internals instead of duplicating them
    - delegation depth stays one hop unless explicitly allowed
    - detect responsibility-overlap candidates across skills by directly reading SKILL text, then check explicit delegation/reference exists between the pair
@@ -54,6 +59,7 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - update topology artifacts in one change:
    - Role map table
    - Orchestration layers
+   - Sub-agent activation scenario catalog (when changed)
    - Delegation graph (Mermaid)
    - Delegation tree (Mermaid)
    - update affected skill instructions only for ownership/delegation wording when needed
@@ -76,6 +82,39 @@ Detect topology drift across all installed skills and apply minimal corrective e
 
 Run this skill on every skill create/update/remove event and on explicit topology check requests.
 If no drift is found, return a no-op handoff with evidence.
+
+## Dual Verification Standard
+
+When requests require high-assurance topology validation (for example O(N^2) edge parity checks), run two independent passes:
+
+1. Sub-agent pass (`codex-exec-sub-agent`) in fresh context.
+2. Local pass (current agent) with the same parity/meta-tool checks.
+3. Compare outcomes and stop on any disagreement until reconciled.
+
+Standardize this evidence set in both passes:
+
+- graph/tree edge parity over installed skill pairs
+- graph-only and tree-only edge sets
+- explicit `codex-exec-sub-agent` universal-access proof (`ANY -> CESA` semantics)
+- strict auditor result (`scripts/audit_topology.py --json`)
+
+If the sub-agent cannot write a requested report file (read-only or permission errors), require inline report fallback and keep the JSONL run path as evidence.
+
+## Sub-Agent Preferred Activation Policy
+
+When keeping topology current, maintain an explicit "preferred activator" lane for `codex-exec-sub-agent` in the topology hierarchy.
+
+Minimum scenario coverage:
+
+- grep/search-heavy discovery where retries are likely (`grepai-deep-analysis` and related orchestrators)
+- strict parity/overlap validation that benefits from independent fresh-context confirmation (`skill-topology-adjuster`)
+- long-running forensic collection (`gh-fix-ci`, large logs) or broad retrospective evidence scans (`session-wrap-up`)
+
+Policy constraints:
+
+- keep these edges optional and scenario-bound; they do not replace primary ownership/delegation
+- if a preferred activator is added in graph, mirror it in tree in the same change
+- keep rationale documented in the topology scenario catalog
 
 ## Scripts
 
@@ -113,6 +152,7 @@ Run:
 
 ```bash
 python3 scripts/audit_topology.py
+python3 scripts/audit_topology.py --json
 skill-creator/scripts/quick_validate.py <path/to/skill-folder>
 ```
 

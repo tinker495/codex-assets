@@ -117,6 +117,15 @@ flowchart LR
 - Re-run Pass 2/3 until the model stops changing (stability check).
 - Include a confidence note in synthesis (high/medium/low with rationale).
 
+## Sub-Agent Delegation (Scenario-Bound)
+- If grep/search remains noisy after one constrained retry cycle, optionally delegate an isolated fresh-context pass to `codex-exec-sub-agent`.
+- Keep delegation bounded and reproducible: pass a prompt file, set timeout, and preserve JSONL evidence path.
+- Use this lane for heavy or repeated exploration only; final claim quality gates still remain in this skill.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
 ## Output Contract
 - Provide a short behavior summary first.
 - Provide an ASCII diagram of the flow in chat output.

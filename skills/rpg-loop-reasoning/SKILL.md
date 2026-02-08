@@ -64,6 +64,15 @@ python /Users/mrx-ksjung/.codex/skills/rpg-loop-reasoning/scripts/rpg_query_pack
 - Separate: confirmed, hypotheses, unresolved.
 - Include one risk table and one next-iteration delta plan.
 
+## Sub-Agent Delegation (Scenario-Bound)
+- If dual-view verification requires independent passes (semantic/topology separation) or large cross-module scans, optionally delegate one bounded pass to `codex-exec-sub-agent`.
+- Keep loop-state decisions in this skill and treat sub-agent output as supporting evidence.
+- Use prompt files and explicit timeout to avoid unbounded nested runs.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
 ## Output Contract (chat)
 
 - Put the decision first: `understanding`, `generation`, or `hybrid`.
@@ -82,6 +91,7 @@ python /Users/mrx-ksjung/.codex/skills/rpg-loop-reasoning/scripts/rpg_query_pack
 
 ## Delegation Boundaries
 
+- `branch-onboarding-brief` owns branch diff onboarding context and can be delegated for entry-point seeding before deep dual-view cycles.
 - `grepai-deep-analysis` owns deep evidence protocol and noise control.
 - `code-health` owns quality metric pipeline.
 - `refresh-branch-docs` owns documentation rewrite workflow.

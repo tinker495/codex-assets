@@ -290,7 +290,7 @@ For every new, updated, or removed skill, delegate topology adjustment to `skill
    - what this skill must delegate
 6. Apply returned one-hop delegation edges.
 7. If drift is detected, apply returned corrective edits immediately (topology docs first, then affected delegation wording).
-8. If the graph changed, apply the returned update to `references/skill_topology.md` in the same change.
+8. If the graph changed, apply the returned update to `references/skill_topology.md` in the same change, and update source-skill delegation wording for all changed edges in the same commit.
 9. Enforce explicit global meta-tool access semantics for `codex-exec-sub-agent` in topology artifacts (for example, `ANY --> CESA` or equivalent wording that means "any skill role can delegate").
 10. Enforce edge parity: every runtime edge in Delegation Graph must also appear in Delegation Tree.
 
@@ -392,6 +392,29 @@ Write instructions for using the skill and its bundled resources.
 
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
+Run dependency preflight first:
+
+```bash
+python3 -c "import yaml; print('yaml:ok')"
+```
+
+If preflight fails (`ModuleNotFoundError: No module named 'yaml'`), use one of these paths before `quick_validate.py`:
+
+1. If dependency install is allowed, install PyYAML:
+
+```bash
+python3 -m pip install pyyaml
+```
+
+2. If install is not allowed (restricted/read-only environment), run temporary fallback checks and mark validation as partial until PyYAML is available:
+
+```bash
+rg "^---$|^name:|^description:" <path/to/skill-folder>/SKILL.md
+python3 $CODEX_HOME/skills/.system/skill-topology-adjuster/scripts/audit_topology.py --json
+```
+
+After dependency recovery (or in normal environments), run:
+
 ```bash
 scripts/quick_validate.py <path/to/skill-folder>
 ```
@@ -406,6 +429,8 @@ Also validate topology consistency for new/updated skills:
 - Confirm `references/skill_topology.md` role map + graph + tree are updated when edges changed.
 - Confirm `codex-exec-sub-agent` remains explicitly reusable by any skill role in topology docs.
 - Confirm Delegation Graph edges are mirrored in Delegation Tree for runtime handoff consistency.
+- Confirm every graph-declared `source -> target` edge has explicit `target` skill reference in `source/SKILL.md`.
+- Confirm every graph-declared `source -> codex-exec-sub-agent` edge includes scenario-bound usage wording in `source/SKILL.md`.
 - Confirm skills that call `codex-exec-sub-agent` use the safe invocation pattern (`--prompt-file`, `--timeout-sec`) or justify why not.
 
 ### Step 7: Iterate

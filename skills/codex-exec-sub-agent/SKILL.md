@@ -60,3 +60,16 @@ Treat the sub-agent prompt as a mini-brief:
 - Avoid `/tmp`/`/var/tmp` output paths when sandbox policies may block writes; prefer workspace paths or `~/.codex/sub_agent_runs`.
 - Use the JSONL log for inspection/debugging; treat file outputs requested in the prompt as the real deliverable.
 - The runner always prints the JSONL path last, even on failures/timeouts, so callers can inspect logs reliably.
+
+## Write-Failure Fallback (Required)
+
+If a sub-agent is asked to write a report/artifact file and write fails (`read-only file system`, `operation not permitted`, `permission denied`), do not drop the result.
+
+Required fallback behavior:
+
+1. Emit the full report inline in the final response.
+2. Include the intended output path and the concrete write error.
+3. Include completion status plus key evidence (commands/checks run).
+4. Preserve and return the JSONL path as the authoritative execution trace.
+
+Callers should treat this inline report as a valid fallback deliverable when file writes are blocked.

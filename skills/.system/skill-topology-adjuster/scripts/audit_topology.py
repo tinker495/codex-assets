@@ -22,6 +22,16 @@ DELEGATION_KEYWORDS = (
     "handover",
     "orchestrator -> specialist",
 )
+SUB_AGENT_GUIDANCE_KEYWORDS = (
+    "delegate",
+    "delegation",
+    "handoff",
+    "sub-agent",
+    "fresh-context",
+    "long-running",
+    "timeout",
+    "run.sh",
+)
 STANDALONE_MARKERS = ("standalone", "delegation optional")
 ORCHESTRATOR_ROLES = {"orchestrator", "specialist-orchestrator"}
 META_ORCHESTRATOR_ROLES = {"meta-orchestrator"}
@@ -350,10 +360,30 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             if resolved in installed_names:
                 edge_sync_impacted_skills.add(resolved)
 
+    required_graph_doc_edges: set[tuple[str, str]] = set()
+    for left_alias, right_alias in graph_edges:
+        source = graph_alias_to_label.get(left_alias) or tree_alias_to_label.get(left_alias) or left_alias
+        target = graph_alias_to_label.get(right_alias) or tree_alias_to_label.get(right_alias) or right_alias
+        if source in installed_names and target in installed_names and source != target:
+            required_graph_doc_edges.add((source, target))
+    required_graph_targets_by_skill: dict[str, set[str]] = {name: set() for name in installed_names}
+    for source, target in required_graph_doc_edges:
+        required_graph_targets_by_skill[source].add(target)
+
     meta_tool_any_skill_access = bool(
         re.search(r"codex-exec-sub-agent", topology_text, flags=re.I)
         and re.search(r"any skill", topology_text, flags=re.I)
     )
+    sub_agent_aliases = {
+        alias for alias, label in graph_alias_to_label.items() if label == "codex-exec-sub-agent"
+    } or {"CESA"}
+    required_sub_agent_doc_skills: set[str] = set()
+    for left_alias, right_alias in graph_edges:
+        if right_alias not in sub_agent_aliases:
+            continue
+        source = graph_alias_to_label.get(left_alias) or tree_alias_to_label.get(left_alias) or left_alias
+        if source in installed_names and source != "codex-exec-sub-agent":
+            required_sub_agent_doc_skills.add(source)
     overlap_candidates = detect_responsibility_overlaps(
         names=installed_names,
         name_to_skill=name_to_skill,
@@ -366,11 +396,25 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
         overlap_index[right].append(candidate)
 
     per_skill: dict[str, dict] = {}
+    missing_graph_edge_docs: list[str] = []
+    missing_sub_agent_doc_skills: list[str] = []
+    weak_sub_agent_doc_skills: list[str] = []
     for name in installed_names:
         text = name_to_skill[name].text
         lower = text.lower()
         refs = sorted(other for other in installed_names if other != name and other in text)
         delegation_hits = [kw for kw in DELEGATION_KEYWORDS if kw in lower or kw in text]
+        sub_agent_lines = [line.lower() for line in text.splitlines() if "codex-exec-sub-agent" in line.lower()]
+        has_sub_agent_ref = bool(sub_agent_lines)
+        has_sub_agent_guidance = bool(
+            sub_agent_lines
+            and any(
+                any(keyword in line for keyword in SUB_AGENT_GUIDANCE_KEYWORDS)
+                for line in sub_agent_lines
+            )
+        )
+        if not has_sub_agent_guidance and "codex-exec-sub-agent/scripts/run.sh" in lower:
+            has_sub_agent_guidance = True
         standalone = all(marker in lower for marker in STANDALONE_MARKERS)
         role = role_map.get(name, "missing")
         issues: list[str] = []
@@ -397,6 +441,24 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             issues.append("delegation graph edge not mirrored in delegation tree section")
         if name == "codex-exec-sub-agent" and not meta_tool_any_skill_access:
             issues.append("topology missing explicit any-skill meta-tool access statement")
+        required_targets = sorted(required_graph_targets_by_skill.get(name, set()))
+        missing_targets = [target for target in required_targets if target not in text]
+        for target in missing_targets:
+            issues.append(
+                f"delegation graph edge {name}->{target} exists but SKILL.md lacks explicit target-skill reference"
+            )
+            missing_graph_edge_docs.append(f"{name}->{target}")
+        if name in required_sub_agent_doc_skills:
+            if not has_sub_agent_ref:
+                issues.append(
+                    "delegation graph declares skill -> codex-exec-sub-agent but SKILL.md lacks explicit codex-exec-sub-agent reference"
+                )
+                missing_sub_agent_doc_skills.append(name)
+            elif not has_sub_agent_guidance:
+                issues.append(
+                    "delegation graph declares skill -> codex-exec-sub-agent but SKILL.md lacks scenario-bound delegation wording near that reference"
+                )
+                weak_sub_agent_doc_skills.append(name)
         for candidate in overlap_index.get(name, []):
             peer = candidate["skills"][0] if candidate["skills"][1] == name else candidate["skills"][1]
             issues.append(
@@ -412,6 +474,11 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             "path": str(name_to_skill[name].path),
             "references": refs,
             "delegation_keywords": delegation_hits,
+            "required_graph_targets": required_targets,
+            "missing_graph_targets": missing_targets,
+            "requires_sub_agent_doc": name in required_sub_agent_doc_skills,
+            "has_sub_agent_reference": has_sub_agent_ref,
+            "has_sub_agent_guidance": has_sub_agent_guidance,
             "standalone_markers": standalone,
             "overlap_candidates": overlap_index.get(name, []),
             "status": "needs-fix" if issues else "pass",
@@ -444,6 +511,21 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
         global_findings.append(
             "topology missing explicit any-skill reusable meta-tool statement for codex-exec-sub-agent"
         )
+    if missing_graph_edge_docs:
+        global_findings.append(
+            "delegation graph edges missing explicit source-skill documentation: "
+            + ", ".join(sorted(missing_graph_edge_docs))
+        )
+    if missing_sub_agent_doc_skills:
+        global_findings.append(
+            "skills with graph-declared sub-agent edges but no codex-exec-sub-agent reference in SKILL.md: "
+            + ", ".join(sorted(missing_sub_agent_doc_skills))
+        )
+    if weak_sub_agent_doc_skills:
+        global_findings.append(
+            "skills with graph-declared sub-agent edges but weak scenario guidance in SKILL.md: "
+            + ", ".join(sorted(weak_sub_agent_doc_skills))
+        )
     if overlap_candidates:
         global_findings.append(
             (
@@ -468,6 +550,11 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             ],
         },
         "meta_tool_any_skill_access": meta_tool_any_skill_access,
+        "required_graph_doc_edges": [f"{source}->{target}" for source, target in sorted(required_graph_doc_edges)],
+        "missing_graph_edge_docs": sorted(missing_graph_edge_docs),
+        "sub_agent_graph_requirements": sorted(required_sub_agent_doc_skills),
+        "sub_agent_doc_missing": sorted(missing_sub_agent_doc_skills),
+        "sub_agent_doc_weak": sorted(weak_sub_agent_doc_skills),
         "responsibility_overlap_candidates": overlap_candidates,
         "needs_fix_count": len(needs_fix),
         "needs_fix_skills": needs_fix,

@@ -73,7 +73,25 @@ Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
   main-merge, pr-workflow,
   session-wrap-up
+
+Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
+  grepai-deep-analysis, branch-health-remediation-workflow,
+  non-test-bloat-reduction, rpg-loop-reasoning,
+  skill-topology-adjuster, codex-ralph-loop, session-wrap-up, gh-fix-ci
 ```
+
+## Sub-Agent Activation Scenarios
+
+| Skill | Prefer `codex-exec-sub-agent` When... | Expected Benefit |
+| --- | --- | --- |
+| grepai-deep-analysis | grep/search results are noisy across many modules and retries are needed | fresh context per cycle, less context contamination |
+| branch-health-remediation-workflow | branch is large and evidence collection spans onboarding + health + deep analysis | isolate heavy scans, keep main orchestrator thin |
+| non-test-bloat-reduction | repeated candidate-cluster sweeps are needed over broad code areas | bounded long-running passes with traceable JSONL logs |
+| rpg-loop-reasoning | dual-view loop needs independent semantic/topology verification passes | reduce coupled reasoning errors between passes |
+| skill-topology-adjuster | strict parity checks or O(N^2) overlap validation is requested | independent verification lane for drift adjudication |
+| codex-ralph-loop | story execution needs fresh-context implementation bursts | avoid state bleed between story iterations |
+| session-wrap-up | retrospective requires broad evidence mining before synthesis | offload heavy background scans while preserving main summary flow |
+| gh-fix-ci | Actions logs are large, multi-run, or require repeated forensic extraction | isolate log-heavy analysis with reproducible artifacts |
 
 ## Delegation Graph
 
@@ -130,10 +148,20 @@ flowchart LR
   DOC["doc"] --> PDF["pdf"]
   SS["spreadsheet"] --> PDF
   ANY["any-skill (*)"] --> CESA["codex-exec-sub-agent"]
+
+  GDA --> CESA
+  BHRW --> CESA
+  NTBR --> CESA
+  RLR --> CESA
+  STA --> CESA
+  CRL --> CESA
+  SWU --> CESA
+  GHF --> CESA
 ```
 
 `codex-exec-sub-agent` is a cross-cutting meta-tool and `agents-md-builder` is an elemental specialist.
 `ANY --> CESA` denotes optional runtime delegation capability from any skill role.
+Additional skill-to-CESA edges mark preferred activation lanes for high-cost search/analysis scenarios; they are recommendations, not mandatory handoffs.
 
 ## Delegation Tree (Operational View)
 
@@ -216,6 +244,15 @@ flowchart TD
   META --> GHC["gh-address-comments"]
 
   ANY["Any Skill (Universal Access)"] --> CESA
+
+  GDA --> CESA
+  BHRW --> CESA
+  NTBR --> CESA
+  RLR --> CESA
+  STA --> CESA
+  CRL --> CESA
+  SWU --> CESA
+  GHF --> CESA
 ```
 
 ## Refactor Checklist

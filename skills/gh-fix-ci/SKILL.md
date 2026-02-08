@@ -58,6 +58,15 @@ Prereq: authenticate with the standard GitHub CLI once (for example, run `gh aut
 8. Recheck status.
    - After changes, suggest re-running the relevant tests and `gh pr checks` to confirm.
 
+## Sub-Agent Delegation (Scenario-Bound)
+- If CI forensic collection is heavy (large multi-run logs or repeated extraction), optionally delegate a bounded log-mining pass to `codex-exec-sub-agent`.
+- Keep fix-plan gating and final decisioning in this skill; sub-agent output is supporting evidence.
+- Use prompt files and explicit timeout to keep nested execution deterministic.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
 ## Delegation Boundaries
 
 - This skill owns GitHub Actions failure inspection, log analysis, and fix-plan gating.

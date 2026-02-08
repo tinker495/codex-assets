@@ -58,6 +58,15 @@ Include a structural impact check per proposal:
 - module ownership change
 - risk of cross-module drift
 
+## Sub-Agent Delegation (Scenario-Bound)
+- If branch-wide evidence collection becomes heavy (onboarding + health + deep analysis across many modules), optionally delegate bounded scan passes to `codex-exec-sub-agent`.
+- Keep orchestration ownership in this skill; use sub-agent output as evidence input, not as final remediation authority.
+- Use prompt files and timeouts for deterministic runs.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
 ## Output Contract (chat)
 - Answer first with the remediation plan summary.
 - Provide an ASCII flow diagram.

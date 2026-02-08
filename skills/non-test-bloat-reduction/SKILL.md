@@ -162,6 +162,15 @@ Use deterministic fallbacks when tool CLI contracts differ by version.
 
 When fallback is used, record one-line evidence in the cycle report.
 
+## Sub-Agent Delegation (Scenario-Bound)
+- If candidate-cluster discovery or repeated broad-path scans become long-running, optionally delegate isolated scan batches to `codex-exec-sub-agent`.
+- Keep quota/control gates in this skill; sub-agent output is evidence only and must still pass local abstraction/complexity gates.
+- Use bounded execution and keep JSONL traces for auditability.
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
+```
+
 ## Output Contract
 - Start with an intent-cluster table first (mandatory).
 - Required columns:
