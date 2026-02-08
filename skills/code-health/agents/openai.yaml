@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Health"
+  short_description: "Run code health checks and summarize hotspots"
+  default_prompt: "Use $code-health to run repo code health and summarize risks."

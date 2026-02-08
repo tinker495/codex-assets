@@ -1,0 +1,4 @@
+interface:
+  display_name: "Branch Onboarding Brief"
+  short_description: "Onboard diff vs main and deliver a branch briefing"
+  default_prompt: "Analyze current branch vs main, run onboarding phase, then produce a formatted branch brief."
