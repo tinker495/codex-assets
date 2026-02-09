@@ -16,6 +16,11 @@ Pull relevant Notion pages, synthesize findings, and publish clear briefs or rep
 4) Draft in Notion with `Notion:notion-create-pages` using the matching template (quick, summary, comparison, comprehensive).
 5) Link sources and add a references/citations section; update as new info arrives with `Notion:notion-update-page`.
 
+## Ownership boundary
+- Own cross-source research synthesis deliverables: briefs, summaries, comparisons, and reports with citations.
+- Delegate meeting agenda/pre-read packaging and attendee-tailored facilitation structure to `notion-meeting-intelligence`.
+- For mixed requests, complete research synthesis here first, then hand off meeting packaging to `notion-meeting-intelligence`.
+
 ## Workflow
 ### 0) If any MCP call fails because Notion MCP is not connected, pause and set it up:
 1. Add the Notion MCP:

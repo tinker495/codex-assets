@@ -1,0 +1,4 @@
+interface:
+  display_name: "PaperBanana CLI"
+  short_description: "Run local PaperBanana generate/plot/evaluate from any workspace."
+  default_prompt: "Use local PaperBanana to generate diagrams, plots, or evaluate a generated diagram."

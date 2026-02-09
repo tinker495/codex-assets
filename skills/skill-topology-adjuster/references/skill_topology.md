@@ -26,21 +26,36 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `skill-installer` | meta | install/list external skills |
 | `find-skills` | utility | discover installable skills and recommend install paths |
 | `automation-creator` | utility | Codex automation directives |
+| `using-superpowers` | utility | universal skill invocation discipline at conversation start |
+| `dispatching-parallel-agents` | utility | identify independent tasks and dispatch parallel agent work |
 | `codex-session-recall` | utility | session log recall and filtering |
 | `codex-exec-sub-agent` | meta-tool | isolated sub-agent execution and JSONL run capture |
 | `agents-md-builder` | specialist | AGENTS.md authoring and quality rewrite workflow |
+| `brainstorming` | specialist | requirement discovery and design shaping before implementation |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
+| `executing-plans` | specialist | plan execution with checkpointed batch delivery |
+| `finishing-a-development-branch` | specialist | branch completion workflow (verify, choose integration path, cleanup) |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with dual-view augmentation gating |
+| `receiving-code-review` | specialist | rigorous triage and validation of incoming review feedback |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
+| `requesting-code-review` | specialist | pre-merge review request and findings handoff workflow |
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
 | `gh-address-comments` | specialist | PR comment retrieval and response workflow |
 | `pdf` | specialist | PDF rendering and visual QA |
 | `doc` | specialist | DOCX editing and conversion workflow |
 | `spreadsheet` | specialist | spreadsheet modeling/editing workflow |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
+| `subagent-driven-development` | specialist | execute independent implementation tasks with fresh subagent loops |
 | `swarm-planner` | specialist | dependency-aware plan synthesis for parallel execution |
+| `systematic-debugging` | specialist | root-cause-first debugging protocol |
 | `screenshot` | specialist | OS-level screenshot capture |
+| `test-driven-development` | specialist | red-green-refactor implementation protocol |
+| `using-git-worktrees` | specialist | isolated worktree setup and safety checks |
+| `verification-before-completion` | specialist | completion gate enforcing fresh verification evidence |
+| `writing-plans` | specialist | implementation plan authoring for multi-step tasks |
+| `writing-skills` | specialist | skill authoring and validation workflow |
+| `paperbanana-cli` | specialist | PaperBanana CLI execution for diagram/plot generation and evaluation |
 | `notion-knowledge-capture` | specialist | Notion knowledge capture and structured write-back |
 | `notion-meeting-intelligence` | specialist | Notion-backed meeting preparation and agenda intelligence |
 | `notion-research-documentation` | specialist | multi-source Notion research synthesis and documentation |
@@ -61,13 +76,17 @@ Define ownership and delegation boundaries across installed skills so specialist
 ```text
 Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, find-skills, automation-creator,
+  using-superpowers, dispatching-parallel-agents,
   codex-session-recall, codex-exec-sub-agent, ralph-driven-development
 
 Layer 1: Specialists (single-domain ownership)
-  agents-md-builder,
+  agents-md-builder, brainstorming, executing-plans, finishing-a-development-branch,
+  receiving-code-review, requesting-code-review, subagent-driven-development,
+  systematic-debugging, test-driven-development, using-git-worktrees,
+  verification-before-completion, writing-plans, writing-skills,
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
-  swarm-planner, notion-knowledge-capture, notion-meeting-intelligence,
+  swarm-planner, paperbanana-cli, notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
@@ -135,11 +154,26 @@ flowchart LR
   AC["automation-creator"]
   SI["skill-installer"]
   FS["find-skills"]
+  USP["using-superpowers"]
+  DPA["dispatching-parallel-agents"]
   GHF["gh-fix-ci"]
   GHC["gh-address-comments"]
   JNB["jupyter-notebook"]
+  BRN["brainstorming"]
+  EPL["executing-plans"]
+  FDB["finishing-a-development-branch"]
+  RCR["receiving-code-review"]
+  QCR["requesting-code-review"]
+  SDD["subagent-driven-development"]
+  SDBG["systematic-debugging"]
   SP["swarm-planner"]
   SHOT["screenshot"]
+  TDD["test-driven-development"]
+  UGW["using-git-worktrees"]
+  VBC["verification-before-completion"]
+  WPL["writing-plans"]
+  WSK["writing-skills"]
+  PB["paperbanana-cli"]
   CD["co-design"]
   PT["parallel-task"]
   NKC["notion-knowledge-capture"]
@@ -220,9 +254,24 @@ flowchart TD
   DOCOPS --> SS["spreadsheet"]
   DOCOPS --> JNB["jupyter-notebook"]
   DOCOPS --> SHOT["screenshot"]
+  DOCOPS --> PB["paperbanana-cli"]
 
   ROOT --> PLAN["Planning Specialists"]
   PLAN --> SP["swarm-planner"]
+
+  ROOT --> PROC["Process Specialists"]
+  PROC --> BRN["brainstorming"]
+  PROC --> EPL["executing-plans"]
+  PROC --> FDB["finishing-a-development-branch"]
+  PROC --> RCR["receiving-code-review"]
+  PROC --> QCR["requesting-code-review"]
+  PROC --> SDD["subagent-driven-development"]
+  PROC --> SDBG["systematic-debugging"]
+  PROC --> TDD["test-driven-development"]
+  PROC --> UGW["using-git-worktrees"]
+  PROC --> VBC["verification-before-completion"]
+  PROC --> WPL["writing-plans"]
+  PROC --> WSK["writing-skills"]
 
   ROOT --> NOTION["Notion Specialists"]
   NOTION --> NKC["notion-knowledge-capture"]
@@ -239,6 +288,8 @@ flowchart TD
   META --> SI["skill-installer"]
   META --> FS["find-skills"]
   META --> AC["automation-creator"]
+  META --> USP["using-superpowers"]
+  META --> DPA["dispatching-parallel-agents"]
   META --> CSR["codex-session-recall"]
   META --> RDD["ralph-driven-development"]
   META --> CESA["codex-exec-sub-agent"]

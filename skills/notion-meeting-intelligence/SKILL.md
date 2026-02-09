@@ -16,6 +16,11 @@ Prep meetings by pulling Notion context, tailoring agendas/pre-reads, and enrich
 4) Draft agenda/pre-read in Notion with `Notion:notion-create-pages`, embedding source links and owner/timeboxes.
 5) Enrich with Codex research (industry insights, benchmarks, risks) and update the page with `Notion:notion-update-page` as plans change.
 
+## Ownership boundary
+- Own meeting-prep deliverables: agenda, pre-read, attendee-specific framing, facilitation flow.
+- Delegate deep multi-source research briefs/reports/comparative analyses to `notion-research-documentation`.
+- For mixed requests, keep meeting framing here, hand off research synthesis to `notion-research-documentation`, then integrate results into final meeting materials.
+
 ## Workflow
 ### 0) If any MCP call fails because Notion MCP is not connected, pause and set it up:
 1. Add the Notion MCP:
