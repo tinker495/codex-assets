@@ -37,6 +37,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `executing-plans` | specialist | plan execution with checkpointed batch delivery |
 | `finishing-a-development-branch` | specialist | branch completion workflow (verify, choose integration path, cleanup) |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with dual-view augmentation gating |
+| `grepai-trace-noise-remediation` | specialist | bounded trace-noise reduction loop with TDD and metric validation |
 | `receiving-code-review` | specialist | rigorous triage and validation of incoming review feedback |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
 | `requesting-code-review` | specialist | pre-merge review request and findings handoff workflow |
@@ -81,6 +82,7 @@ Layer 0: Meta/Meta-Tool/Utility
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, brainstorming, executing-plans, finishing-a-development-branch,
+  grepai-trace-noise-remediation,
   receiving-code-review, requesting-code-review, subagent-driven-development,
   systematic-debugging, test-driven-development, using-git-worktrees,
   verification-before-completion, writing-plans, writing-skills,
@@ -143,6 +145,9 @@ flowchart LR
   PR["pr-workflow"] --> BOB
   PR --> CH
   PR --> GDA
+
+  GTNR["grepai-trace-noise-remediation"] --> TDD["test-driven-development"]
+  GTNR --> VBC["verification-before-completion"]
 
   RDD["ralph-driven-development"]
 
@@ -263,6 +268,7 @@ flowchart TD
   PROC --> BRN["brainstorming"]
   PROC --> EPL["executing-plans"]
   PROC --> FDB["finishing-a-development-branch"]
+  PROC --> GTNR["grepai-trace-noise-remediation"]
   PROC --> RCR["receiving-code-review"]
   PROC --> QCR["requesting-code-review"]
   PROC --> SDD["subagent-driven-development"]
@@ -272,6 +278,9 @@ flowchart TD
   PROC --> VBC["verification-before-completion"]
   PROC --> WPL["writing-plans"]
   PROC --> WSK["writing-skills"]
+
+  GTNR --> TDD
+  GTNR --> VBC
 
   ROOT --> NOTION["Notion Specialists"]
   NOTION --> NKC["notion-knowledge-capture"]

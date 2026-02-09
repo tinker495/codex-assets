@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grepai Trace Noise"
+  short_description: "Reduce trace graph noise with TDD loops"
+  default_prompt: "Run trace-noise remediation loop for grepai call graph output."

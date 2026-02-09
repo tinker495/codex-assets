@@ -26,6 +26,8 @@ Request -> Preflight -> Route Task -> Run CLI -> Return Output Path + Next Actio
 3. Execute through the wrapper script:
    - `bash scripts/run_paperbanana.sh <subcommand> ...`
    - For `generate`, prefer stable wrapper: `bash scripts/generate_with_stable_output.sh ...`
+   - Image profile default is `pro`; switch when needed via `--image-profile flash|pro` (or `--flash` shortcut)
+   - Output resolution default is `1k`; override via `--output-resolution 1k|2k|4k`
 4. Report:
    - Exact command used.
    - Output file path (`--output` if provided, otherwise PaperBanana auto path).
@@ -140,6 +142,18 @@ bash scripts/generate_with_stable_output.sh \
   --iterations 3
 ```
 
+### Generate Diagram (Flash profile override)
+
+```bash
+bash scripts/generate_with_stable_output.sh \
+  --input <method_txt> \
+  --caption "<figure_caption>" \
+  --output <target.png> \
+  --iterations 3 \
+  --output-resolution 1k \
+  --image-profile flash
+```
+
 ### Generate Plot
 
 ```bash
@@ -158,6 +172,29 @@ bash scripts/run_paperbanana.sh evaluate \
   --context <method_txt> \
   --caption "<figure_caption>"
 ```
+
+## Image Profile Selection
+
+- `flash` profile: `gemini-2.5-flash-image` (Nano Banana flash).
+- `pro` profile: `gemini-3-pro-image-preview`.
+- Wrapper default profile: `pro`.
+- If `--image-provider openrouter_imagen` is passed, the wrapper maps to OpenRouter model IDs automatically:
+  - `flash` -> `google/gemini-2.5-flash-image`
+  - `pro` -> `google/gemini-3-pro-image-preview`
+- Conflict rule: do not combine `--image-profile` with `--image-model` (wrapper returns an error).
+
+## Output Resolution Selection
+
+- Supported values: `1k`, `2k`, `4k`.
+- Wrapper default: `1k`.
+- Forwarding rule: wrapper always passes `--output-resolution` to the PaperBanana CLI.
+
+## Flash Compatibility Notes (MANDATORY)
+
+- Root cause from real runs: `gemini-2.5-flash-image` can fail with `400 INVALID_ARGUMENT` when `image_size` is sent in provider config.
+- Current PaperBanana behavior: for Flash Image, provider uses `aspect_ratio` and omits `image_size`; generated image is then normalized to requested output resolution before save.
+- Implication for operators: keep wrapper-driven resolution usage (`--output-resolution`) and do not force unsupported provider internals.
+- Validation cue: logs may show native Flash output sizes (for example 1024x1024 or 1344x768) followed by a resize log to target canvas.
 
 ## Log-Guided Refinement Loop (MANDATORY when iterating)
 
@@ -298,7 +335,7 @@ Example caption reinforcement:
 
 - `generate`:
   - Required: method text file, caption.
-  - Optional: `--output`, `--iterations`.
+  - Optional: `--output`, `--iterations`, `--output-resolution 1k|2k|4k`, `--image-profile flash|pro` (or `--flash`).
 - `plot`:
   - Required: CSV/JSON data file, intent.
   - Optional: `--output`, `--iterations`.
@@ -315,6 +352,13 @@ Example caption reinforcement:
    - Pass `--output` explicitly.
 4. Need detailed flags
    - Read `references/usage.md`.
+5. Profile/model conflict
+   - Use either `--image-profile` or explicit `--image-model`, not both.
+6. Resolution validation error
+   - Use one of `1k`, `2k`, `4k` for `--output-resolution`.
+7. Flash `INVALID_ARGUMENT` failure
+   - Ensure branch includes Flash compatibility patch (omit `image_size` for `gemini-2.5-flash-image`).
+   - Re-run with explicit flash selection first: `--image-profile flash --output-resolution 1k`.
 
 ## Resources
 

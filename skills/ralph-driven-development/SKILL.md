@@ -55,6 +55,17 @@ Expected files:
 - `progress.txt`
 - `AGENTS.md` (repo or nearest parent)
 
+Fallback when `prd.json` is missing:
+
+- If the user intent is iterative optimization/remediation (for example "계속", "최적화 계속"), run one bounded ad-hoc iteration instead of stopping.
+- Ad-hoc iteration contract:
+  1. Pick one measurable target with evidence (for example edge_count reduction, complexity offender count).
+  2. Apply TDD (`red -> green`) for that single target.
+  3. Run required quality checks from `AGENTS.md` or `quality-plan`.
+  4. Report as `ad-hoc iteration (no prd)` and do not mark story pass state.
+  5. Recommend creating `prd.json` before the next multi-iteration cycle.
+- If user intent is feature delivery (not optimization/remediation), ask for PRD preparation instead of guessing backlog.
+
 Workflow:
 
 1. Read `references/scenario-catalog.md`, `references/prd-json-schema.md`, `references/quality-profiles.md`, and repo-local `AGENTS.md`.

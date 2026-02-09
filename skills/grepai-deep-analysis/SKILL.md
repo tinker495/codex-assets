@@ -30,7 +30,7 @@ flowchart LR
   - max 3 `grepai search` queries per cycle
   - max 4 trace roots per cycle
   - max 2 retries for any single failure mode
-- Track a retry ledger with tags: `search-noisy`, `trace-empty`, `trace-overbroad`, `symbol-collision`.
+- Track a retry ledger with tags: `search-noisy`, `trace-empty`, `trace-overbroad`, `symbol-collision`, `stale-index`.
 
 ### 0.5 Search-then-Zoom (Required)
 - Use a two-step retrieval discipline:
@@ -38,6 +38,15 @@ flowchart LR
   - `Zoom`: lock onto 1 to 3 roots and confirm exact behavior with trace + `rg -n`.
 - Do not keep broad search results as final evidence.
 - Before synthesis, ensure each key claim can be traversed from a concrete root symbol.
+
+### 0.6 Index Freshness Gate (Required)
+- Before Pass 2, verify symbol index freshness when the session touched parser/index inputs (for example `trace/extractor*`, `trace/store*`, `cli/watch*`).
+- If `trace graph` outputs stay unchanged after meaningful code changes, classify as `stale-index` and refresh index first.
+- Preferred refresh sequence:
+  1. Check watcher state with `grepai watch --status`.
+  2. Restart watcher if needed (`grepai watch --stop`, then `grepai watch --background`) or run one bounded foreground watch cycle.
+  3. Re-run the same trace roots only after refresh.
+- Do not treat pre-refresh trace results as final evidence.
 
 ### 1. Pass 1: Surface Map (Discovery Only)
 - Use `grepai search "<query>" --json --compact --limit 15` to list likely entry points, key modules, and domain nouns.
@@ -104,7 +113,7 @@ flowchart LR
   - `search-exploration`: noisy retrieval, weak seeds, over-broad hit sets.
   - `reasoning-interpretation`: conflicting hypotheses, weak contract inference.
   - `context-scope`: wrong boundary, stale file selection, scope drift.
-  - `tool-execution`: command/tool errors, empty outputs, parser failures.
+  - `tool-execution`: command/tool errors, empty outputs, parser failures, stale index artifacts.
 - For each bucket, record one corrective action and one retry-count entry in the limitation log.
 
 ### Deep Analysis Protocol (Required)
