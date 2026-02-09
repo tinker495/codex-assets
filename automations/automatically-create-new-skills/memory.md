@@ -1,2 +1,2 @@
-Last run: 2026-02-08 10:43:29 KST
-Summary: No session log files found under ~/.codex/sessions for the last 24h; no noise signals detected and no skill updates performed.
+Last run: 2026-02-09 11:01:31 KST
+Summary: Detected path-sensitive noise from missing collect_branch_info.py in recent sessions and applied minimal guardrail updates to branch-onboarding-brief, branch-health-remediation-workflow, and code-health. Added explicit test -f/test -d checks, rg-based path verification, and git-context fallback guidance. Validation passed via uv run --with pyyaml quick_validate.py for all three updated skills.

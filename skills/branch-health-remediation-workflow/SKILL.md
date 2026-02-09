@@ -19,6 +19,15 @@ flowchart LR
 
 ## Workflow
 
+0. Preflight path guardrails (before repo scripts/shared paths).
+Use existence checks first for path-sensitive steps:
+- `test -f scripts/collect_branch_info.py` before onboarding script usage.
+- `test -d "$CODEX_HOME/shared/code-health"` before reading shared health outputs.
+- Use `rg --files` as a secondary check when path assumptions are unclear.
+If a required path is missing, skip that path and continue with fallback branch context commands:
+- `git log --since=1.week --name-only`
+- `git diff --stat`
+
 1. Onboard the branch.
 Run the `branch-onboarding-brief` skill first.
 Proceed immediately to the next phases without asking for approval.

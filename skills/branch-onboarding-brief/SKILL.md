@@ -16,12 +16,15 @@ Create a reliable, repeatable onboarding phase that summarizes the current branc
 Prefer the bundled script for deterministic data:
 
 ```bash
+test -f scripts/collect_branch_info.py || rg --files -g 'collect_branch_info.py'
 python scripts/collect_branch_info.py --base main --format json
 ```
 
-If the script is unavailable, fall back to:
+If the script is unavailable (or script path check fails), fall back to:
 
 ```bash
+git log --since=1.week --name-only
+git diff --stat
 git branch --show-current
 git log main..HEAD --oneline
 git diff main..HEAD --name-only
@@ -64,6 +67,7 @@ When categorizing changes, make your criteria explicit (for example: tests by `t
 - Use search-as-discovery: run `scripts/collect_branch_info.py` first; do not start with broad repo-wide scans.
 - Apply path filtering: prioritize changed-file lists from branch diff output before expanding to repository-wide search.
 - Use trace-plus-rg evidence gating: run targeted `rg` on identified files/modules first; only then expand with `rg --files`.
+- Path-sensitive guardrail: verify script existence with `test -f` (or `rg --files`) before execution; if missing, skip script and continue with git-based branch context commands.
 - Avoid fallback loops: if git/base-detection fails twice, resolve base once (`origin/HEAD`) and proceed with the minimal diff set.
 
 ## Output format (chat)

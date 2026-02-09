@@ -13,6 +13,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 1. Confirm repo root (the script expects to run from the repository root).
 2. Ensure tools exist in the environment: `pytest`, `coverage`, `vulture`, `radon`, `xenon`, and `jscpd` (via `npx` or global install). Use `uv` if available.
 3. Run pipeline (preferred):
+   - `test -f /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py || rg --files /Users/mrx-ksjung/.codex/skills/code-health -g 'run_code_health.py'`
    - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20`
    - Use `--mode full` for deeper scans.
    - Use `--top-files 20` to expand the main-branch churn list.
@@ -35,6 +36,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Use search-as-discovery: execute bundled health scripts first, then run ad-hoc search only when script output leaves a gap.
 - Apply path filtering: scope follow-up `rg` to files surfaced by diff/health outputs before any broader scan.
 - Use trace-plus-rg evidence gating: require a concrete hotspot/module trace before escalating to `rg --files` or `find`.
+- Path-sensitive guardrail: verify script/shared path existence with `test -f` / `test -d` first; when `$CODEX_HOME/shared/code-health` is missing, skip it and continue with `/tmp/code-health`.
 - Avoid fallback loops: if a tool invocation fails twice, use the documented fallback once (for example `--skip-coverage`) and continue.
 
 ## Report template
@@ -66,3 +68,4 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Default output directory: `$CODEX_HOME/shared/code-health` if `CODEX_HOME` is set, otherwise `/tmp/code-health`.
 - Filenames include project and branch: `<project>__<branch>__code_health.{md,json}`.
 - On re-run, previous files are renamed with `legacy__...__YYYYmmdd_HHMMSS` to keep history.
+- Before reading the shared output directory, check `test -d "$CODEX_HOME/shared/code-health"`; if missing, use `/tmp/code-health` and continue.
