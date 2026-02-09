@@ -1,6 +1,6 @@
 ---
 name: code-health
-description: "Run and summarize repository code health checks (duplication, dead code, complexity, maintainability, coverage hotspots, diff summary) using internalized skill scripts (no Makefile dependency). Use when asked to assess code health, find hotspots, or produce a structured risk report in this repo or similar Python repos with code-health tooling."
+description: "Run and summarize repository code health checks (duplication, dead code, complexity, maintainability, coverage hotspots, diff summary) using internalized skill scripts (no Makefile dependency). Also use for xenon/radon complexity-fail triage and remediation localization."
 ---
 
 # Code Health
@@ -18,9 +18,15 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
    - Use `--top-files 20` to expand the main-branch churn list.
    - Use `--skip-coverage` only if tests are too heavy; ask before skipping coverage when accuracy matters.
    - Use `--out-dir /tmp/code-health` or another global directory to avoid repo pollution.
-4. Summarize outputs using the report template below, keeping non-test and test diffs separate.
-5. Call out net code growth and missing tests; prefer deletion-first actions.
-6. If the task includes repository navigation/localization comparison, report efficiency metrics:
+4. If the request is complexity-fix oriented (`xenon FAIL`, `radon C+`), run:
+   - `uv run radon cc src -s -n C`
+   - `uv run xenon --max-absolute B --max-modules A --max-average A src` (or repo-provided thresholds)
+5. On complexity fail, apply two-phase triage from `references/xenon_triage_playbook.md`:
+   - Phase 1: clear block-level offenders (C/D blocks first).
+   - Phase 2: clear module-rank offenders (B modules -> A) without behavior drift.
+6. Summarize outputs using the report template below, keeping non-test and test diffs separate.
+7. Call out net code growth and missing tests; prefer deletion-first actions.
+8. If the task includes repository navigation/localization comparison, report efficiency metrics:
    - `steps` (average tool or reasoning steps)
    - `cost_usd` (if available from logs)
    - `efficiency = Acc@5 / cost_usd` (or mark unavailable when no cost metric exists)
@@ -54,6 +60,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - `scripts/diff_summary_compact.py`: compact git diff summary.
 - `scripts/code_health_compact.py`: vulture/radon/xenon summary with thresholds.
 - `scripts/coverage_hotspots.py`: coverage hotspot report from `coverage.json`.
+- `references/xenon_triage_playbook.md`: block-first/module-second remediation order for xenon failures.
 
 ## Output naming
 - Default output directory: `$CODEX_HOME/shared/code-health` if `CODEX_HOME` is set, otherwise `/tmp/code-health`.

@@ -30,6 +30,7 @@ Delegate structural reduction execution to `non-test-bloat-reduction` and metric
   - offending block count (`CC > 10`)
   - minimum required CC reduction estimate
   - xenon pass/fail
+- Run the standard gate bundle from `references/complexity_gate_bundle.md`.
 
 2. Build reduction candidates.
 - Request intent clusters from `non-test-bloat-reduction`.
@@ -64,4 +65,5 @@ Delegate structural reduction execution to `non-test-bloat-reduction` and metric
 ## Resources
 
 - Decision policy: `references/decision_matrix.md`
+- Gate commands: `references/complexity_gate_bundle.md`
 - Cycle checker: `scripts/quick_validate.py`

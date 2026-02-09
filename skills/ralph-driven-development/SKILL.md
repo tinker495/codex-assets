@@ -1,6 +1,6 @@
 ---
 name: ralph-driven-development
-description: Unified Ralph execution skill that combines one-story PRD loop delivery in Codex with an external ordered-spec runner workflow. Use when asked to run Ralph loops, execute one story at a time from `prd.json`, continue iterative delivery, or run sequential spec files until a completion phrase is emitted.
+description: Unified Ralph execution skill that combines one-story PRD loop delivery, ordered spec-runner workflow, and quality-remediation loops (xenon/radon fail fix). Use when asked to run Ralph loops, execute one story at a time from `prd.json`, continue iterative delivery, run sequential specs, or fix quality-gate failures.
 ---
 
 # Ralph Driven Development
@@ -15,6 +15,7 @@ This skill owns:
 - Ralph loop sequencing and stop conditions.
 - State updates for iterative progress artifacts (`prd.json`, `progress.txt`, `docs/done.md`, `docs/logs/agent-run.log`).
 - Story/spec pass-block gating.
+- Quality-remediation loop gating when complexity checks fail.
 
 This skill may delegate specialist work as needed:
 
@@ -40,8 +41,9 @@ Use this decision order before execution:
 
 1. If user explicitly asks for story-by-story PRD execution, choose Mode A.
 2. If user explicitly asks to run ordered `docs/tasks/*.md` specs with a completion phrase, choose Mode B.
-3. If both contexts exist but user intent is ambiguous, default to Mode A and state that assumption.
-4. Do not run both modes in one invocation unless user explicitly requests it.
+3. If user explicitly asks to fix quality-gate failures (for example xenon/radon FAIL), choose Mode C.
+4. If both contexts exist but user intent is ambiguous, default to Mode A and state that assumption.
+5. Do not run multiple modes in one invocation unless user explicitly requests it.
 
 ### Mode A: In-Codex PRD Loop (default)
 
@@ -90,6 +92,28 @@ Workflow:
 4. Append full run output to `docs/logs/agent-run.log`.
 5. Append finished spec paths to `docs/done.md`.
 6. Resume safely by rerunning; completed specs are skipped.
+
+### Mode C: Quality Remediation Loop (complexity-fail fix)
+
+Use this mode when the user asks to remove `xenon`/`radon` failures rather than deliver a new story.
+
+Expected files:
+
+- `AGENTS.md` (repo quality rules)
+- source files reported by complexity tools
+
+Workflow:
+
+1. Run baseline checks:
+   - `uv run radon cc src -s -n C`
+   - `uv run xenon --max-absolute B --max-modules A --max-average A src` (or repo-defined thresholds)
+2. Delegate metric localization to `code-health` lane and collect offender list.
+3. Apply bounded remediation in this order:
+   1. block offenders (C/D)
+   2. module-rank offenders (B modules to A)
+4. Re-run baseline checks after each bounded patch batch.
+5. Stop when checks pass or when progress stalls; report blockers with concrete file-level evidence.
+6. In this mode, do not mark PRD stories passed unless the user also requested story delivery.
 
 ## PRD Preparation
 
@@ -171,6 +195,7 @@ python ~/.codex/skills/ralph-driven-development/scripts/ralph.py --repo-root .
 - Keep `progress.txt` append-only.
 - Preserve user-authored changes outside the current story scope.
 - In spec-runner mode, do not mark spec done without the magic phrase.
+- In quality-remediation mode, never report completion without fresh xenon/radon pass output.
 
 ## Output Contract
 
@@ -200,9 +225,17 @@ At end of invocation:
 - "use magic phrase completion"
 - "resume from docs/done.md"
 
+- Mode C (quality remediation):
+- "xenon fail fix"
+- "radon complexity fix"
+- "Complexity (xenon): FAIL"
+- "복잡도 실패 항목 전부 수정"
+- "quality gate failure fix"
+
 ## References
 
 - `references/scenario-catalog.md`: recommended use cases, anti-patterns, trigger phrases.
 - `references/prd-json-schema.md`: JSON contract and quality checklist.
 - `references/quality-profiles.md`: stack-based fallback quality checks when AGENTS.md is incomplete.
 - `references/jaxtar-quality-profile.md`: optional specialization example for one repository.
+- `references/quality-remediation-mode.md`: mode-C triage/remediation checklist for xenon/radon failures.
