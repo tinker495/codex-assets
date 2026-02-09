@@ -24,6 +24,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `skill-creator` | meta | skill design rules and structure |
 | `skill-topology-adjuster` | utility | topology role classification, ownership boundaries, and delegation graph updates |
 | `skill-installer` | meta | install/list external skills |
+| `find-skills` | utility | discover installable skills and recommend install paths |
 | `automation-creator` | utility | Codex automation directives |
 | `codex-session-recall` | utility | session log recall and filtering |
 | `codex-exec-sub-agent` | meta-tool | isolated sub-agent execution and JSONL run capture |
@@ -38,6 +39,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `doc` | specialist | DOCX editing and conversion workflow |
 | `spreadsheet` | specialist | spreadsheet modeling/editing workflow |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
+| `swarm-planner` | specialist | dependency-aware plan synthesis for parallel execution |
 | `screenshot` | specialist | OS-level screenshot capture |
 | `notion-knowledge-capture` | specialist | Notion knowledge capture and structured write-back |
 | `notion-meeting-intelligence` | specialist | Notion-backed meeting preparation and agenda intelligence |
@@ -47,7 +49,9 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent-compression and bloat reduction |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
+| `co-design` | orchestrator | design-aware parallel task execution with design-mode routing |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
+| `parallel-task` | orchestrator | dependency-ordered parallel subagent task execution |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
 | `ralph-driven-development` | meta-orchestrator | unified Ralph loop policy across PRD iterations and ordered spec-runner delivery |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
@@ -56,14 +60,14 @@ Define ownership and delegation boundaries across installed skills so specialist
 
 ```text
 Layer 0: Meta/Meta-Tool/Utility
-  skill-creator, skill-topology-adjuster, skill-installer, automation-creator,
+  skill-creator, skill-topology-adjuster, skill-installer, find-skills, automation-creator,
   codex-session-recall, codex-exec-sub-agent, ralph-driven-development
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder,
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
-  notion-knowledge-capture, notion-meeting-intelligence,
+  swarm-planner, notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
@@ -71,7 +75,7 @@ Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
-  main-merge, pr-workflow,
+  co-design, main-merge, parallel-task, pr-workflow,
   session-wrap-up
 
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
@@ -130,10 +134,14 @@ flowchart LR
 
   AC["automation-creator"]
   SI["skill-installer"]
+  FS["find-skills"]
   GHF["gh-fix-ci"]
   GHC["gh-address-comments"]
   JNB["jupyter-notebook"]
+  SP["swarm-planner"]
   SHOT["screenshot"]
+  CD["co-design"]
+  PT["parallel-task"]
   NKC["notion-knowledge-capture"]
   NMI["notion-meeting-intelligence"]
   NRD["notion-research-documentation"]
@@ -166,7 +174,9 @@ flowchart TD
   ROOT --> ORCH["Primary Orchestrators"]
   ORCH --> BHRW["branch-health-remediation-workflow"]
   ORCH --> CLB["complexity-loc-balancer"]
+  ORCH --> CD["co-design"]
   ORCH --> MM["main-merge"]
+  ORCH --> PT["parallel-task"]
   ORCH --> PR["pr-workflow"]
   ORCH --> SWU["session-wrap-up"]
 
@@ -211,6 +221,9 @@ flowchart TD
   DOCOPS --> JNB["jupyter-notebook"]
   DOCOPS --> SHOT["screenshot"]
 
+  ROOT --> PLAN["Planning Specialists"]
+  PLAN --> SP["swarm-planner"]
+
   ROOT --> NOTION["Notion Specialists"]
   NOTION --> NKC["notion-knowledge-capture"]
   NOTION --> NMI["notion-meeting-intelligence"]
@@ -224,6 +237,7 @@ flowchart TD
   META --> SC["skill-creator"]
   META --> STA["skill-topology-adjuster"]
   META --> SI["skill-installer"]
+  META --> FS["find-skills"]
   META --> AC["automation-creator"]
   META --> CSR["codex-session-recall"]
   META --> RDD["ralph-driven-development"]
