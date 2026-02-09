@@ -64,6 +64,59 @@ Apply this gate before any `generate` call.
    - Prefer keeping existing text/ASCII.
    - Report skipped conversion with one-line reason: `below diagram threshold`.
 
+## Source Text Authoring Rules (MANDATORY)
+
+PaperBanana renders source text into visual diagrams. Text-heavy source = text-heavy diagram. The source must describe **visual topology**, not technical specifications.
+
+### Anti-Text-Wall Rules
+
+1. **Box labels: 2~5 words max.**
+   - Good: `P0 Masking`, `Binder 4-Stage`, `SPP Execution`
+   - Bad: `P0 Action Masking: Overstow prevention (intra-block vertical order); Cross-zone HOLD/DECK restow prevention; PBS/Block Stowage DG zone masks`
+2. **No code, variable names, or formulas inside boxes.**
+   - Good: `Resistance Update`
+   - Bad: `resistance[l] += alpha * resistance_delta[l]`
+3. **No multi-line descriptions inside nodes.**
+   - Each node = one short label. Supplementary text goes to edge labels or a small legend, not inside the box.
+4. **Edge labels: max 3 words.**
+   - Good: `feedback`, `per block`, `eval only`
+   - Bad: `SPP rejection stats -> resistance_delta[block] updated -> affects next step P0/P1/P2`
+5. **Focus on TOPOLOGY (nodes + edges + flow direction), not CONTENT.**
+   - Source text defines: what boxes exist, how they connect, what the visual layout is.
+   - Source text does NOT define: implementation details, data schemas, algorithms.
+
+### Source Text Structure Template
+
+```text
+<Title of Diagram>
+
+NODES (short labels only):
+  Node1, Node2, Node3, ...
+
+FLOW:
+  Node1 -> Node2 -> Node3
+  Node3 -> Node4 [label: "eval only"]
+  Node4 --feedback--> Node1
+
+LAYOUT HINTS:
+  - Top-to-bottom / Left-to-right
+  - Group {Node1, Node2} as "Phase A"
+  - Highlight Node3 (decision point)
+
+VISUAL REQUIREMENTS:
+  - Use color grouping for phases
+  - Dashed arrows for optional/eval-only paths
+  - Bold arrows for main flow
+```
+
+### Context/Caption Anti-Text-Wall Directive
+
+Always include this phrase in the `--caption` or `-c` argument:
+
+> **"Schematic diagram with SHORT labels (2-5 words per box). No paragraphs or code inside boxes. Focus on flow topology."**
+
+This overrides PaperBanana's tendency to reproduce all source text verbatim.
+
 ## Graph vs ASCII Policy (MANDATORY)
 
 1. Keep graph diagrams as Mermaid:
@@ -185,6 +238,61 @@ Observed repeated failure classes in iterative runs:
 - Constraint matrix drift (missing row groups, duplicated/omitted rows, mismatched `—` cells).
 
 Mitigation: convert each failure into a literal `MUST` statement in the next prompt, then re-run.
+
+## Post-Generation Verification (MANDATORY)
+
+After every `generate` call, **read the output image** and verify against source text spec:
+1. All specified edges exist and no forbidden edges appear.
+2. Colors match spec (do not rely on PaperBanana critic alone).
+3. Layout constraints are met (band positions, routing, anchoring).
+4. If verification fails, identify best iteration from `run_<id>/diagram_iter_*.png` and copy that instead of `final_output.png`.
+
+## Iteration Selection Policy
+
+PaperBanana's critic may not select the best iteration. When the final output still has issues:
+1. Read ALL iteration images (`diagram_iter_1.png`, `diagram_iter_2.png`, `diagram_iter_3.png`).
+2. Select the iteration that best satisfies the source text spec.
+3. Copy that specific iteration to the target path.
+
+## Known Failure Patterns and Mitigations
+
+### Cross-Band Routing (bypass / skip connections)
+
+**Problem**: When dashed lines must cross from one horizontal band to another (e.g., Preprocess → SPP skipping MPP), PaperBanana's image generator routes them through the intermediate band interior, violating no-touch constraints on intermediate nodes (e.g., P0/P1/P2).
+
+**Mitigation**: In source text AND caption, provide **explicit spatial routing geometry**:
+- Specify FAR-LEFT MARGIN or FAR-RIGHT MARGIN routing.
+- Name exactly which side each bypass line must use.
+- State "completely OUTSIDE the [band name] band interior".
+- Add "Leave generous whitespace margins on both sides for bypass routing" to LAYOUT section.
+
+Example caption reinforcement:
+> "Bypass A routes down the FAR-RIGHT margin, completely OUTSIDE the MPP band. Bypass C routes down the FAR-LEFT margin."
+
+### Color Fidelity
+
+**Problem**: PaperBanana often renders specified dashed line colors as gray instead of the requested color (blue, green, red).
+
+**Mitigation**:
+- Include hex color codes in source text: `A=bright blue (#2196F3)`.
+- Repeat color requirements in QUALITY GATE section.
+- In caption: explicitly state "Bypass A MUST be blue, NOT gray".
+
+### Missing Edges
+
+**Problem**: Edges connecting nodes across different bands (e.g., MaterializedPool → inventory_slice) are frequently dropped during generation.
+
+**Mitigation**:
+- In source text LAYOUT section, describe the cross-band edge explicitly: "MaterializedPool → inventory_slice is a VERTICAL arrow going straight down from Preprocess band to MPP band."
+- Add the edge to QUALITY GATE checklist.
+
+### Endpoint Precision
+
+**Problem**: Dashed lines terminate on band backgrounds instead of specific box borders.
+
+**Mitigation**:
+- In source text, add explicit ENDPOINT ANCHOR RULES section.
+- In caption: "All bypass arrows terminate ON the [target box] box border, not on background."
 
 ## Input Contract
 
