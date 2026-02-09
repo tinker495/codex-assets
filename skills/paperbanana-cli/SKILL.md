@@ -64,6 +64,17 @@ Apply this gate before any `generate` call.
    - Prefer keeping existing text/ASCII.
    - Report skipped conversion with one-line reason: `below diagram threshold`.
 
+## Graph vs ASCII Policy (MANDATORY)
+
+1. Keep graph diagrams as Mermaid:
+   - If the source is a true graph (flowchart, dependency graph, decision graph), keep or author it in Mermaid first.
+   - Do not replace Mermaid graph sources with PaperBanana-only artifacts by default.
+2. Prioritize PaperBanana for non-graph or geometry-heavy ASCII:
+   - Use PaperBanana primarily when the source diagram is not a graph, or when ASCII geometry is too complex to maintain/read.
+   - Typical targets: layered spatial layouts, dense occupancy maps, and complex geometric schematics.
+3. Conversion boundary:
+   - If a Mermaid graph already communicates clearly, skip PaperBanana conversion unless the user explicitly requests publication-grade rendering.
+
 ## Task Commands
 
 ### Generate Diagram
