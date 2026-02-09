@@ -18,6 +18,7 @@ Detect topology drift across all installed skills and apply minimal corrective e
 - Target skill responsibilities (from request + SKILL.md)
 - Current topology document (default: `skill-topology-adjuster/references/skill_topology.md`)
 - Existing delegation edges touching the target skill
+- Specialist-identity erosion signals (whether one skill weakens another skill's specialist ownership)
 - Change context (new/updated/removed skills, or explicit drift-check request)
 
 ## Workflow
@@ -43,6 +44,8 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - for every graph-declared `skill -> codex-exec-sub-agent` preferred edge, that source skill `SKILL.md` must also contain scenario-bound `codex-exec-sub-agent` delegation guidance
    - sub-agent preferred activators are explicitly documented in hierarchy/scenario form for high-cost scans (for example grep/search-heavy, O(N^2) parity checks, large log forensics)
    - orchestrators delegate specialist internals instead of duplicating them
+   - detect specialist-identity erosion: if skill A's guidance makes skill B lose specialist ownership (A absorbs B's specialist internals instead of delegating), mark drift
+   - for each erosion candidate pair (A, B), confirm whether A claims direct ownership/execution of B-owned specialist workflow; if yes and no explicit delegation boundary exists, mark `needs-fix`
    - delegation depth stays one hop unless explicitly allowed
    - detect responsibility-overlap candidates across skills by directly reading SKILL text, then check explicit delegation/reference exists between the pair
    - every skill has a per-skill audit status (`pass`/`needs-fix`) with reason
@@ -69,6 +72,7 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - final role
    - detected drift items and applied fixes
    - per-skill audit summary (each skill: pass/needs-fix + reason)
+   - specialist-identity erosion findings (none or pairwise A -> B with reason)
    - ownership/delegation bullets
    - exact files changed
 
@@ -78,6 +82,22 @@ Detect topology drift across all installed skills and apply minimal corrective e
 - For every overlap candidate, open both SKILL files and compare their responsibility text directly.
 - Use evidence from actual SKILL body wording (Objective/Purpose/Workflow/trigger language) before marking `needs-fix`.
 - If overlap is real and there is no explicit delegation/reference edge, mark both sides `needs-fix` and propose the minimum boundary/delegation edit.
+- For specialist-identity erosion, read both SKILL files and verify whether non-owning skill text claims specialist internals that should remain owned by the specialist skill.
+- If erosion is real, mark the eroding skill `needs-fix` (and mark the eroded specialist `needs-fix` if its boundary text became ambiguous), then propose the smallest ownership/delegation wording fix.
+
+## Specialist Identity Erosion Check
+
+Treat the following as explicit topology drift candidates:
+
+- A non-specialist skill claims it can directly run or redefine specialist internals that belong to another installed specialist skill.
+- A specialist-orchestrator or orchestrator keeps a copied specialist checklist instead of delegating to the specialist owner.
+- A utility/meta skill expands into cross-domain implementation ownership that causes specialist skills to lose clear ownership boundaries.
+
+Default correction policy:
+
+1. Restore specialist ownership wording in the specialist skill.
+2. Remove copied internals from non-owning skills.
+3. Replace copied internals with explicit delegation to the specialist owner.
 
 ## Real-Time Adjustment Loop
 

@@ -18,3 +18,8 @@
 - 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
 - 검증: `pytest tests/tui/test_overlay_rules.py -q`.
 - Run time: 2026-02-08 02:25:50 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 zone map 기본값(데크) 사용으로 hold-only bay 영역 표시에 영향을 받는 경로를 점검.
+- 버그: deck_row_no가 비어있는 hold-only bay에서도 데크 zone map을 기본 사용하여 zone 헤더/컬럼 스타일이 비어 보임(overlay 및 render_bay_grid_table).
+- 수정: 데크 행 유무에 따라 hold/deck zone map 선택, zone 헤더 길이는 col_to_zone 크기 기반으로 계산하도록 보정.
+- 검증: `PYTHONPATH=./src python` 스니펫으로 hold-only bay에서 zone map/zone 헤더 길이 정상 확인.
+- Run time: 2026-02-09 01:32:30 UTC

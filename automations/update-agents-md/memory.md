@@ -1,2 +1,3 @@
-- Updated AGENTS.md quick-start with Makefile targets: sync, git-lfs, editable, install-hooks, code-health-diff, clean; bumped last-updated date.
-- Runtime: 2026-02-08 10:43:24 +0900
+- Scanned AGENTS.md files in /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization; found root + subdir AGENTS plus node_modules copy.
+- Identified missing app-run commands from README (`stowage`, `python -m stowage`) to add under root AGENTS; edit blocked by workspace-write restrictions (repo not in writable roots).
+- Runtime: 2026-02-09 10:36:37 +0900
