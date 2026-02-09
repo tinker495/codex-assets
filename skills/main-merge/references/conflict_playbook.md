@@ -45,6 +45,12 @@ pytest -q tests/path/to/affected_test.py -k "<keyword>"
 git merge --continue
 ```
 
+If the shell is non-interactive and git cannot open an editor, run:
+
+```bash
+GIT_EDITOR=true git merge --continue
+```
+
 ## Guardrails
 
 - Do not use destructive git commands.

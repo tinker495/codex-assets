@@ -30,10 +30,11 @@ Capture changed files, net LOC, and high-churn non-test modules from onboarding 
   - architecture shift invalidates existing doc boundaries
 
 3. Build the documentation impact set.
+Use `origin/main` as the default base to avoid stale-local-base drift.
 Run:
 
 ```bash
-python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --base main --format md
+python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --base origin/main --format md
 ```
 
 Use `references/doc_update_matrix.md` to validate and expand candidate docs.

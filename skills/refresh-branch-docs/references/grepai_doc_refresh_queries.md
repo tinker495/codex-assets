@@ -7,7 +7,7 @@ Run these queries in order and keep `--json` enabled.
 `grepai search` is discovery-only. Always filter first and ground with `trace graph + rg`.
 
 ```bash
-python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --base main --format json > /tmp/doc_ctx.json
+python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --base origin/main --format json > /tmp/doc_ctx.json
 jq '.changed_files[]' /tmp/doc_ctx.json | head
 ```
 

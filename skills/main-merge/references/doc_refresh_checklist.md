@@ -7,7 +7,7 @@ Use this checklist after merge conflicts are resolved and validation is complete
 Run:
 
 ```bash
-python "$CODEX_HOME/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py" --base main --format md
+python "$CODEX_HOME/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py" --base origin/main --format md
 ```
 
 Prioritize:

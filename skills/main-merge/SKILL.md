@@ -64,6 +64,13 @@ git add <resolved-files>
 git merge --continue
 ```
 
+If `git merge --continue` fails in non-interactive shells with editor-related errors,
+retry with:
+
+```bash
+GIT_EDITOR=true git merge --continue
+```
+
 5. Validate post-merge behavior.
 Run the smallest meaningful checks first, then expand only for touched risk areas.
 Prefer project commands when available (for example `make test`, targeted pytest, or lint).
