@@ -1,4 +1,4 @@
 interface:
-  display_name: "메인 머지"
-  short_description: "브랜치 온보딩 후 main 병합, 충돌 해결, 문서 갱신"
+  display_name: "Main Merge"
+  short_description: "Branch onboarding after main merge, conflict resolution, and document refresh"
   default_prompt: "Use $main-merge to onboard the current branch, merge main, resolve conflicts, and refresh branch documentation."

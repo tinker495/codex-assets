@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import which
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, NamedTuple, Sequence
 
 FAILURE_CONCLUSIONS = {
     "failure",
@@ -48,6 +48,13 @@ PENDING_LOG_MARKERS = (
 )
 
 
+class TargetPR(NamedTuple):
+    repo_slug: str
+    pr: str
+    url: str | None = None
+    source: str = "unknown"
+
+
 class GhResult:
     def __init__(self, returncode: int, stdout: str, stderr: str):
         self.returncode = returncode
@@ -55,9 +62,13 @@ class GhResult:
         self.stderr = stderr
 
 
-def run_gh_command(args: Sequence[str], cwd: Path) -> GhResult:
+def run_gh_command(args: Sequence[str], cwd: Path, gh_repo: str | None = None) -> GhResult:
+    cmd = ["gh"]
+    if gh_repo:
+        cmd.extend(["-R", gh_repo])
+    cmd.extend(args)
     process = subprocess.run(
-        ["gh", *args],
+        cmd,
         cwd=cwd,
         text=True,
         capture_output=True,
@@ -65,9 +76,15 @@ def run_gh_command(args: Sequence[str], cwd: Path) -> GhResult:
     return GhResult(process.returncode, process.stdout, process.stderr)
 
 
-def run_gh_command_raw(args: Sequence[str], cwd: Path) -> tuple[int, bytes, str]:
+def run_gh_command_raw(
+    args: Sequence[str], cwd: Path, gh_repo: str | None = None
+) -> tuple[int, bytes, str]:
+    cmd = ["gh"]
+    if gh_repo:
+        cmd.extend(["-R", gh_repo])
+    cmd.extend(args)
     process = subprocess.run(
-        ["gh", *args],
+        cmd,
         cwd=cwd,
         capture_output=True,
     )
@@ -87,6 +104,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--pr", default=None, help="PR number or URL (defaults to current branch PR)."
     )
+    parser.add_argument(
+        "--gh-repo",
+        default=None,
+        help=(
+            "GitHub repository slug (owner/repo) used for PR/check lookup. "
+            "When omitted, auto-resolves current-repo PR then fork-upstream PR."
+        ),
+    )
     parser.add_argument("--max-lines", type=int, default=DEFAULT_MAX_LINES)
     parser.add_argument("--context", type=int, default=DEFAULT_CONTEXT_LINES)
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of text output.")
@@ -103,17 +128,31 @@ def main() -> int:
     if not ensure_gh_available(repo_root):
         return 1
 
-    pr_value = resolve_pr(args.pr, repo_root)
-    if pr_value is None:
+    target = resolve_target_pr(args.pr, args.gh_repo, repo_root)
+    if target is None:
         return 1
 
-    checks = fetch_checks(pr_value, repo_root)
+    checks = fetch_checks(target.pr, repo_root, target.repo_slug)
     if checks is None:
         return 1
 
     failing = [c for c in checks if is_failing(c)]
     if not failing:
-        print(f"PR #{pr_value}: no failing checks detected.")
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "repo": target.repo_slug,
+                        "pr": target.pr,
+                        "prUrl": target.url,
+                        "resolutionSource": target.source,
+                        "results": [],
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            print(f"{target.repo_slug} PR #{target.pr}: no failing checks detected.")
         return 0
 
     results = []
@@ -122,15 +161,27 @@ def main() -> int:
             analyze_check(
                 check,
                 repo_root=repo_root,
+                repo_slug=target.repo_slug,
                 max_lines=max(1, args.max_lines),
                 context=max(1, args.context),
             )
         )
 
     if args.json:
-        print(json.dumps({"pr": pr_value, "results": results}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "repo": target.repo_slug,
+                    "pr": target.pr,
+                    "prUrl": target.url,
+                    "resolutionSource": target.source,
+                    "results": results,
+                },
+                indent=2,
+            )
+        )
     else:
-        render_results(pr_value, results)
+        render_results(target.repo_slug, target.pr, results)
 
     return 1
 
@@ -159,31 +210,171 @@ def ensure_gh_available(repo_root: Path) -> bool:
     return False
 
 
-def resolve_pr(pr_value: str | None, repo_root: Path) -> str | None:
+def resolve_target_pr(
+    pr_value: str | None, gh_repo: str | None, repo_root: Path
+) -> TargetPR | None:
     if pr_value:
-        return pr_value
-    result = run_gh_command(["pr", "view", "--json", "number"], cwd=repo_root)
+        return resolve_explicit_pr(pr_value, gh_repo, repo_root)
+
+    direct = resolve_current_repo_pr(repo_root, gh_repo)
+    if direct is not None:
+        return direct
+
+    if gh_repo:
+        print(
+            f"Error: no open PR found for current branch in {gh_repo}.",
+            file=sys.stderr,
+        )
+        return None
+
+    upstream = resolve_upstream_pr_for_fork(repo_root)
+    if upstream is not None:
+        return upstream
+
+    print(
+        "Error: unable to resolve a PR from current branch in current repo or upstream fork parent.",
+        file=sys.stderr,
+    )
+    return None
+
+
+def resolve_explicit_pr(
+    pr_value: str, gh_repo: str | None, repo_root: Path
+) -> TargetPR | None:
+    url_match = re.search(r"github\.com/([^/]+/[^/]+)/pull/(\d+)", pr_value)
+    if url_match:
+        return TargetPR(
+            repo_slug=url_match.group(1),
+            pr=url_match.group(2),
+            url=pr_value,
+            source="explicit-url",
+        )
+
+    if not pr_value.isdigit():
+        print(
+            "Error: --pr must be a PR number or GitHub PR URL.",
+            file=sys.stderr,
+        )
+        return None
+
+    repo_slug = gh_repo or fetch_repo_slug(repo_root)
+    if not repo_slug:
+        print(
+            "Error: unable to resolve target repository for --pr number input.",
+            file=sys.stderr,
+        )
+        return None
+    return TargetPR(repo_slug=repo_slug, pr=pr_value, source="explicit-number")
+
+
+def resolve_current_repo_pr(repo_root: Path, gh_repo: str | None) -> TargetPR | None:
+    fields = "number,url"
+    result = run_gh_command(["pr", "view", "--json", fields], cwd=repo_root, gh_repo=gh_repo)
     if result.returncode != 0:
-        message = (result.stderr or result.stdout or "").strip()
-        print(message or "Error: unable to resolve PR.", file=sys.stderr)
         return None
     try:
         data = json.loads(result.stdout or "{}")
     except json.JSONDecodeError:
-        print("Error: unable to parse PR JSON.", file=sys.stderr)
         return None
     number = data.get("number")
     if not number:
-        print("Error: no PR number found.", file=sys.stderr)
         return None
-    return str(number)
+    url = str(data.get("url") or "")
+    repo_slug = gh_repo or parse_repo_from_pr_url(url) or fetch_repo_slug(repo_root)
+    if not repo_slug:
+        return None
+    return TargetPR(repo_slug=repo_slug, pr=str(number), url=url or None, source="current-repo")
 
 
-def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
+def resolve_upstream_pr_for_fork(repo_root: Path) -> TargetPR | None:
+    repo_info = fetch_repo_info(repo_root)
+    if not repo_info:
+        return None
+    if not bool(repo_info.get("isFork")):
+        return None
+
+    current_slug = str(repo_info.get("nameWithOwner") or "")
+    current_owner = current_slug.split("/", 1)[0] if "/" in current_slug else ""
+    parent_slug = parse_parent_slug(repo_info)
+    if not current_owner or not parent_slug:
+        return None
+
+    branch = current_branch(repo_root)
+    if not branch:
+        return None
+
+    prs = fetch_upstream_pr_candidates(repo_root, parent_slug, current_owner, branch)
+    if not isinstance(prs, list) or not prs:
+        return None
+
+    prs = [p for p in prs if isinstance(p, dict) and p.get("number")]
+    if not prs:
+        return None
+    prs.sort(key=lambda p: str(p.get("updatedAt") or ""), reverse=True)
+    selected = prs[0]
+    return TargetPR(
+        repo_slug=parent_slug,
+        pr=str(selected["number"]),
+        url=str(selected.get("url") or "") or None,
+        source="fork-upstream-head-branch",
+    )
+
+
+def fetch_upstream_pr_candidates(
+    repo_root: Path, parent_slug: str, current_owner: str, branch: str
+) -> list[dict[str, Any]] | None:
+    fields = "number,url,updatedAt"
+    primary = run_gh_command(
+        [
+            "pr",
+            "list",
+            "--state",
+            "open",
+            "--head",
+            f"{current_owner}:{branch}",
+            "--json",
+            fields,
+        ],
+        cwd=repo_root,
+        gh_repo=parent_slug,
+    )
+    if primary.returncode == 0:
+        try:
+            primary_list = json.loads(primary.stdout or "[]")
+        except json.JSONDecodeError:
+            primary_list = []
+        if isinstance(primary_list, list) and primary_list:
+            return primary_list
+
+    fallback = run_gh_command(
+        [
+            "pr",
+            "list",
+            "--state",
+            "open",
+            "--search",
+            f"head:{branch} author:{current_owner}",
+            "--json",
+            fields,
+        ],
+        cwd=repo_root,
+        gh_repo=parent_slug,
+    )
+    if fallback.returncode != 0:
+        return None
+    try:
+        fallback_list = json.loads(fallback.stdout or "[]")
+    except json.JSONDecodeError:
+        return None
+    return fallback_list if isinstance(fallback_list, list) else None
+
+
+def fetch_checks(pr_value: str, repo_root: Path, repo_slug: str) -> list[dict[str, Any]] | None:
     primary_fields = ["name", "state", "conclusion", "detailsUrl", "startedAt", "completedAt"]
     result = run_gh_command(
         ["pr", "checks", pr_value, "--json", ",".join(primary_fields)],
         cwd=repo_root,
+        gh_repo=repo_slug,
     )
     if result.returncode != 0:
         message = "\n".join(filter(None, [result.stderr, result.stdout])).strip()
@@ -205,6 +396,7 @@ def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
             result = run_gh_command(
                 ["pr", "checks", pr_value, "--json", ",".join(selected_fields)],
                 cwd=repo_root,
+                gh_repo=repo_slug,
             )
             if result.returncode != 0:
                 message = (result.stderr or result.stdout or "").strip()
@@ -238,6 +430,7 @@ def is_failing(check: dict[str, Any]) -> bool:
 def analyze_check(
     check: dict[str, Any],
     repo_root: Path,
+    repo_slug: str,
     max_lines: int,
     context: int,
 ) -> dict[str, Any]:
@@ -256,11 +449,12 @@ def analyze_check(
         base["note"] = "No GitHub Actions run id detected in detailsUrl."
         return base
 
-    metadata = fetch_run_metadata(run_id, repo_root)
+    metadata = fetch_run_metadata(run_id, repo_root, repo_slug)
     log_text, log_error, log_status = fetch_check_log(
         run_id=run_id,
         job_id=job_id,
         repo_root=repo_root,
+        repo_slug=repo_slug,
     )
 
     if log_status == "pending":
@@ -307,7 +501,7 @@ def extract_job_id(url: str) -> str | None:
     return None
 
 
-def fetch_run_metadata(run_id: str, repo_root: Path) -> dict[str, Any] | None:
+def fetch_run_metadata(run_id: str, repo_root: Path, repo_slug: str) -> dict[str, Any] | None:
     fields = [
         "conclusion",
         "status",
@@ -318,7 +512,11 @@ def fetch_run_metadata(run_id: str, repo_root: Path) -> dict[str, Any] | None:
         "headSha",
         "url",
     ]
-    result = run_gh_command(["run", "view", run_id, "--json", ",".join(fields)], cwd=repo_root)
+    result = run_gh_command(
+        ["run", "view", run_id, "--json", ",".join(fields)],
+        cwd=repo_root,
+        gh_repo=repo_slug,
+    )
     if result.returncode != 0:
         return None
     try:
@@ -334,13 +532,14 @@ def fetch_check_log(
     run_id: str,
     job_id: str | None,
     repo_root: Path,
+    repo_slug: str,
 ) -> tuple[str, str, str]:
-    log_text, log_error = fetch_run_log(run_id, repo_root)
+    log_text, log_error = fetch_run_log(run_id, repo_root, repo_slug)
     if not log_error:
         return log_text, "", "ok"
 
     if is_log_pending_message(log_error) and job_id:
-        job_log, job_error = fetch_job_log(job_id, repo_root)
+        job_log, job_error = fetch_job_log(job_id, repo_root, repo_slug)
         if job_log:
             return job_log, "", "ok"
         if job_error and is_log_pending_message(job_error):
@@ -355,20 +554,19 @@ def fetch_check_log(
     return "", log_error, "error"
 
 
-def fetch_run_log(run_id: str, repo_root: Path) -> tuple[str, str]:
-    result = run_gh_command(["run", "view", run_id, "--log"], cwd=repo_root)
+def fetch_run_log(run_id: str, repo_root: Path, repo_slug: str) -> tuple[str, str]:
+    result = run_gh_command(["run", "view", run_id, "--log"], cwd=repo_root, gh_repo=repo_slug)
     if result.returncode != 0:
         error = (result.stderr or result.stdout or "").strip()
         return "", error or "gh run view failed"
     return result.stdout, ""
 
 
-def fetch_job_log(job_id: str, repo_root: Path) -> tuple[str, str]:
-    repo_slug = fetch_repo_slug(repo_root)
-    if not repo_slug:
-        return "", "Error: unable to resolve repository name for job logs."
+def fetch_job_log(job_id: str, repo_root: Path, repo_slug: str) -> tuple[str, str]:
     endpoint = f"/repos/{repo_slug}/actions/jobs/{job_id}/logs"
-    returncode, stdout_bytes, stderr = run_gh_command_raw(["api", endpoint], cwd=repo_root)
+    returncode, stdout_bytes, stderr = run_gh_command_raw(
+        ["api", endpoint], cwd=repo_root, gh_repo=repo_slug
+    )
     if returncode != 0:
         message = (stderr or stdout_bytes.decode(errors="replace")).strip()
         return "", message or "gh api job logs failed"
@@ -389,6 +587,59 @@ def fetch_repo_slug(repo_root: Path) -> str | None:
     if not name_with_owner:
         return None
     return str(name_with_owner)
+
+
+def fetch_repo_info(repo_root: Path) -> dict[str, Any] | None:
+    result = run_gh_command(
+        ["repo", "view", "--json", "nameWithOwner,isFork,parent"],
+        cwd=repo_root,
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        data = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+def parse_parent_slug(repo_info: dict[str, Any]) -> str | None:
+    parent = repo_info.get("parent")
+    if not isinstance(parent, dict):
+        return None
+    name_with_owner = parent.get("nameWithOwner")
+    if name_with_owner:
+        return str(name_with_owner)
+    owner = parent.get("owner")
+    name = parent.get("name")
+    login = owner.get("login") if isinstance(owner, dict) else None
+    if login and name:
+        return f"{login}/{name}"
+    return None
+
+
+def current_branch(repo_root: Path) -> str | None:
+    result = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        return None
+    branch = result.stdout.strip()
+    if not branch or branch == "HEAD":
+        return None
+    return branch
+
+
+def parse_repo_from_pr_url(url: str) -> str | None:
+    match = re.search(r"github\.com/([^/]+/[^/]+)/pull/\d+", url)
+    if not match:
+        return None
+    return match.group(1)
 
 
 def normalize_field(value: Any) -> str:
@@ -456,9 +707,9 @@ def tail_lines(text: str, max_lines: int) -> str:
     return "\n".join(lines[-max_lines:])
 
 
-def render_results(pr_number: str, results: Iterable[dict[str, Any]]) -> None:
+def render_results(repo_slug: str, pr_number: str, results: Iterable[dict[str, Any]]) -> None:
     results_list = list(results)
-    print(f"PR #{pr_number}: {len(results_list)} failing checks analyzed.")
+    print(f"{repo_slug} PR #{pr_number}: {len(results_list)} failing checks analyzed.")
     for result in results_list:
         print("-" * 60)
         print(f"Check: {result.get('name', '')}")

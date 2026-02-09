@@ -106,6 +106,86 @@ bash scripts/run_paperbanana.sh evaluate \
   --caption "<figure_caption>"
 ```
 
+## Log-Guided Refinement Loop (MANDATORY when iterating)
+
+When generation requires retries, read run logs and promote critic feedback into explicit hard constraints.
+
+1. Mine critic output across all iterations:
+   - `find <output_dir>/run_* -path '*/iter_*/details.json' -print0 | xargs -0 jq -r '.critique.critic_suggestions[]? // empty'`
+2. Cluster recurring failures:
+   - Endpoint mismatch (`A -> B` wrong target).
+   - Arrow style/color mismatch (solid/dashed, black/grey/red, thickness).
+   - Loop timing mismatch (`validate` once vs every loop).
+   - Matrix/table omissions (missing rows/groups, wrong legend, wrong `—` cells).
+3. Rewrite source text with `MUST` constraints only (no vague language).
+4. Regenerate to the same `--output` path and recheck logs.
+5. Accept only if latest critic suggestions are empty and visual spot-check confirms key constraints.
+
+## Prompt Hardening Checklist (for diagram generation)
+
+Use this checklist whenever previous runs required more than one revision.
+
+1. Edge contract:
+   - Enumerate every critical edge explicitly as `SOURCE -> TARGET`.
+   - Declare forbidden alternatives: `DO NOT connect to background/group container`.
+2. Style contract:
+   - Fix arrow style per edge class (main flow, branch, feedback, bypass).
+   - Use exact style words (`solid`, `dashed`, `thin`, `bold`) and exact color names; avoid synonyms.
+3. Loop contract:
+   - Specify loop granularity in plain logic (e.g., `validate_plan(FULL) exactly once after all blocks/containers`).
+   - State which arrows represent loop-back vs normal forward flow.
+4. Table/matrix contract:
+   - Provide full row-group and row list with exact ordering.
+   - Provide complete cell-state map (`full`, `approx`, `indirect`, `—`) for every row/column.
+   - Explicitly include legend policy (keep or remove) to avoid oscillation.
+
+## Critic Conflict Arbitration (MANDATORY)
+
+Critic feedback can conflict across iterations. Resolve with deterministic priority:
+
+1. Source truth first:
+   - If critic feedback contradicts the source method text, keep source truth and reject critic request.
+2. Semantics over cosmetics:
+   - Prioritize node identity, edge endpoints, loop timing, and table values over font/style micro-adjustments.
+3. Freeze decisions:
+   - When a property oscillates (for example rectangle vs rounded rectangle), pin one canonical value in source text with `MUST` and `MUST NOT`.
+4. Stop condition:
+   - If remaining critic issues are cosmetic-only and semantic checks pass, mark as acceptable with caveat.
+
+## Endpoint Precision Protocol (for bypass/feedback-heavy graphs)
+
+When repeated failures mention "connect to border/background":
+
+1. Add explicit anchor constraints:
+   - `Arrow MUST terminate on <node> border (not center, not group background).`
+2. Add anti-target constraints:
+   - `Arrow MUST NOT terminate on band/subgraph container.`
+3. Reduce ambiguous crossings:
+   - Require orthogonal routing around nodes so arrows do not appear to point to adjacent nodes.
+4. Keep bypass labels near origin:
+   - Place bypass labels close to source node to avoid critic drift on readability.
+
+## Matrix Determinism Mode (for table diagrams)
+
+For constraint matrices, enforce data-first rendering:
+
+1. Encode each cell with both color and token (`F/A/I/—`) to prevent color-only drift.
+2. Provide exact row count and exact row order.
+3. Ban duplicate row labels explicitly (`must appear once only`).
+4. Add row-group membership assertions per row (which group owns the row).
+5. Reject output if any row/group mismatch is found, even when critic reports no issues.
+
+## High-Risk Patterns from Real Runs (2026-02-09)
+
+Observed repeated failure classes in iterative runs:
+
+- Arrow endpoint drift (edge points to nearby region instead of target node).
+- Arrow style drift (correct node mapping but wrong dashed/solid, color, or thickness).
+- Feedback/loop semantic drift (wrong source node or wrong loop timing semantics).
+- Constraint matrix drift (missing row groups, duplicated/omitted rows, mismatched `—` cells).
+
+Mitigation: convert each failure into a literal `MUST` statement in the next prompt, then re-run.
+
 ## Input Contract
 
 - `generate`:
