@@ -23,3 +23,8 @@
 - 수정: 데크 행 유무에 따라 hold/deck zone map 선택, zone 헤더 길이는 col_to_zone 크기 기반으로 계산하도록 보정.
 - 검증: `PYTHONPATH=./src python` 스니펫으로 hold-only bay에서 zone map/zone 헤더 길이 정상 확인.
 - Run time: 2026-02-09 01:32:30 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 lift overlay 및 anomaly 관련 변경을 점검.
+- 결과: `pytest tests/domain/test_invalid_manual_core.py -q`, `pytest tests/calculators/test_oog_calculator.py -q`, `pytest tests/tui/test_overlay_rules.py -q`, `pytest tests/routing/test_rotation_history_render.py -q` 모두 통과; 최신 변경과 직접 연관된 실패/재현 가능한 버그 미발견.
+- 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
+- 검증: 위 pytest 4건 실행.
+- Run time: 2026-02-10 01:33:12 UTC

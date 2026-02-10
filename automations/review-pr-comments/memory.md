@@ -1,2 +1,2 @@
-Summary: gh auth status failed (invalid token). gh auth token missing; gh api user failed (network/auth). Requested user to run `gh auth login -h github.com` and retry. No PRs fetched.
-LastRun: 2026-02-09 10:30:26
+Summary: Diagnosed repeated gh auth prompts as automation runtime constraints (workspace-write sandbox + network-restricted runs can cause gh auth checks to misclassify as login failure). Confirmed normal interactive gh auth works, then hardened automation. Applied two fixes: (1) switched gh credential storage to file (gh auth login --with-token --insecure-storage) so automation can read token without keychain dependency, and (2) updated review-pr-comments automation prompt to distinguish true auth-missing (no oauth token + invalid status) from network/sandbox errors and avoid asking gh auth login on connectivity-only failures.
+LastRun: 2026-02-10 10:41:39 KST
