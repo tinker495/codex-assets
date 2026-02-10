@@ -7,12 +7,24 @@ metadata:
 
 # PR Comment Handler
 
-Guide to find the open PR for the current branch and address its comments with gh CLI. Run all `gh` commands with elevated network access.
+Guide to find the open PR for the current branch and address its comments with gh CLI.
 
-Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), then run `gh auth status` with escalated permissions (include workflow/repo scopes) so `gh` commands succeed. If sandboxing blocks `gh auth status`, rerun it with `sandbox_permissions=require_escalated`.
+Prereq:
+- Ensure `gh` exists first: `command -v gh`.
+- Before running git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- Use non-interactive gh env for all gh calls: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
+- If any `gh` call still fails with `Error: could not open a new TTY`, rerun once with the same env and then report failure.
 
 ## 0) Resolve target PR (fork-aware)
 - Preferred: run `scripts/fetch_comments.py` directly (auto-resolves current repo PR, then fork upstream parent PR by head branch when needed).
+- Path guardrail (required, search-as-discovery):
+  - First verify local script path: `test -f scripts/fetch_comments.py`.
+  - If missing, search candidate paths before fallback: `rg --files -g 'fetch_comments.py'`.
+  - If found, run the first exact path.
+  - If still missing, fallback to bundled absolute path: `python /Users/mrx-ksjung/.codex/skills/gh-address-comments/scripts/fetch_comments.py`.
+  - If all script paths are missing, switch to gh-only discovery:
+    - `gh pr view --json number,url`
+    - `gh pr list --state open --search "author:@me" --json number,url,updatedAt`
 - Optional overrides:
   - `python scripts/fetch_comments.py --repo "." --pr "123"`
   - `python scripts/fetch_comments.py --repo "." --pr "https://github.com/org/repo/pull/123"`

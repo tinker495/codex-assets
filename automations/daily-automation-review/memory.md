@@ -1,11 +1,10 @@
-- Summary: Implemented recommended automation updates. Edited `automatically-create-new-skills` prompt to add explicit missing-path noise triggers (`No such file or directory`, missing `collect_branch_info.py`, missing `/shared/code-health`) plus pre-check/fallback guardrails (`test -f/-d`, `rg --files`, `git log --since=1.week --name-only`, `git diff --stat`). Edited `update-agents-md` prompt to require AGENTS discovery before edits, skip missing paths without `sed`, and stop with no-change evidence when no AGENTS files exist.
-- Run time: 2026-02-08T21:08:14+0900
+- Summary: Scanned 2026-02-09 sessions and automation TOMLs. Detected recurring noise: ModuleNotFoundError yaml, command-not-found (grepai-deep-analysis/timeout/pdfinfo), No such file or directory, not-a-git-repo, and gh errors (unknown flag --repo, unable to resolve PR from branch, jq parse error). Prepared ranked recommendations with prompt deltas targeting automatically-create-new-skills (add triggers + guardrails for missing commands/gh flag/jq parse and PR-resolution fallback) and optional review-pr-comments guardrail note.
+- Run time: 2026-02-10T10:51:41+09:00
+- Summary: Reviewed 2026-02-09 sessions and automations. Found recurring sandbox denials: here-doc temp file creation failures (5 files), blocked-by-policy rm cleanup attempts (6), and operation-not-permitted writes to /tmp or repo docs. Recommended updating 'Automatically create new skills' automation prompt with new noise triggers and guardrails (avoid here-docs, avoid rm, verify writable paths before writes). No automation files changed.
+- Run time: 2026-02-10T10:53:10+0900
 
-- Summary: Reviewed 2026-02-07 sessions and automations. Found recurring operational noise: missing repo script `scripts/collect_branch_info.py`, missing shared path `/shared/code-health`, and sed on non-existent AGENTS paths. Proposed prompt-delta recommendations to add existence checks, rg-based discovery, and fallback branch info collection in relevant automations (especially Automatically create new skills and Update AGENTS.md). No automation files changed.
-- Run time: 2026-02-08T11:16:26+0900
+- Summary: Applied ranked recommendation by updating existing automation 'automatically-create-new-skills'. Added explicit high-noise threshold (>=2 hits or >=2 sessions), new sandbox-denial triggers (here-doc temp failure, Sandbox(Denied, PermissionError, blocked by policy), and guardrails to avoid here-doc/rm cleanup plus writable-path checks with fallback. Updated updated_at; no new automation created.
+- Run time: 2026-02-10T10:59:56+0900
 
-- Summary: Reviewed 2026-02-08 session logs and all automation TOMLs. Found no recurring operational noise signals (no file-not-found/traceback/quick_validate failures); only expected skill text references and routine runs. No automation prompt updates recommended.
-- Run time: 2026-02-09T10:51:47+0900
-
-- Summary: Scanned 2026-02-08 (UTC) session JSONL for nonzero exec outputs and recurring operational noise. Identified repeat errors: missing PyYAML (ModuleNotFoundError: No module named 'yaml'), unsupported --json flag, missing collect_branch_info.py, missing prd.json, gh TTY errors, grepai command missing, and non-git repo runs. Prepared ranked automation prompt deltas for automatically-create-new-skills, review-pr-comments, and recent-code-bugfix with explicit noise triggers and guardrails.
-- Run time: 2026-02-09T10:53:01+0900
+- Summary: Executed the ranked updates on existing automations only (no new automation). Updated `automatically-create-new-skills` prompt with additional recurring noise triggers (`unknown flag --repo`, `jq parse error`, `unable to resolve PR from current branch`, missing `timeout`/`pdfinfo`) and concrete fallback guardrails. Updated `review-pr-comments` prompt with explicit fallback rules for PR-resolution failure and `--repo` flag rejection. Validated both files with TOML parsing.
+- Run time: 2026-02-10T11:01:09+09:00

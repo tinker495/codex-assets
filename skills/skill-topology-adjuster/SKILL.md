@@ -141,6 +141,7 @@ Policy constraints:
 
 Use `scripts/audit_topology.py` as the default strict auditor.
 Treat the script as candidate generation plus baseline checks; final overlap judgment must be validated by direct SKILL text reading.
+If `--json` is rejected, rerun without the flag and parse the text output.
 
 ```bash
 python3 scripts/audit_topology.py
@@ -175,7 +176,12 @@ Run:
 ```bash
 python3 scripts/audit_topology.py
 python3 scripts/audit_topology.py --json
-skill-creator/scripts/quick_validate.py <path/to/skill-folder>
+uv run --with pyyaml /Users/mrx-ksjung/.codex/skills/.system/skill-creator/scripts/quick_validate.py <path/to/skill-folder>
 ```
+
+Quick validation guardrail:
+- Run `quick_validate.py` once.
+- If it fails, rerun once with the same `uv run --with pyyaml` command.
+- If it fails twice, stop and report without further edits.
 
 If topology changed, verify role map + graph + tree are synchronized in `skill-topology-adjuster/references/skill_topology.md`.

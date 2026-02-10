@@ -65,6 +65,7 @@ Fallback when `prd.json` is missing:
   4. Report as `ad-hoc iteration (no prd)` and do not mark story pass state.
   5. Recommend creating `prd.json` before the next multi-iteration cycle.
 - If user intent is feature delivery (not optimization/remediation), ask for PRD preparation instead of guessing backlog.
+- Path guardrail (required): before any `ralph_state.py --prd prd.json` command, verify `test -f prd.json`.
 
 Workflow:
 
@@ -170,6 +171,9 @@ python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py brief --p
 
 # Suggested quality checks
 python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py quality-plan --repo-root . --json
+
+# If `--json` is rejected by the tool, rerun without it and parse text output
+python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py quality-plan --repo-root .
 
 # Print next pending story
 python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py next --prd prd.json

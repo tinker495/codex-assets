@@ -11,7 +11,12 @@ description: "Use when a user asks to debug or fix failing GitHub PR checks that
 Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.
 - Draft the fix plan inline in this skill and request approval before implementing.
 
-Prereq: authenticate with the standard GitHub CLI once (for example, run `gh auth login`), then confirm with `gh auth status` (repo + workflow scopes are typically required).
+Prereq:
+- Ensure `gh` exists first: `command -v gh`.
+- Before git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- Authenticate with GitHub CLI once (for example, `gh auth login`) and confirm with `gh auth status`.
+- Use non-interactive gh env for all gh calls: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
+- If a `gh` command fails with `Error: could not open a new TTY`, rerun once with the same env and then report failure.
 
 ## Inputs
 
@@ -48,6 +53,7 @@ Prereq: authenticate with the standard GitHub CLI once (for example, run `gh aut
      - Auto/fork-aware: `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "."`
      - Override repo: `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --gh-repo "<owner/repo>" --pr "123"`
      - Add `--json` for machine-friendly output.
+     - If `--json` is rejected by a tool/version, rerun without `--json` and parse text output.
    - Manual fallback:
      - `gh pr checks <pr> --repo <target_repo> --json name,state,bucket,link,startedAt,completedAt,workflow`
        - If a field is rejected, rerun with the available fields reported by `gh`.
@@ -62,6 +68,10 @@ Prereq: authenticate with the standard GitHub CLI once (for example, run `gh aut
 5. Summarize failures for the user.
    - Provide the failing check name, run URL (if any), and a concise log snippet.
    - Call out missing logs explicitly.
+   - If workflow file lookup is needed, use path filtering first:
+     - `test -d .github/workflows || true`
+     - `rg --files .github/workflows -g '*.yml' -g '*.yaml'`
+     - If no file matches expected name, continue with gh run metadata and do not fail on local path assumptions.
 6. Create a plan.
    - Draft a concise inline plan with: failure cause, proposed fix, tests to run, rollback note.
    - Request explicit approval before implementation.
