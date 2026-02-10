@@ -57,7 +57,9 @@ For each category, calculate:
 - Lines deleted
 - Net change
 - Percentage of total
-Then record the per-category net changes in the "주요 변경사항 (Key Changes)" section.
+- Before state summary (one-line)
+- After state summary (one-line)
+Then record both the per-category net changes and the mandatory "Before → After" table in the "주요 변경사항 (Key Changes)" section.
 
 ### 5) Identify Breaking Changes
 
@@ -89,6 +91,16 @@ Use this format (**한국어로 자세히 작성**):
 - Document: +/-XX
 - Tooling: +/-XX
 - Bugfix: +/-XX
+
+#### 카테고리별 Before → After (필수)
+| Category | Before | After | Evidence |
+|----------|--------|-------|----------|
+| Feature | [Before behavior/structure] | [After behavior/structure] | [files/commits] |
+| Refactor | [Before structure] | [After structure] | [files/commits] |
+| Test | [Before test scope] | [After test scope] | [files/commits] |
+| Document | [Before docs state] | [After docs state] | [files/commits] |
+| Tooling | [Before tooling flow] | [After tooling flow] | [files/commits] |
+| Bugfix | [Before defect/limitation] | [After fix/result] | [files/commits] |
 
 #### 1. [Feature/System Name]
 | 항목 | 설명 |
@@ -212,6 +224,7 @@ When you finish, report:
 - Files changed count
 - Total line changes (added/deleted/net)
 - Category breakdown table
+- Category before/after table
 - Breaking changes summary (if any)
 - Code-health summary
 - Checklist results (pass/fail/blocked)
