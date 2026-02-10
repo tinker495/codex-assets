@@ -45,6 +45,15 @@ Match the level of specificity to the task's fragility and variability:
 
 Think of Codex as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
 
+### Keep Intermediate Artifacts Out of User Repositories
+
+Use isolated temp locations for planning and scratch artifacts by default.
+
+- Prefer `/private/tmp` (fallback: `$CODEX_HOME/tmp`).
+- Keep prompts, draft plans, scratch notes, and review logs outside the target codebase.
+- Write into the target repository only for user-requested final deliverables.
+- Do not create incidental `tmp/` or scratch files inside user repositories unless explicitly requested.
+
 ### Anatomy of a Skill
 
 Every skill consists of a required SKILL.md file and optional bundled resources:
@@ -358,7 +367,7 @@ Before adding workflow steps, identify whether the behavior is owned by another 
 - Move repeated procedural details (protocols, quality gates, command packs) into the owning skill.
 - In non-owning skills, replace duplicated details with short delegation instructions that reference the owning skill by name.
 - Keep ownership one-hop deep: orchestrator -> specialist. Avoid long delegation chains.
-- When delegating to `codex-exec-sub-agent`, standardize quoting-safe/bounded invocation (`--prompt-file`, `--timeout-sec`) and avoid `/tmp`/`/var/tmp` output paths unless policy allows it.
+- When delegating to `codex-exec-sub-agent`, standardize quoting-safe/bounded invocation (`--prompt-file`, `--timeout-sec`) and keep outputs outside the target repository (prefer `/private/tmp`, fallback `$CODEX_HOME/tmp`).
 
 #### Start with Reusable Skill Contents
 
@@ -387,6 +396,11 @@ Do not include any other fields in YAML frontmatter.
 ##### Body
 
 Write instructions for using the skill and its bundled resources.
+
+Also include explicit artifact-location policy in the body:
+
+- Planning/review intermediates must stay outside user repositories by default.
+- Repository writes are limited to requested final outputs.
 
 ### Step 6: Validate the Skill
 

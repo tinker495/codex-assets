@@ -19,6 +19,7 @@ Create implementation plans with explicit task dependencies optimized for parall
 4. **Explicit Dependencies**: Every task declares what it depends on, enabling maximum parallelization
 5. **Atomic Tasks**: Each task is independently executable by a single agent
 6. **Review Before Yield**: A subagent reviews the plan for gaps before finalizing
+7. **Artifact Isolation**: Save plans and all intermediate artifacts outside the target codebase by default (`/private/tmp` preferred, fallback `$CODEX_HOME/tmp`). Never write planning scratch files into the repository unless the user explicitly asks.
 
 ## Process
 
@@ -78,7 +79,11 @@ Tasks with empty/satisfied dependencies can run in parallel (T1, T2 above).
 
 ### 4. Save Plan
 
-Save to `<topic>-plan.md` in the CWD.
+Save to `/private/tmp/<topic>-plan.md` by default.
+
+- If `/private/tmp` is unavailable, use `$CODEX_HOME/tmp/<topic>-plan.md`.
+- Do **not** save planning artifacts in repository CWD by default.
+- Only copy a plan into the repository when the user explicitly requests repository persistence.
 
 ### 5. Subagent Review
 
@@ -98,6 +103,8 @@ Context: [brief context about the task]
 ```
 
 If the subagent provides actionable feedback, revise the plan before yielding.
+
+Store review prompt files, review logs, and helper outputs in `/private/tmp` (or `$CODEX_HOME/tmp` fallback), not in the target repository.
 
 ### 5a. Review Timeout and Fallback (Required)
 
@@ -191,3 +198,4 @@ T2 ──┴── T4 ──┘
 - Do NOT implement - only create the plan
 - Always use Context7 for external dependencies before finalizing tasks
 - Always ask questions where ambiguity exists
+- Keep all intermediate planning artifacts out of the codebase (plan drafts, prompts, logs, scratch notes)

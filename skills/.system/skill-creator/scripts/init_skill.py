@@ -70,6 +70,12 @@ Delete this entire "Structuring This Skill" section when done - it's just guidan
 - Concrete examples with realistic user requests
 - References to scripts/templates/references as needed]
 
+## Artifact Location Policy (required)
+
+- Keep intermediate artifacts (plan drafts, prompts, logs, scratch notes) out of user repositories by default.
+- Prefer `/private/tmp` (fallback: `$CODEX_HOME/tmp`) for temporary files.
+- Write to the target repository only for user-requested final deliverables.
+
 ## Resources (optional)
 
 Create only the resource directories this skill actually needs. Delete this section if no resources are required.
