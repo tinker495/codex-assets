@@ -47,6 +47,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `doc` | specialist | DOCX editing and conversion workflow |
 | `spreadsheet` | specialist | spreadsheet modeling/editing workflow |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
+| `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
 | `subagent-driven-development` | specialist | execute independent implementation tasks with fresh subagent loops |
 | `swarm-planner` | specialist | dependency-aware plan synthesis for parallel execution |
 | `systematic-debugging` | specialist | root-cause-first debugging protocol |
@@ -56,7 +57,6 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `verification-before-completion` | specialist | completion gate enforcing fresh verification evidence |
 | `writing-plans` | specialist | implementation plan authoring for multi-step tasks |
 | `writing-skills` | specialist | skill authoring and validation workflow |
-| `paperbanana-cli` | specialist | PaperBanana CLI execution for diagram/plot generation and evaluation |
 | `notion-knowledge-capture` | specialist | Notion knowledge capture and structured write-back |
 | `notion-meeting-intelligence` | specialist | Notion-backed meeting preparation and agenda intelligence |
 | `notion-research-documentation` | specialist | multi-source Notion research synthesis and documentation |
@@ -88,7 +88,7 @@ Layer 1: Specialists (single-domain ownership)
   verification-before-completion, writing-plans, writing-skills,
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
-  swarm-planner, paperbanana-cli, notion-knowledge-capture, notion-meeting-intelligence,
+  swarm-planner, docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
@@ -173,12 +173,12 @@ flowchart LR
   SDBG["systematic-debugging"]
   SP["swarm-planner"]
   SHOT["screenshot"]
+  DCAA["docs-codebase-alignment-audit"]
   TDD["test-driven-development"]
   UGW["using-git-worktrees"]
   VBC["verification-before-completion"]
   WPL["writing-plans"]
   WSK["writing-skills"]
-  PB["paperbanana-cli"]
   CD["co-design"]
   PT["parallel-task"]
   NKC["notion-knowledge-capture"]
@@ -259,7 +259,7 @@ flowchart TD
   DOCOPS --> SS["spreadsheet"]
   DOCOPS --> JNB["jupyter-notebook"]
   DOCOPS --> SHOT["screenshot"]
-  DOCOPS --> PB["paperbanana-cli"]
+  DOCOPS --> DCAA["docs-codebase-alignment-audit"]
 
   ROOT --> PLAN["Planning Specialists"]
   PLAN --> SP["swarm-planner"]

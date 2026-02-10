@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docs Codebase Alignment Audit"
+  short_description: "Audit docs/codebase alignment workflows"
+  default_prompt: "Audit and fix docs codebase alignment with minimal diffs"

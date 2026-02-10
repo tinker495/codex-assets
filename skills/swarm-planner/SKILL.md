@@ -99,6 +99,20 @@ Context: [brief context about the task]
 
 If the subagent provides actionable feedback, revise the plan before yielding.
 
+### 5a. Review Timeout and Fallback (Required)
+
+Treat subagent review as bounded execution:
+
+1. Start review with a bounded command (JSONL log + explicit output path).
+2. Poll progress for a fixed timeout window (recommended: 120 seconds).
+3. If final review content is missing, incomplete, or the process hangs:
+   - stop waiting,
+   - record the failure mode briefly,
+   - run local static review immediately using the same 4 criteria:
+     1) missing dependencies, 2) ordering failures, 3) missing edge cases, 4) gaps/gotchas.
+4. Revise the plan using whichever review evidence is available (subagent and/or local fallback).
+5. Never claim "subagent reviewed" unless final review output was actually captured.
+
 
 ## Plan Template
 
