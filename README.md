@@ -1,5 +1,7 @@
 # codex-assets mirror
 
+> 이거 그냥 개인용이니 신경쓰지 말고 지나가 =
+
 This repository mirrors local Codex assets from:
 
 - `~/.codex/skills` -> `./skills`
