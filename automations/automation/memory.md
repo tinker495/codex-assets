@@ -1,2 +1,2 @@
-- Last run: 2026-02-10T10:01:21Z
-- Summary: Reviewed 2026-02-10 non-merge commits (docs/AGENTS/CLAUDE/testing-guide + minor xenon output). No intent/implementation mismatches found; residual risk only around doc-command drift.
+- Last run: 2026-02-11T10:01:58Z
+- Summary: Reviewed 2026-02-11 merge PR #96 changes (blocked_plan + SPP scaffolding + docs). Flagged potential intent mismatches: SPPInput lacks bypass/selector fields from spec, BlockedPlan built from placements requires cell_position, and builder treats occupied_slots as feasible slots.
