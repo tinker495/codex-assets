@@ -12,8 +12,5 @@
 - Summary: Scanned 2026-02-10 sessions and automation TOMLs. Yesterday's sessions contained no user/assistant messages (all empty JSONL entries), so no recurring operational noise signals were observed. No automation prompt updates recommended.
 - Run time: 2026-02-11T10:50:49+09:00
 
-- Summary: Scanned 2026-02-10 sessions and automation TOMLs. Observed repeated path-miss noise:  and . Recommended updates: add CODEX_HOME default/guardrail plus new noise trigger in , and add daily-automation-review detection guardrail to count only top-level  errors (ignore nested log echoes).
-- Run time: 2026-02-11T10:52:05+0900
-
-- Summary: Scanned 2026-02-10 sessions and automation TOMLs. Observed repeated path-miss noise: `ls: scripts/fetch_comments.py` and `ls: /automations/automatically-create-new-skills`. Recommended updates: add CODEX_HOME default/guardrail plus new noise trigger in `automatically-create-new-skills`, and add daily-automation-review detection guardrail to count only top-level `function_call_output` errors (ignore nested log echoes).
-- Run time: ${ts}
+- Summary: Applied ranked updates to existing automations only. Updated `automatically-create-new-skills` with a new noise signal (`ls: /automations/automatically-create-new-skills`) and a CODEX_HOME path guardrail (`CODEX_HOME=${CODEX_HOME:-$HOME/.codex}`, no `/automations/...` absolute path). Updated `daily-automation-review` with a detection guardrail to count noise only from `response_item` + `function_call_output` entries. No new automation created.
+- Run time: 2026-02-11T11:04:18+0900
