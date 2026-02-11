@@ -81,6 +81,7 @@ Tasks with empty/satisfied dependencies can run in parallel (T1, T2 above).
 
 Save to `/private/tmp/<topic>-plan.md` by default.
 
+- Before writing, verify destination parent directory with `test -w`.
 - If `/private/tmp` is unavailable, use `$CODEX_HOME/tmp/<topic>-plan.md`.
 - Do **not** save planning artifacts in repository CWD by default.
 - Only copy a plan into the repository when the user explicitly requests repository persistence.
@@ -112,6 +113,7 @@ Treat subagent review as bounded execution:
 
 1. Start review with a bounded command (JSONL log + explicit output path).
 2. Poll progress for a fixed timeout window (recommended: 120 seconds).
+   - If `timeout` wrapper is unavailable, poll using plain shell sleeps (or `gtimeout` when available).
 3. If final review content is missing, incomplete, or the process hangs:
    - stop waiting,
    - record the failure mode briefly,

@@ -3,3 +3,5 @@
 - Runtime: 2026-02-09 10:36:37 +0900
 - Added CLI run entries (stowage, python -m stowage) to root AGENTS app run section; updated last-updated date.
 - Runtime: 2026-02-10 10:36:29 +0900
+- Updated root AGENTS quick start with sync/git-lfs/editable/install-hooks, code-health-diff, clean, and python -m stowage commands.
+- Runtime: 2026-02-11 10:36:12 +0900

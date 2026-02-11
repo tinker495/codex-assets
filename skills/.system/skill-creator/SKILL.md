@@ -45,15 +45,6 @@ Match the level of specificity to the task's fragility and variability:
 
 Think of Codex as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
 
-### Keep Intermediate Artifacts Out of User Repositories
-
-Use isolated temp locations for planning and scratch artifacts by default.
-
-- Prefer `/private/tmp` (fallback: `$CODEX_HOME/tmp`).
-- Keep prompts, draft plans, scratch notes, and review logs outside the target codebase.
-- Write into the target repository only for user-requested final deliverables.
-- Do not create incidental `tmp/` or scratch files inside user repositories unless explicitly requested.
-
 ### Anatomy of a Skill
 
 Every skill consists of a required SKILL.md file and optional bundled resources:
@@ -227,11 +218,10 @@ Skill creation involves these steps:
 
 1. Understand the skill with concrete examples
 2. Plan reusable skill contents (scripts, references, assets)
-3. Delegate topology impact and orchestration boundaries
-4. Initialize the skill (run init_skill.py)
-5. Edit the skill (implement resources and write SKILL.md)
-6. Validate the skill (run quick_validate.py)
-7. Iterate based on real usage
+3. Initialize the skill (run init_skill.py)
+4. Edit the skill (implement resources and write SKILL.md)
+5. Validate the skill (run quick_validate.py)
+6. Iterate based on real usage
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -284,28 +274,7 @@ Example: When building a `big-query` skill to handle queries like "How many user
 
 To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
 
-### Step 3: Delegating Topology Impact and Orchestration Boundaries
-
-For every new, updated, or removed skill, delegate topology adjustment to `skill-topology-adjuster` in real-time before initialization or major edits.
-
-1. Run strict topology audit first:
-   - `python3 $CODEX_HOME/skills/skill-topology-adjuster/scripts/audit_topology.py`
-   - stop and fix all `needs-fix` items before continuing when exit code is `1`
-2. Pass installed-skills root path (`$CODEX_HOME/skills`) and target skill scope/responsibilities to `skill-topology-adjuster`.
-3. Require a full installed-skill scan result from `skill-topology-adjuster` (no partial checks).
-4. Apply the returned role classification (`specialist`, `orchestrator`, `utility`, `meta`).
-5. Apply returned ownership boundaries:
-   - what this skill owns
-   - what this skill must delegate
-6. Apply returned one-hop delegation edges.
-7. If drift is detected, apply returned corrective edits immediately (topology docs first, then affected delegation wording).
-8. If the graph changed, apply the returned update to `skill-topology-adjuster/references/skill_topology.md` in the same change, and update source-skill delegation wording for all changed edges in the same commit.
-9. Enforce explicit global meta-tool access semantics for `codex-exec-sub-agent` in topology artifacts (for example, `ANY --> CESA` or equivalent wording that means "any skill role can delegate").
-10. Enforce edge parity: every runtime edge in Delegation Graph must also appear in Delegation Tree.
-
-Reject a design when `skill-topology-adjuster` flags duplicated specialist internals.
-
-### Step 4: Initializing the Skill
+### Step 3: Initializing the Skill
 
 At this point, it is time to actually create the skill.
 
@@ -345,7 +314,7 @@ scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 
 Only include other optional interface fields when the user explicitly provides them. For full field descriptions and examples, see references/openai_yaml.md.
 
-### Step 5: Edit the Skill
+### Step 4: Edit the Skill
 
 When editing the (newly-generated or existing) skill, remember that the skill is being created for another instance of Codex to use. Include information that would be beneficial and non-obvious to Codex. Consider what procedural knowledge, domain-specific details, or reusable assets would help another Codex instance execute these tasks more effectively.
 
@@ -357,17 +326,6 @@ Consult these helpful guides based on your skill's needs:
 - **Specific output formats or quality standards**: See references/output-patterns.md for template and example patterns
 
 These files contain established best practices for effective skill design.
-
-#### Apply Ownership and Delegation Boundaries
-
-Before adding workflow steps, identify whether the behavior is owned by another specialist skill.
-
-- Use `skill-topology-adjuster` output as the source of truth for ownership mapping.
-- Keep orchestrator skills focused on ordering and handoff; do not duplicate specialist internals.
-- Move repeated procedural details (protocols, quality gates, command packs) into the owning skill.
-- In non-owning skills, replace duplicated details with short delegation instructions that reference the owning skill by name.
-- Keep ownership one-hop deep: orchestrator -> specialist. Avoid long delegation chains.
-- When delegating to `codex-exec-sub-agent`, standardize quoting-safe/bounded invocation (`--prompt-file`, `--timeout-sec`) and keep outputs outside the target repository (prefer `/private/tmp`, fallback `$CODEX_HOME/tmp`).
 
 #### Start with Reusable Skill Contents
 
@@ -392,62 +350,29 @@ Write the YAML frontmatter with `name` and `description`:
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
 
 Do not include any other fields in YAML frontmatter.
+If any frontmatter value contains `:`, quote the value explicitly.
 
 ##### Body
 
 Write instructions for using the skill and its bundled resources.
 
-Also include explicit artifact-location policy in the body:
-
-- Planning/review intermediates must stay outside user repositories by default.
-- Repository writes are limited to requested final outputs.
-
-### Step 6: Validate the Skill
+### Step 5: Validate the Skill
 
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
-Run dependency preflight first:
-
 ```bash
-python3 -c "import yaml; print('yaml:ok')"
+uv run --with pyyaml scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-If preflight fails (`ModuleNotFoundError: No module named 'yaml'`), use one of these paths before `quick_validate.py`:
+Validation guardrails:
+- Before writing any skill file, verify destination parent directory with `test -w`.
+- If parent is not writable, fallback to current repo root or `$CODEX_HOME`; if neither is writable, stop and report.
+- Run quick validation once.
+- If it fails, rerun once with the same `uv run --with pyyaml` command.
+- If it fails twice, stop and report.
+- If yaml import fails, do not switch to plain `python`; keep `uv run --with pyyaml`.
 
-1. If dependency install is allowed, install PyYAML:
-
-```bash
-python3 -m pip install pyyaml
-```
-
-2. If install is not allowed (restricted/read-only environment), run temporary fallback checks and mark validation as partial until PyYAML is available:
-
-```bash
-rg "^---$|^name:|^description:" <path/to/skill-folder>/SKILL.md
-python3 $CODEX_HOME/skills/skill-topology-adjuster/scripts/audit_topology.py --json
-```
-
-After dependency recovery (or in normal environments), run:
-
-```bash
-scripts/quick_validate.py <path/to/skill-folder>
-```
-
-The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
-
-Also validate topology consistency for new/updated skills:
-
-- Confirm ownership boundaries are explicit in the skill body.
-- Confirm delegation targets use existing skill names.
-- Confirm topology decisions came from `skill-topology-adjuster` when topology changed.
-- Confirm `skill-topology-adjuster/references/skill_topology.md` role map + graph + tree are updated when edges changed.
-- Confirm `codex-exec-sub-agent` remains explicitly reusable by any skill role in topology docs.
-- Confirm Delegation Graph edges are mirrored in Delegation Tree for runtime handoff consistency.
-- Confirm every graph-declared `source -> target` edge has explicit `target` skill reference in `source/SKILL.md`.
-- Confirm every graph-declared `source -> codex-exec-sub-agent` edge includes scenario-bound usage wording in `source/SKILL.md`.
-- Confirm skills that call `codex-exec-sub-agent` use the safe invocation pattern (`--prompt-file`, `--timeout-sec`) or justify why not.
-
-### Step 7: Iterate
+### Step 6: Iterate
 
 After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
 

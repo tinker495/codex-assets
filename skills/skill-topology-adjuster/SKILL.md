@@ -181,7 +181,9 @@ uv run --with pyyaml /Users/mrx-ksjung/.codex/skills/.system/skill-creator/scrip
 
 Quick validation guardrail:
 - Run `quick_validate.py` once.
+- If yaml import fails, rerun validation only via `uv run --with pyyaml` (do not switch to plain `python`).
 - If it fails, rerun once with the same `uv run --with pyyaml` command.
 - If it fails twice, stop and report without further edits.
+- Before writing topology artifacts, verify destination parent directory is writable with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`, otherwise stop and report.
 
 If topology changed, verify role map + graph + tree are synchronized in `skill-topology-adjuster/references/skill_topology.md`.

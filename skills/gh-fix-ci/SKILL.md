@@ -94,6 +94,16 @@ Prereq:
 - This skill owns GitHub Actions failure inspection, log analysis, and fix-plan gating.
 - `gh-address-comments` owns PR review comment response workflows.
 
+## Operational Noise Controls
+
+- Keep search-as-discovery order: inspect checks first, then open workflow/log files only for failing runs.
+- Apply path filtering to local lookup: restrict `rg` to `.github/workflows` before wider search.
+- Use trace-plus-rg evidence gating: widen file search only after concrete failing check/job evidence.
+- If `--json` is rejected by `gh` or helper scripts, rerun without `--json` and parse text output.
+- If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument where supported.
+- If `jq` parsing fails (`jq: parse error`), rerun without `--jq`/`--json` and continue with plain-text parsing.
+- If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR selection.
+
 ## Bundled Resources
 
 ### scripts/inspect_pr_checks.py

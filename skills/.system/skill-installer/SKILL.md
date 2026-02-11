@@ -9,8 +9,6 @@ metadata:
 
 Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
 
-Topology note: This is a standalone meta skill; delegation optional. It does not orchestrate specialist internals.
-
 Use the helper scripts based on the task:
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
 - Install from the curated list when the user provides a skill name.
@@ -50,6 +48,15 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+
+## Operational Noise Controls
+
+- Use search-as-discovery: list/install via bundled scripts first; avoid broad repo scans unless script path is missing.
+- Before executing helper scripts, verify script path with `test -f` (or `rg --files -g '<script-name>'`).
+- If JSON output flags fail (`--format json` or downstream `--json`), rerun without JSON flags and parse text output.
+- If `jq` parsing fails (`jq: parse error`), rerun without `jq` dependency and continue with plain-text parsing.
+- Before installation writes, verify destination parent directory with `test -w`; if not writable, fallback to `$CODEX_HOME/skills` when writable, otherwise stop and report.
+- Avoid fallback loops: one retry per mode (download -> git), then stop and report the last actionable error.
 
 ## Notes
 

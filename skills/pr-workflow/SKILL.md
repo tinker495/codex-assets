@@ -215,6 +215,19 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - `rpg-loop-reasoning`: owns dual-view augmentation when `grepai-deep-analysis` indicates unresolved cross-module ambiguity.
 - This skill owns change categorization, PR narrative, approval gating, and PR creation.
 
+## Operational Noise Controls
+
+- Use search-as-discovery first: run `branch-onboarding-brief` and `code-health` before broad ad-hoc scans.
+- Apply path filtering for follow-up `rg`: scope to files already surfaced by branch diff, code-health outputs, or review findings.
+- Use trace-plus-rg evidence gating: only widen search after concrete evidence from commits, checks, or logs.
+- Before any git commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- If onboarding helper paths are missing (for example `collect_branch_info.py`), fallback to git evidence lanes: `git log --since=1.week --name-only` and `git diff --stat`.
+- For gh commands, use non-interactive env: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
+- If `gh` reports `Error: could not open a new TTY`, rerun once with the same env and then report failure.
+- If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open` and continue with explicit PR selection.
+- If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument.
+- If JSON/JQ parsing fails (`--json` rejected or `jq: parse error`), rerun without `--json`/`--jq` and parse text output.
+
 ## Output Expectations
 
 When you finish, report:

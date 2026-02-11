@@ -45,5 +45,14 @@ Prereq:
 ## 3) If user chooses comments
 - Apply fixes for the selected comments
 
+## Operational Noise Controls
+
+- If any `--json` flag is rejected by the local tool version, rerun without `--json` and parse plain-text output.
+- If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument.
+- If `jq` parsing fails (`jq: parse error`), rerun without `--jq`/`--json` and continue in text-parsing mode.
+- If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR choice.
+- Before writing temp/output files, verify destination parent directory with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`.
+- Keep path filtering tight: run `rg --files -g 'fetch_comments.py'` before broad searches.
+
 Notes:
 - If gh hits auth/rate issues mid-run, prompt the user to re-authenticate with `gh auth login`, then retry.

@@ -8,3 +8,12 @@
 
 - Summary: Executed the ranked updates on existing automations only (no new automation). Updated `automatically-create-new-skills` prompt with additional recurring noise triggers (`unknown flag --repo`, `jq parse error`, `unable to resolve PR from current branch`, missing `timeout`/`pdfinfo`) and concrete fallback guardrails. Updated `review-pr-comments` prompt with explicit fallback rules for PR-resolution failure and `--repo` flag rejection. Validated both files with TOML parsing.
 - Run time: 2026-02-10T11:01:09+09:00
+
+- Summary: Scanned 2026-02-10 sessions and automation TOMLs. Yesterday's sessions contained no user/assistant messages (all empty JSONL entries), so no recurring operational noise signals were observed. No automation prompt updates recommended.
+- Run time: 2026-02-11T10:50:49+09:00
+
+- Summary: Scanned 2026-02-10 sessions and automation TOMLs. Observed repeated path-miss noise:  and . Recommended updates: add CODEX_HOME default/guardrail plus new noise trigger in , and add daily-automation-review detection guardrail to count only top-level  errors (ignore nested log echoes).
+- Run time: 2026-02-11T10:52:05+0900
+
+- Summary: Scanned 2026-02-10 sessions and automation TOMLs. Observed repeated path-miss noise: `ls: scripts/fetch_comments.py` and `ls: /automations/automatically-create-new-skills`. Recommended updates: add CODEX_HOME default/guardrail plus new noise trigger in `automatically-create-new-skills`, and add daily-automation-review detection guardrail to count only top-level `function_call_output` errors (ignore nested log echoes).
+- Run time: ${ts}

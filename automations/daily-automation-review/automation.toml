@@ -1,7 +1,7 @@
 version = 1
 id = "daily-automation-review"
 name = "Daily automation review"
-prompt = "Analyze yesterday's ~/.codex/sessions and existing ~/.codex/automations, detect recurring operational noise in workflows driven by skills or automations, and prioritize update actions that automatically trigger context refinement when noise is high. Prefer updating existing automations over creating new ones, define explicit noise triggers and guardrails, include exact prompt deltas, and avoid duplicates. Open an inbox item with ranked update recommendations and implementation rationale, or provide no-change evidence when signals are weak."
+prompt = "Analyze yesterday's ~/.codex/sessions and existing ~/.codex/automations, detect recurring operational noise in workflows driven by skills or automations, and prioritize update actions that automatically trigger context refinement when noise is high. Before scanning, verify path existence with test -d ~/.codex/sessions and test -d ~/.codex/automations; if either is missing, report and stop. For any repo-script/shared-path references, verify with test -f/test -d or rg --files first; if missing, fallback to git log --since=1.week --name-only and git diff --stat. Avoid here-doc syntax and use python -c or single-line commands. Prefer updating existing automations over creating new ones, define explicit noise triggers and guardrails, include exact prompt deltas, and avoid duplicates. Open an inbox item with ranked update recommendations and implementation rationale, or provide no-change evidence when signals are weak."
 status = "ACTIVE"
 rrule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10;BYMINUTE=50"
 cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization", "/Users/mrx-ksjung/project/codex-skills"]

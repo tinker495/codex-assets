@@ -28,3 +28,8 @@
 - 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
 - 검증: 위 pytest 4건 실행.
 - Run time: 2026-02-10 01:33:12 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 RenderWidgetFactory bay overlay 위젯 캐시 키를 점검.
+- 버그: `bay_overlay_widget` 캐시 키에 `global_rows`/`global_tiers`가 포함되지 않아 동일 stowage plan/bay/color_mode에서 다른 전역 행/티어 설정이 있어도 같은 위젯을 재사용함(렌더 상태가 stale).
+- 수정: 캐시 키에 `global_rows`/`global_tiers`를 tuple로 포함.
+- 검증: `uv run pytest tests/tui/test_widget_factory.py -q`.
+- Run time: 2026-02-11 01:32:11 UTC

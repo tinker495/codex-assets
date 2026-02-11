@@ -18,7 +18,8 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
    - Use `--mode full` for deeper scans.
    - Use `--top-files 20` to expand the main-branch churn list.
    - Use `--skip-coverage` only if tests are too heavy; ask before skipping coverage when accuracy matters.
-   - Use `--out-dir /tmp/code-health` or another global directory to avoid repo pollution.
+   - Before using `--out-dir`, verify writability: `test -w /tmp` or `test -d "$CODEX_HOME/shared/code-health"`.
+   - If neither is writable, fallback to a repo-root temp dir (for example, `<repo_root>/.codex_tmp/code-health`) and report the fallback.
 4. If the request is complexity-fix oriented (`xenon FAIL`, `radon C+`), run:
    - `uv run radon cc src -s -n C`
    - `uv run xenon --max-absolute B --max-modules A --max-average A src` (or repo-provided thresholds)
@@ -36,8 +37,12 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Use search-as-discovery: execute bundled health scripts first, then run ad-hoc search only when script output leaves a gap.
 - Apply path filtering: scope follow-up `rg` to files surfaced by diff/health outputs before any broader scan.
 - Use trace-plus-rg evidence gating: require a concrete hotspot/module trace before escalating to `rg --files` or `find`.
+- Before git-driven diff context commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- If repo-scoped helper paths are missing, fallback to git evidence lanes: `git log --since=1.week --name-only` and `git diff --stat`.
 - Path-sensitive guardrail: verify script/shared path existence with `test -f` / `test -d` first; when `$CODEX_HOME/shared/code-health` is missing, skip it and continue with `/tmp/code-health`.
 - Avoid fallback loops: if a tool invocation fails twice, use the documented fallback once (for example `--skip-coverage`) and continue.
+- Avoid here-doc syntax; use `python -c` or single-line commands for inline scripts.
+- If running `ruff` implicitly via health scripts, set `RUFF_CACHE_DIR` to a writable path (prefer `<repo_root>/.ruff_cache`) after `test -w <repo_root>`.
 
 ## Report template
 - Summary: duplication %, xenon status, coverage included/skipped.

@@ -203,6 +203,19 @@ python ~/.codex/skills/ralph-driven-development/scripts/ralph_state.py append-pr
 python ~/.codex/skills/ralph-driven-development/scripts/ralph.py --repo-root .
 ```
 
+## Operational Noise Controls
+
+- Before git commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- Use search-as-discovery first: run Ralph state/script commands before broad repository scans.
+- Apply path filtering for `rg`: start from files surfaced by PRD/story/spec state outputs.
+- Use trace-plus-rg evidence gating: widen search only after concrete failing checks/story evidence.
+- Before running repo scripts or shared paths, verify with `test -f` / `test -d` (or `rg --files` for discovery).
+- If repo helper paths are missing, fallback to branch context commands: `git log --since=1.week --name-only` and `git diff --stat`.
+- If `grepai` is unavailable, skip grepai-only steps and continue with `rg`-based discovery.
+- If `timeout` is unavailable, rerun without timeout wrapper (or use `gtimeout` when available).
+- If `pdfinfo` is unavailable, use Python PDF metadata fallback (`pypdf`/`pdfplumber`) or skip with note.
+- Avoid here-doc syntax; use `python -c` or single-line commands.
+
 ## Guardrails
 
 - Never mark a story passed unless required checks pass.
