@@ -48,6 +48,7 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `spreadsheet` | specialist | spreadsheet modeling/editing workflow |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
 | `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
+| `ralph-loop-builder` | specialist | scaffold purpose-fit `.codex/<workspace>` Ralph loop workspaces |
 | `subagent-driven-development` | specialist | execute independent implementation tasks with fresh subagent loops |
 | `swarm-planner` | specialist | dependency-aware plan synthesis for parallel execution |
 | `systematic-debugging` | specialist | root-cause-first debugging protocol |
@@ -89,7 +90,7 @@ Layer 1: Specialists (single-domain ownership)
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
   swarm-planner, docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
-  notion-research-documentation, notion-spec-to-implementation
+  notion-research-documentation, notion-spec-to-implementation, ralph-loop-builder
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
   grepai-deep-analysis, refresh-branch-docs, non-test-bloat-reduction
@@ -185,6 +186,7 @@ flowchart LR
   NMI["notion-meeting-intelligence"]
   NRD["notion-research-documentation"]
   NSI["notion-spec-to-implementation"]
+  RLB["ralph-loop-builder"]
 
   DOC["doc"] --> PDF["pdf"]
   SS["spreadsheet"] --> PDF
@@ -278,6 +280,7 @@ flowchart TD
   PROC --> VBC["verification-before-completion"]
   PROC --> WPL["writing-plans"]
   PROC --> WSK["writing-skills"]
+  PROC --> RLB["ralph-loop-builder"]
 
   GTNR --> TDD
   GTNR --> VBC

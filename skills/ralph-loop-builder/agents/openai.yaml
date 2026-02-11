@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ralph Loop Builder"
+  short_description: "Scaffold purpose-fit Ralph loop workspaces"
+  default_prompt: "Create a new .codex Ralph workspace for the requested objective, initialize core files, and tailor templates to the repository context."
