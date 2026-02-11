@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
 import sys
 from pathlib import Path
 
@@ -32,6 +31,178 @@ def derive_branch_name(base_ref: str) -> str:
     if "/" not in trimmed:
         return trimmed
     return trimmed.rsplit("/", maxsplit=1)[-1]
+
+
+def infer_loc_budget_from_purpose(purpose: str) -> int | None:
+    lowered = purpose.lower()
+    if "loc" not in lowered and "line" not in lowered:
+        return None
+
+    plus_match = re.search(r"\+\s*(\d+)", lowered)
+    if plus_match:
+        return int(plus_match.group(1))
+
+    near_loc_match = re.search(r"(?:loc|line(?:s)?)\D{0,12}(\d+)", lowered)
+    if near_loc_match:
+        return int(near_loc_match.group(1))
+    return None
+
+
+def build_loc_diff_gate_snippet(base_ref: str, loc_budget: int | None) -> str:
+    lines = [
+        "python - <<'PY'",
+        "import subprocess",
+        "import sys",
+        "",
+        f"BASE = {base_ref!r}",
+        'out = subprocess.check_output(["git", "diff", "--numstat", f"{BASE}...HEAD"], text=True)',
+        "added = 0",
+        "deleted = 0",
+        "for line in out.splitlines():",
+        '    parts = line.split("\\t")',
+        "    if len(parts) < 3:",
+        "        continue",
+        "    a, d = parts[0], parts[1]",
+        "    if a.isdigit() and d.isdigit():",
+        "        added += int(a)",
+        "        deleted += int(d)",
+        "net = added - deleted",
+        'print(f"LOC diff vs {BASE}: +{added} -{deleted} (net {net:+})")',
+    ]
+    if loc_budget is not None:
+        lines.extend(
+            [
+                f"if net > {loc_budget}:",
+                f'    print("FAIL: net LOC exceeds +{loc_budget} budget")',
+                "    sys.exit(1)",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "if net > 0:",
+                '    print("WARN: net LOC increased relative to base ref")',
+            ]
+        )
+    lines.append("PY")
+    return "\n".join(lines)
+
+
+def build_loc_diff_check_command(base_ref: str, loc_budget: int | None) -> str:
+    script_lines = [
+        "import subprocess",
+        "import sys",
+        f"base = {base_ref!r}",
+        "out = subprocess.check_output(['git', 'diff', '--numstat', f'{base}...HEAD'], text=True)",
+        "added = 0",
+        "deleted = 0",
+        "for line in out.splitlines():",
+        "    parts = line.split('\\t')",
+        "    if len(parts) < 3:",
+        "        continue",
+        "    a, d = parts[0], parts[1]",
+        "    if a.isdigit() and d.isdigit():",
+        "        added += int(a)",
+        "        deleted += int(d)",
+        "net = added - deleted",
+        "print(f'LOC diff vs {base}: +{added} -{deleted} (net {net:+})')",
+    ]
+    if loc_budget is not None:
+        script_lines.append(f"sys.exit(1 if net > {loc_budget} else 0)")
+    else:
+        script_lines.append("sys.exit(0)")
+    script = "\n".join(script_lines)
+    escaped = script.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return f'python -c "{escaped}"'
+
+
+def patch_runner_template(raw_text: str) -> str:
+    text = raw_text
+
+    replacements = (
+        (
+            '# Ralph Audit Loop (OpenAI Codex) - Long-running autonomous *read-only* audit loop.',
+            "# Ralph Workspace Loop (OpenAI Codex) - Long-running autonomous story-by-story workspace loop.",
+        ),
+        (
+            "# Writes all artifacts under `.codex/ralph-audit/` (PRD state, logs, and audit reports).",
+            "# Writes all artifacts under the current workspace directory (PRD state, logs, and reports).",
+        ),
+        ("Starting Ralph Audit (OpenAI Codex)", "Starting Ralph Workspace Loop (OpenAI Codex)"),
+        ("Ralph Audit Iteration", "Ralph Workspace Iteration"),
+        ("Ralph audit completed all tasks!", "Ralph workspace loop completed all tasks!"),
+        ("All audit tasks are marked passes:true.", "All workspace tasks are marked passes:true."),
+        ('printf "# Ralph Audit (OpenAI Codex)\\n\\n"', 'printf "# Ralph Workspace Loop (OpenAI Codex)\\n\\n"'),
+        (
+            "# Run Codex read-only; persist the model's last message to a file we control.",
+            "# Run Codex with workspace sandbox policy; persist the model's last message to a file we control.",
+        ),
+        (
+            "# Persist the audit report and mark story passed in PRD state.",
+            "# Persist the story report and mark story passed in PRD state.",
+        ),
+    )
+    for old, new in replacements:
+        text = text.replace(old, new)
+
+    anchor = 'PROGRESS_FILE="$SCRIPT_DIR/progress.txt"\n'
+    if anchor not in text:
+        raise ValueError("Could not patch runner: missing PROGRESS_FILE anchor")
+    text = text.replace(
+        anchor,
+        anchor
+        + "\n"
+        + 'WORKSPACE_READ_ONLY="$(jq -r \'.workspaceSettings.readOnly // true\' "$PRD_FILE" 2>/dev/null || echo "true")"\n'
+        + 'if [[ "$WORKSPACE_READ_ONLY" == "true" ]]; then\n'
+        + '  SANDBOX_MODE="read-only"\n'
+        + "else\n"
+        + '  SANDBOX_MODE="workspace-write"\n'
+        + "fi\n"
+        + "\n"
+        + 'REQUESTED_MODEL="$(jq -r \'.workspaceSettings.modelPolicy.defaultProfile.model // "gpt-5.3-codex"\' "$PRD_FILE" 2>/dev/null || echo "gpt-5.3-codex")"\n'
+        + 'REASONING_EFFORT="$(jq -r \'.workspaceSettings.modelPolicy.defaultProfile.reasoningEffort // "high"\' "$PRD_FILE" 2>/dev/null || echo "high")"\n',
+        1,
+    )
+
+    text = re.sub(
+        r"# Pinned by default\..*?REASONING_EFFORT=\"high\"\n\n",
+        "# Enforce workspace default model unless caller explicitly matches it.\n",
+        text,
+        count=1,
+        flags=re.S,
+    )
+
+    hard_requirements_block = (
+        '    printf "Hard requirements:\\n"\n'
+        '    if [[ "$WORKSPACE_READ_ONLY" == "true" ]]; then\n'
+        '      printf \'%s\\n\' "- Do NOT modify any files in the repo."\n'
+        "    else\n"
+        '      printf \'%s\\n\' "- You MAY modify repo files only when required by the current story scope."\n'
+        "    fi\n"
+        '    printf \'%s\\n\' "- You MUST keep `uv run xenon --max-absolute B --max-modules A --max-average A src` passing."\n'
+        '    printf \'%s\\n\' "- Your final response MUST be ONLY the markdown report contents for $OUT_REL."\n'
+    )
+    text = text.replace(
+        '    printf "Hard requirements:\\n"\n'
+        '    printf \'%s\\n\' "- Do NOT modify any files in the repo."\n'
+        '    printf \'%s\\n\' "- Your final response MUST be ONLY the markdown report contents for $OUT_REL."\n',
+        hard_requirements_block,
+        1,
+    )
+
+    text = text.replace('-s read-only', '-s "$SANDBOX_MODE"')
+    text = text.replace(
+        'echo "  Model: $REQUESTED_MODEL (reasoning_effort=$REASONING_EFFORT)"',
+        'echo "  Model: $REQUESTED_MODEL (reasoning_effort=$REASONING_EFFORT)"\n'
+        'echo "  Sandbox: $SANDBOX_MODE"',
+        1,
+    )
+    text = text.replace(
+        'log_event "RUN START max_iterations=$MAX_ITERATIONS max_attempts_per_story=$MAX_ATTEMPTS_PER_STORY search=$ENABLE_SEARCH model=$REQUESTED_MODEL reasoning_effort=$REASONING_EFFORT"',
+        'log_event "RUN START max_iterations=$MAX_ITERATIONS max_attempts_per_story=$MAX_ATTEMPTS_PER_STORY search=$ENABLE_SEARCH model=$REQUESTED_MODEL reasoning_effort=$REASONING_EFFORT sandbox=$SANDBOX_MODE"',
+        1,
+    )
+    return text
 
 
 def build_audit_stories(workspace: str, purpose: str) -> list[dict]:
@@ -235,6 +406,7 @@ def build_prd(
     purpose: str,
     mode: str,
     base_ref: str,
+    loc_budget: int | None,
     read_only: bool,
     model_policy: dict,
     story_model_overrides: dict[str, dict[str, str]],
@@ -269,9 +441,9 @@ def build_prd(
             "modelPolicy": model_policy,
         },
         "verificationCommands": {
-            "typecheck": "echo 'Ralph loop: capture verification evidence per story output'",
-            "lint": "echo 'Ralph loop: capture verification evidence per story output'",
-            "test": "echo 'Ralph loop: run focused checks required by story notes'",
+            "typecheck": "uv run ruff check src tests",
+            "lint": "uv run radon cc src -s -n C && uv run xenon --max-absolute B --max-modules A --max-average A src",
+            "test": build_loc_diff_check_command(base_ref=base_ref, loc_budget=loc_budget),
         },
         "userStories": stories,
     }
@@ -298,17 +470,24 @@ def build_readme(
     purpose: str,
     mode: str,
     base_ref: str,
+    loc_budget: int | None,
     read_only: bool,
     model_policy: dict,
 ) -> str:
     default_profile = model_policy["defaultProfile"]
     fallback_profile = model_policy["fallbackProfile"]
     mutation_label = "read-only" if read_only else "read-write"
+    loc_budget_line = (
+        f"LOC Budget: net <= +{loc_budget} (vs {base_ref})"
+        if loc_budget is not None
+        else f"LOC Budget: none (track trend vs {base_ref})"
+    )
     return f"""# Ralph Workspace ({workspace})
 
 Purpose: {purpose}
 Mode: {mode}
 Base Ref: {base_ref}
+{loc_budget_line}
 Mutation Policy: {mutation_label}
 Default Model: {default_profile['model']} ({default_profile['reasoningEffort']})
 Fallback Model: {fallback_profile['model']} ({fallback_profile['reasoningEffort']})
@@ -334,6 +513,7 @@ def build_codex_md(
     workspace: str,
     purpose: str,
     base_ref: str,
+    loc_budget: int | None,
     mode: str,
     read_only: bool,
     model_policy: dict,
@@ -538,6 +718,19 @@ If explicitly asked for final completion signal:
 - Include exact line numbers for every finding
 - When uncertain, document with evidence
 """
+    loc_rule = (
+        f"Keep net LOC vs `{base_ref}` at `<= +{loc_budget}` for every completed story."
+        if loc_budget is not None
+        else "Keep non-test LOC trend explicit and prefer net reduction."
+    )
+    gate_bundle = "\n".join(
+        [
+            "uv run ruff check src tests",
+            "uv run radon cc src -s -n C",
+            "uv run xenon --max-absolute B --max-modules A --max-average A src",
+            build_loc_diff_gate_snippet(base_ref=base_ref, loc_budget=loc_budget),
+        ]
+    )
     return f"""# Ralph Instructions ({workspace})
 
 You are an autonomous Ralph operator for this workspace.
@@ -563,15 +756,12 @@ You are an autonomous Ralph operator for this workspace.
 2. Evidence before claims.
 3. Keep base ref explicit as `{base_ref}` when reporting diff metrics.
 4. Keep xenon state non-regressive across cycles.
-5. Keep non-test LOC trend explicit and prefer net reduction.
+5. {loc_rule}
 
 ## Gate Bundle
 
 ```bash
-uv run ruff check src tests
-uv run radon cc src -s -n C
-uv run xenon --max-absolute B --max-modules A --max-average A src
-python "$CODEX_HOME/skills/code-health/scripts/diff_summary_compact.py" --base {base_ref}
+{gate_bundle}
 ```
 """
 
@@ -580,9 +770,9 @@ def copy_runner(template_dir: Path, target_dir: Path, max_iterations: int) -> No
     source = template_dir / "ralph.sh"
     destination = target_dir / "ralph.sh"
     if source.exists():
-        shutil.copy2(source, destination)
-        text = destination.read_text(encoding="utf-8")
+        text = source.read_text(encoding="utf-8")
         text = re.sub(r"MAX_ITERATIONS=\d+", f"MAX_ITERATIONS={max_iterations}", text, count=1)
+        text = patch_runner_template(text)
         destination.write_text(text, encoding="utf-8")
         destination.chmod(0o755)
         return
@@ -614,6 +804,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--purpose", required=True, help="One-line objective for this Ralph loop")
     parser.add_argument("--mode", choices=("audit", "delivery"), default="audit")
     parser.add_argument("--base-ref", default="origin/main")
+    parser.add_argument(
+        "--loc-budget",
+        type=int,
+        default=None,
+        help="Optional net LOC budget threshold against base ref (for example: 200 for <= +200)",
+    )
     parser.add_argument("--template", default=".codex/ralph-audit", help="Template workspace path")
     parser.add_argument("--max-iterations", type=int, default=20)
     mutation_group = parser.add_mutually_exclusive_group()
@@ -662,6 +858,9 @@ def main() -> int:
         return 1
 
     read_only = args.read_only if args.read_only is not None else args.mode == "audit"
+    loc_budget = args.loc_budget
+    if loc_budget is None:
+        loc_budget = infer_loc_budget_from_purpose(args.purpose)
 
     try:
         story_model_overrides = parse_story_model_overrides(args.story_model_overrides)
@@ -689,6 +888,7 @@ def main() -> int:
             purpose=args.purpose,
             mode=args.mode,
             base_ref=args.base_ref,
+            loc_budget=loc_budget,
             read_only=read_only,
             model_policy=model_policy,
             story_model_overrides=story_model_overrides,
@@ -702,6 +902,7 @@ def main() -> int:
         purpose=args.purpose,
         mode=args.mode,
         base_ref=args.base_ref,
+        loc_budget=loc_budget,
         read_only=read_only,
         model_policy=model_policy,
     )
@@ -709,6 +910,7 @@ def main() -> int:
         workspace=workspace,
         purpose=args.purpose,
         base_ref=args.base_ref,
+        loc_budget=loc_budget,
         mode=args.mode,
         read_only=read_only,
         model_policy=model_policy,
@@ -718,7 +920,11 @@ def main() -> int:
     (target_dir / "progress.txt").write_text(progress_text, encoding="utf-8")
     (target_dir / "README.md").write_text(readme_text, encoding="utf-8")
     (target_dir / "CODEX.md").write_text(codex_text, encoding="utf-8")
-    copy_runner(template_dir=template_dir, target_dir=target_dir, max_iterations=args.max_iterations)
+    try:
+        copy_runner(template_dir=template_dir, target_dir=target_dir, max_iterations=args.max_iterations)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     for log_name in ("events.log", "run.log"):
         (target_dir / log_name).write_text("", encoding="utf-8")
@@ -726,6 +932,8 @@ def main() -> int:
     print(f"[OK] Created workspace: {target_dir}")
     print(f"[OK] Stories: {len(prd_payload['userStories'])} ({args.mode})")
     print(f"[OK] Base ref: {args.base_ref}")
+    if loc_budget is not None:
+        print(f"[OK] LOC budget: <= +{loc_budget}")
     default_profile = model_policy["defaultProfile"]
     print(f"[OK] Read-only: {str(read_only).lower()}")
     print(f"[OK] Default model: {default_profile['model']} ({default_profile['reasoningEffort']})")

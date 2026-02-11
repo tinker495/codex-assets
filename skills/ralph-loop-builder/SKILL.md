@@ -31,6 +31,7 @@ This skill does not own:
 - `purpose` (one-line objective)
 - `mode` (`audit` or `delivery`)
 - `base_ref` (default `origin/main`)
+- optional `loc_budget` (net LOC threshold vs base ref; can be auto-inferred from purpose like `+200 LOC`)
 - mutation policy override (`--read-only` or `--allow-write`, optional)
 - model profile defaults (review/fix) and optional per-story overrides
 
@@ -41,6 +42,7 @@ python ~/.codex/skills/ralph-loop-builder/scripts/bootstrap_ralph_loop.py \
   --workspace ralph-audit \
   --purpose "delegation-integrity and main-diff reduction audit" \
   --mode audit \
+  --loc-budget 200 \
   --read-only \
   --review-model gpt-5.2 \
   --review-reasoning-effort xhigh \
@@ -66,6 +68,7 @@ python ~/.codex/skills/ralph-loop-builder/scripts/bootstrap_ralph_loop.py \
 - `purpose`: short objective sentence; injected into README/CODEX/PRD descriptions.
 - `mode`: use `audit` for review-first loops, `delivery` for implementation-oriented loops.
 - `base_ref`: explicit diff base (`origin/main` recommended).
+- `loc_budget`: optional explicit net LOC budget vs base ref (`--loc-budget 200` means `net <= +200`); if omitted, script attempts inference from purpose text.
 - mutation policy:
   - default: `audit` -> read-only, `delivery` -> read-write
   - override: `--read-only` or `--allow-write`

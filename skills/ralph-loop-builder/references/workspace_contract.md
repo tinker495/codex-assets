@@ -65,5 +65,7 @@ Every generated workspace must carry one explicit base reference (`origin/main` 
 
 ## Runner Rule
 
-- Prefer copying `ralph.sh` from an existing template workspace.
+- Prefer copying `ralph.sh` from an existing template workspace, then normalize it to a mode-agnostic runner.
+- Runner must resolve sandbox mode from `prd.json.workspaceSettings.readOnly` (`read-only` vs `workspace-write`) at runtime.
+- Runner model defaults must be read from `prd.json.workspaceSettings.modelPolicy.defaultProfile`.
 - If template runner is missing, generate a safe failing stub and stop with a clear recovery instruction.
