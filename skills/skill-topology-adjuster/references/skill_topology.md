@@ -27,20 +27,18 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `find-skills` | utility | discover installable skills and recommend install paths |
 | `automation-creator` | utility | Codex automation directives |
 | `using-superpowers` | utility | universal skill invocation discipline at conversation start |
-| `dispatching-parallel-agents` | utility | identify independent tasks and dispatch parallel agent work |
 | `codex-session-recall` | utility | session log recall and filtering |
 | `codex-exec-sub-agent` | meta-tool | isolated sub-agent execution and JSONL run capture |
 | `agents-md-builder` | specialist | AGENTS.md authoring and quality rewrite workflow |
 | `brainstorming` | specialist | requirement discovery and design shaping before implementation |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
-| `executing-plans` | specialist | plan execution with checkpointed batch delivery |
+| `code-review-workflow` | specialist | outbound review request and inbound feedback triage workflow |
+| `executing-plans` | specialist | plan execution with batch-checkpoint and subagent-loop strategies |
 | `finishing-a-development-branch` | specialist | branch completion workflow (verify, choose integration path, cleanup) |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with dual-view augmentation gating |
 | `grepai-trace-noise-remediation` | specialist | bounded trace-noise reduction loop with TDD and metric validation |
-| `receiving-code-review` | specialist | rigorous triage and validation of incoming review feedback |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
-| `requesting-code-review` | specialist | pre-merge review request and findings handoff workflow |
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
 | `gh-address-comments` | specialist | PR comment retrieval and response workflow |
 | `pdf` | specialist | PDF rendering and visual QA |
@@ -49,14 +47,12 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
 | `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
 | `ralph-loop-builder` | specialist | scaffold purpose-fit `.codex/<workspace>` Ralph loop workspaces |
-| `subagent-driven-development` | specialist | execute independent implementation tasks with fresh subagent loops |
-| `swarm-planner` | specialist | dependency-aware plan synthesis for parallel execution |
 | `systematic-debugging` | specialist | root-cause-first debugging protocol |
 | `screenshot` | specialist | OS-level screenshot capture |
 | `test-driven-development` | specialist | red-green-refactor implementation protocol |
 | `using-git-worktrees` | specialist | isolated worktree setup and safety checks |
 | `verification-before-completion` | specialist | completion gate enforcing fresh verification evidence |
-| `writing-plans` | specialist | implementation plan authoring for multi-step tasks |
+| `writing-plans` | specialist | implementation plan authoring for single/swarm execution lanes |
 | `writing-skills` | specialist | skill authoring and validation workflow |
 | `notion-knowledge-capture` | specialist | Notion knowledge capture and structured write-back |
 | `notion-meeting-intelligence` | specialist | Notion-backed meeting preparation and agenda intelligence |
@@ -66,9 +62,8 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent-compression and bloat reduction |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
-| `co-design` | orchestrator | design-aware parallel task execution with design-mode routing |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
-| `parallel-task` | orchestrator | dependency-ordered parallel subagent task execution |
+| `parallel-task` | orchestrator | dependency-wave and independent-domain parallel execution policy |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
 | `ralph-driven-development` | meta-orchestrator | unified Ralph loop policy across PRD iterations and ordered spec-runner delivery |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
@@ -78,18 +73,16 @@ Define ownership and delegation boundaries across installed skills so specialist
 ```text
 Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, find-skills, automation-creator,
-  using-superpowers, dispatching-parallel-agents,
-  codex-session-recall, codex-exec-sub-agent, ralph-driven-development
+  using-superpowers, codex-session-recall, codex-exec-sub-agent, ralph-driven-development
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, brainstorming, executing-plans, finishing-a-development-branch,
-  grepai-trace-noise-remediation,
-  receiving-code-review, requesting-code-review, subagent-driven-development,
+  code-review-workflow, grepai-trace-noise-remediation,
   systematic-debugging, test-driven-development, using-git-worktrees,
   verification-before-completion, writing-plans, writing-skills,
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
-  swarm-planner, docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
+  docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation, ralph-loop-builder
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
@@ -97,8 +90,7 @@ Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
-  co-design, main-merge, parallel-task, pr-workflow,
-  session-wrap-up
+  main-merge, parallel-task, pr-workflow, session-wrap-up
 
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
   grepai-deep-analysis, branch-health-remediation-workflow,
@@ -161,18 +153,14 @@ flowchart LR
   SI["skill-installer"]
   FS["find-skills"]
   USP["using-superpowers"]
-  DPA["dispatching-parallel-agents"]
   GHF["gh-fix-ci"]
   GHC["gh-address-comments"]
   JNB["jupyter-notebook"]
   BRN["brainstorming"]
   EPL["executing-plans"]
   FDB["finishing-a-development-branch"]
-  RCR["receiving-code-review"]
-  QCR["requesting-code-review"]
-  SDD["subagent-driven-development"]
+  CRW["code-review-workflow"]
   SDBG["systematic-debugging"]
-  SP["swarm-planner"]
   SHOT["screenshot"]
   DCAA["docs-codebase-alignment-audit"]
   TDD["test-driven-development"]
@@ -180,7 +168,6 @@ flowchart LR
   VBC["verification-before-completion"]
   WPL["writing-plans"]
   WSK["writing-skills"]
-  CD["co-design"]
   PT["parallel-task"]
   NKC["notion-knowledge-capture"]
   NMI["notion-meeting-intelligence"]
@@ -215,7 +202,6 @@ flowchart TD
   ROOT --> ORCH["Primary Orchestrators"]
   ORCH --> BHRW["branch-health-remediation-workflow"]
   ORCH --> CLB["complexity-loc-balancer"]
-  ORCH --> CD["co-design"]
   ORCH --> MM["main-merge"]
   ORCH --> PT["parallel-task"]
   ORCH --> PR["pr-workflow"]
@@ -264,21 +250,18 @@ flowchart TD
   DOCOPS --> DCAA["docs-codebase-alignment-audit"]
 
   ROOT --> PLAN["Planning Specialists"]
-  PLAN --> SP["swarm-planner"]
+  PLAN --> WPL["writing-plans"]
 
   ROOT --> PROC["Process Specialists"]
   PROC --> BRN["brainstorming"]
   PROC --> EPL["executing-plans"]
   PROC --> FDB["finishing-a-development-branch"]
+  PROC --> CRW["code-review-workflow"]
   PROC --> GTNR["grepai-trace-noise-remediation"]
-  PROC --> RCR["receiving-code-review"]
-  PROC --> QCR["requesting-code-review"]
-  PROC --> SDD["subagent-driven-development"]
   PROC --> SDBG["systematic-debugging"]
   PROC --> TDD["test-driven-development"]
   PROC --> UGW["using-git-worktrees"]
   PROC --> VBC["verification-before-completion"]
-  PROC --> WPL["writing-plans"]
   PROC --> WSK["writing-skills"]
   PROC --> RLB["ralph-loop-builder"]
 
@@ -301,7 +284,6 @@ flowchart TD
   META --> FS["find-skills"]
   META --> AC["automation-creator"]
   META --> USP["using-superpowers"]
-  META --> DPA["dispatching-parallel-agents"]
   META --> CSR["codex-session-recall"]
   META --> RDD["ralph-driven-development"]
   META --> CESA["codex-exec-sub-agent"]

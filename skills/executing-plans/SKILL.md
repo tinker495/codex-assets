@@ -1,84 +1,105 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+description: Use when executing a written implementation plan; supports batch-checkpoint and subagent-loop strategies.
 ---
 
 # Executing Plans
 
 ## Overview
 
-Load plan, review critically, execute tasks in batches, report for review between batches.
+Execute an existing implementation plan with explicit strategy selection.
 
-**Core principle:** Batch execution with checkpoints for architect review.
+- `strategy=batch-checkpoint` (default)
+- `strategy=subagent-loop`
 
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+Announce at start:
+"I'm using the executing-plans skill to implement this plan."
 
-## The Process
+## Strategy Selection
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+- `strategy=batch-checkpoint`
+  - Use for checkpointed delivery with human feedback between batches.
+- `strategy=subagent-loop`
+  - Use for same-session execution when tasks are mostly independent.
+  - Execute task-by-task with implementer + two-stage review.
 
-### Step 2: Execute Batch
-**Default: First 3 tasks**
+If user explicitly sets strategy, follow it.
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+## Shared Preflight (all strategies)
 
-### Step 3: Report
-When batch complete:
-- Show what was implemented
-- Show verification output
-- Say: "Ready for feedback."
+1. Read the full plan.
+2. Check for ambiguity, contradictions, and blockers.
+3. If critical gaps exist, stop and ask before coding.
+4. Create a task tracker (TodoWrite or equivalent).
+5. Never start on `main`/`master` without explicit user consent.
 
-### Step 4: Continue
-Based on feedback:
-- Apply changes if needed
-- Execute next batch
-- Repeat until complete
+## Strategy `batch-checkpoint`
 
-### Step 5: Complete Development
+### Step 1: Execute batch
 
-After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+Default batch size: first 3 pending tasks.
 
-## When to Stop and Ask for Help
+Per task:
+1. mark `in_progress`
+2. execute the task as written
+3. run required verification
+4. mark `completed`
 
-**STOP executing immediately when:**
-- Hit a blocker mid-batch (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
-- You don't understand an instruction
-- Verification fails repeatedly
+### Step 2: Report and wait
 
-**Ask for clarification rather than guessing.**
+After each batch:
+- summarize changes
+- show verification output
+- report `Ready for feedback.`
+- wait for feedback before next batch
 
-## When to Revisit Earlier Steps
+### Step 3: Continue
 
-**Return to Review (Step 1) when:**
-- Partner updates the plan based on your feedback
-- Fundamental approach needs rethinking
+Apply feedback and repeat until all tasks complete.
 
-**Don't force through blockers** - stop and ask.
+## Strategy `subagent-loop`
 
-## Remember
-- Review plan critically first
-- Follow plan steps exactly
-- Don't skip verifications
-- Reference skills when plan says to
-- Between batches: just report and wait
-- Stop when blocked, don't guess
-- Never start implementation on main/master branch without explicit user consent
+Per task loop:
+1. dispatch implementer subagent with full task context
+2. if implementer asks questions, answer and continue
+3. implementer executes/tests/self-reviews
+4. run spec review; if issues exist, fix then re-review
+5. run code-quality review; if issues exist, fix then re-review
+6. mark task complete only after both reviews pass
+
+Rules:
+- do not run overlapping implementer tasks in parallel
+- do not start code-quality review before spec review passes
+- do not move to next task with unresolved review issues
+
+Prompt templates:
+- `/Users/mrx-ksjung/.codex/skills/executing-plans/prompts/implementer-prompt.md`
+- `/Users/mrx-ksjung/.codex/skills/executing-plans/prompts/spec-reviewer-prompt.md`
+- `/Users/mrx-ksjung/.codex/skills/executing-plans/prompts/code-quality-reviewer-prompt.md`
+
+## Completion
+
+After all tasks are done and verified:
+1. announce finishing step
+2. use `superpowers:finishing-a-development-branch`
+3. follow its integration/cleanup workflow
+
+## Stop Conditions
+
+Stop immediately and ask for clarification when:
+- plan instructions are unclear or contradictory
+- required verification repeatedly fails
+- hidden dependencies block execution
+
+Do not guess through blockers.
 
 ## Integration
 
-**Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+Required workflow skills:
+- `superpowers:using-git-worktrees`
+- `superpowers:writing-plans`
+- `superpowers:finishing-a-development-branch`
+
+Recommended in `strategy=subagent-loop`:
+- `superpowers:code-review-workflow`
+- `superpowers:test-driven-development`

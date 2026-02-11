@@ -9,6 +9,12 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
+## Delegation Boundary
+
+- This skill owns skill design, structure, and creation workflow guidance.
+- Delegate topology reconciliation to `skill-topology-adjuster` after skill create/update/remove events.
+- For meta-role audit requirements, this skill is not standalone; delegation is required for topology drift handling.
+
 ## About Skills
 
 Skills are modular, self-contained folders that extend Codex's capabilities by providing

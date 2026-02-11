@@ -1,121 +1,146 @@
 ---
 name: parallel-task
 description: >
-  Only to be triggered by explicit /parallel-task commands. 
+  Use when executing 2+ tasks in parallel; supports dependency-aware plan execution (`mode=standard`), UI-routed execution (`mode=design-route`), and independent-domain dispatch without a plan (`mode=independent`).
 ---
 
 # Parallel Task Executor
 
-You are an Orchestrator for subagents. Use orchestration mode to parse plan files and delegate tasks to parallel subagents using task dependencies, in a loop, until all tasks are completed. Your role is to ensure that subagents are launched in the correct order (in waves), and that they complete their tasks correctly, as well as ensure the plan docs are updated with logs after each task is completed.
+You are an Orchestrator for parallel execution.
 
-## Process
+This skill owns three lanes:
+- `mode=standard`: plan-based dependency waves
+- `mode=design-route`: plan-based waves with design-task routing
+- `mode=independent`: no plan file, dispatch one agent per independent domain
 
-### Step 1: Parse Request
+Choose one mode at start and keep it for the full invocation.
 
-Extract from user request:
-1. **Plan file**: The markdown plan to read
-2. **Task subset** (optional): Specific task IDs to run
+## Mode Selection
 
-If no subset provided, run the full plan.
+- `mode=standard`
+  - Use when a plan file exists and tasks should run via dependency waves.
+- `mode=design-route`
+  - Use when plan tasks include significant UI/styling scope.
+  - Route `design` tasks via `claude -p` and `standard` tasks via Task tool subagents.
+- `mode=independent`
+  - Use when there is no plan file and the request is multiple independent tasks/failures.
+  - Dispatch one subagent per domain in parallel.
 
-### Step 2: Read & Parse Plan
+If the user explicitly sets mode, follow it.
+If no mode is set:
+- choose `mode=standard` when a plan path/task IDs are provided
+- choose `mode=independent` when the request is ad-hoc independent work
 
-1. Find task subsections (e.g., `### T1:` or `### Task 1.1:`)
-2. For each task, extract:
-   - Task ID and name
-   - **depends_on** list (from `- **depends_on**: [...]`)
-   - Full content (description, location, acceptance criteria, validation)
-3. Build task list
-4. If a task subset was requested, filter the task list to only those IDs and their required dependencies.
+Legacy command wording `/co-design` should be interpreted as `mode=design-route`.
 
-### Step 3: Launch Subagents
+## Design Task Classification (`mode=design-route`)
 
-For each **unblocked** task, launch subagent with:
-- **description**: "Implement task [ID]: [name]"
-- **prompt**: Use template below
+Classify task as `design` when it includes:
+- CSS/SCSS/Tailwind/themes/tokens
+- template/markup/layout/responsiveness
+- visual effects/transitions/animations
+- UI visual accessibility
 
-Launch all unblocked tasks in parallel. A task is unblocked if all IDs in its depends_on list are complete.
+Otherwise classify as `standard`.
+If mixed, classify as `design`.
 
-### Task Prompt Template
+## Plan-Based Process (`mode=standard` and `mode=design-route`)
 
-```
-You are implementing a specific task from a development plan.
+### Step 1: Parse request
 
-## Context
-- Plan: [filename]
-- Goals: [relevant overview from plan]
-- Dependencies: [prerequisites for this task]
-- Related tasks: [tasks that depend on or are depended on by this task]
-- Constraints: [risks from plan]
+Extract:
+1. plan file path
+2. optional task subset
 
-## Your Task
-**Task [ID]: [Name]**
+### Step 2: Read and parse plan
 
-Location: [File paths]
-Description: [Full description]
+For each task, extract:
+- task ID and name
+- `depends_on`
+- description/location/acceptance criteria/validation
 
-Acceptance Criteria:
-[List from plan]
+If subset was requested, keep requested IDs plus required dependencies.
+In `mode=design-route`, classify each task as `design` or `standard`.
 
-Validation:
-[Tests or verification from plan]
+### Step 3: Launch by dependency wave
 
-## Instructions
-1. Examine working plan and any relevant or dependent files
-2. Implement changes for all acceptance criteria
-3. Keep work **atomic and committable**
-4. For each file: read first, edit carefully, preserve formatting
-5. Run validation if feasible
-6. **ALWAYS mark completed tasks IN THE *-plan.md file AS SOON AS YOU COMPLETE IT!** and update with:
-    - Concise work log
-    - Files modified/created
-    - Errors or gotchas encountered
-7. Commit your work
-   - Note: There are other agents working in parallel to you, so only stage and commit the files you worked on. NEVER PUSH. ONLY COMMIT.
-8. Double Check that you updated the *-plan.md file and committed your work before yielding
-9. Return summary of:
-   - Files modified/created
-   - Changes made
-   - How criteria are satisfied
-   - Validation performed or deferred
+A task is unblocked when all `depends_on` task IDs are complete.
+Launch all unblocked tasks in parallel.
 
-## Important
-- Be careful with paths
-- Stop and describe blockers if encountered
-- Focus on this specific task
+- `mode=standard`: all tasks via Task tool subagents.
+- `mode=design-route`:
+  - `standard` tasks -> Task tool subagents
+  - `design` tasks -> `claude -p` background process
+
+```bash
+claude -p "YOUR_PROMPT_HERE" \
+  --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch" \
+  --max-turns 50 \
+  --output-format text \
+  > /tmp/parallel-task-[TASK_ID]-output.log 2>&1 &
 ```
 
-Ensure that the agent marked its task complete before moving on to the next task or set of tasks.
+Track PID and output log for each background task.
 
-### Step 4: Check and Validate.
+### Step 4: Validate wave output
 
-After subagents complete their work:
-1. Inspect their outputs for correctness and completeness.
-2. Validate the results against the expected outcomes.
-3. If the task is truly completed correctly, ENSURE THAT TASK WAS MARKED COMPLETE WITH LOGS.
-4. If a task was not successful, have the agent retry or escalate the issue.
-5. Ensure that that wave of work has been committed to github before moving on to the next wave of tasks.
+After each wave:
+1. inspect outputs for completeness/correctness
+2. verify plan task status and logs were updated
+3. retry/escalate failed tasks
+4. proceed to next unblocked wave
 
-### Step 5: Repeat
+Repeat until all tasks are complete.
 
-1. Review the plan again to see what new set of unblocked tasks are available.
-2. Continue launching unblocked tasks in parallel until plan is done.
-3. Repeat the process until *all** tasks are both complete, validated, and working without errors. 
+## Independent Process (`mode=independent`)
 
+Use this when tasks are independent and no formal plan is provided.
+
+### Step 1: Split into domains
+
+Group work by independent domains (different files/subsystems/root causes).
+If tasks are coupled or share state heavily, stop and ask one targeted question.
+
+### Step 2: Create per-domain prompt
+
+Each subagent prompt must include:
+- narrow scope (one domain)
+- explicit constraints (avoid unrelated edits)
+- expected output (root cause, changed files, validation)
+
+### Step 3: Dispatch in parallel
+
+Launch one subagent per independent domain.
+Do not dispatch overlapping domains in parallel.
+
+### Step 4: Integrate and verify
+
+- review each subagent result
+- resolve conflicts if any
+- run final integration checks/tests
+- summarize by domain with status
 
 ## Error Handling
 
-- Task subset not found: List available task IDs
-- Parse failure: Show what was tried, ask for clarification
+- Plan file missing or parse failure: show what failed and ask for corrected path/input.
+- Task subset not found: list available task IDs.
+- Background process crash/timeout: inspect logs, retry or reroute.
+- Overlapping domains in `mode=independent`: stop parallelization and run sequentially.
 
 ## Example Usage
 
-```
-'Implement the plan using parallel task skill'
+```text
 /parallel-task plan.md
 /parallel-task ./plans/auth-plan.md T1 T2 T4
-/parallel-task user-profile-plan.md --tasks T3 T7
+/parallel-task --mode design-route plans/landing-page.md
+/parallel-task "Fix 3 independent failures in auth tests, billing API, and CSV export"
 ```
+
+## Delegation Boundaries
+
+- This skill owns parallel launch policy, dependency waves, and independent-domain dispatch.
+- `writing-plans` owns plan authoring and dependency schema.
+- `executing-plans` owns non-parallel sequential execution strategies.
 
 ## Execution Summary Template
 
@@ -123,25 +148,29 @@ After subagents complete their work:
 # Execution Summary
 
 ## Tasks Assigned: [N]
+- Mode: [standard | design-route | independent]
+- Design tasks (if any): [count]
+- Standard tasks: [count]
+- Independent domains (if any): [count]
 
 ### Completed
-- Task [ID]: [Name] - [Brief summary]
+- [Task/Domain ID]: [Summary]
 
 ### Issues
-- Task [ID]: [Name]
+- [Task/Domain ID]
   - Issue: [What went wrong]
-  - Resolution: [How resolved or what's needed]
+  - Resolution: [How resolved or what is needed]
 
 ### Blocked
-- Task [ID]: [Name]
-  - Blocker: [What's preventing completion]
-  - Next Steps: [What needs to happen]
+- [Task/Domain ID]
+  - Blocker: [What blocks completion]
+  - Next steps: [Needed action]
 
 ## Overall Status
 [Completion summary]
 
 ## Files Modified
-[List of changed files]
+[List]
 
 ## Next Steps
 [Recommendations]

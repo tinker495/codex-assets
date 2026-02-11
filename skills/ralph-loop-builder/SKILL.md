@@ -9,6 +9,7 @@ description: Use when a user wants a new purpose-specific Ralph workspace under 
 
 Build a fresh Ralph workspace quickly and consistently so the team can start purpose-focused loops without hand-authoring boilerplate files.
 This skill creates scaffolding only; actual story execution belongs to `ralph-driven-development`.
+It also sets mutation policy (`read-only` vs `read-write`) and model routing defaults for the workspace.
 
 ## Ownership and Delegation
 
@@ -29,6 +30,8 @@ This skill does not own:
 - `purpose` (one-line objective)
 - `mode` (`audit` or `delivery`)
 - `base_ref` (default `origin/main`)
+- mutation policy override (`--read-only` or `--allow-write`, optional)
+- model profile defaults (review/fix) and optional per-story overrides
 
 2. Bootstrap workspace:
 ```bash
@@ -37,11 +40,18 @@ python ~/.codex/skills/ralph-loop-builder/scripts/bootstrap_ralph_loop.py \
   --workspace ralph-audit \
   --purpose "delegation-integrity and main-diff reduction audit" \
   --mode audit \
+  --read-only \
+  --review-model gpt-5.2 \
+  --review-reasoning-effort xhigh \
+  --fix-model gpt-5.3-codex \
+  --fix-reasoning-effort high \
   --base-ref origin/main
 ```
 
 3. Validate generated state:
 - `prd.json` exists and all stories have `passes: false`.
+- `prd.json.workspaceSettings.readOnly` and `workspaceSettings.modelPolicy` match requested defaults.
+- every story has `modelProfile` (default or story override).
 - `progress.txt` checklist matches story IDs/titles.
 - `README.md`/`CODEX.md` mention the requested `purpose` and `base_ref`.
 
@@ -52,8 +62,17 @@ python ~/.codex/skills/ralph-loop-builder/scripts/bootstrap_ralph_loop.py \
 
 - `workspace`: lowercase hyphen-case recommended (for example `ralph-audit`).
 - `purpose`: short objective sentence; injected into README/CODEX/PRD descriptions.
-- `mode`: use `audit` for read-only evidence loops, `delivery` for implementation-oriented loops.
+- `mode`: use `audit` for review-first loops, `delivery` for implementation-oriented loops.
 - `base_ref`: explicit diff base (`origin/main` recommended).
+- mutation policy:
+  - default: `audit` -> read-only, `delivery` -> read-write
+  - override: `--read-only` or `--allow-write`
+- model defaults:
+  - review default: `--review-model gpt-5.2 --review-reasoning-effort xhigh`
+  - fix default: `--fix-model gpt-5.3-codex --fix-reasoning-effort high`
+- per-story model assignment:
+  - `--story-model-overrides '{"US-002":{"model":"gpt-5.3-codex","reasoningEffort":"high"}}'`
+  - or pass a JSON file path with the same object shape
 - `--force`: allow overwrite when workspace already exists.
 
 ## Output Artifacts
@@ -70,6 +89,9 @@ Required generated files:
 
 - Never overwrite existing workspace contents unless `--force` is set.
 - Keep `passes` initialized to `false` for all stories.
+- Keep mutation policy explicit in `workspaceSettings.readOnly`.
+- Keep model defaults explicit in `workspaceSettings.modelPolicy`.
+- Keep per-story model decisions explicit via `userStories[].modelProfile`.
 - Keep path references self-consistent (`.codex/<workspace>/...`) after generation.
 - Keep base ref explicit in diff-related guidance to avoid ambiguous metrics.
 

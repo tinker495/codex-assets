@@ -1,116 +1,131 @@
 ---
 name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code
+description: Use when you need an implementation plan before coding; supports single-track plans and dependency-aware swarm plans.
 ---
 
 # Writing Plans
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Create an implementation plan before coding.
 
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+- `mode=single`: one primary execution lane (default)
+- `mode=swarm`: dependency-aware parallel-ready plan
 
-**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
+Announce at start:
+"I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+## Mode Selection
 
-**Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
+- `mode=single`
+  - Use for normal implementation planning.
+  - Save to `docs/plans/YYYY-MM-DD-<feature-name>.md` by default.
+- `mode=swarm`
+  - Use for multi-agent or parallel execution planning.
+  - Require explicit `depends_on` for every task.
+  - Save scratch plan outside repo by default (`/private/tmp`, fallback `$CODEX_HOME/tmp`).
 
-## Bite-Sized Task Granularity
+If user explicitly chooses mode, follow that choice.
 
-**Each step is one action (2-5 minutes):**
-- "Write the failing test" - step
-- "Run it to make sure it fails" - step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
-- "Commit" - step
+## Shared Preparation
 
-## Plan Document Header
+1. Read requirements/spec and inspect current code paths.
+2. Resolve ambiguity before final tasking.
+3. For external APIs/dependencies, confirm latest docs first.
+4. Use exact file paths and verifiable commands.
+5. Keep plan DRY, YAGNI, TDD-aligned.
 
-**Every plan MUST start with this header:**
+## Mode `single` Workflow
+
+1. Define goal, architecture approach, and tech stack.
+2. Break work into sequential tasks.
+3. For each task, include files, tests-first steps, verification commands.
+4. Save under repo docs unless user requested another path.
+
+### Single Header (required)
 
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan.
 
-**Goal:** [One sentence describing what this builds]
-
-**Architecture:** [2-3 sentences about approach]
-
-**Tech Stack:** [Key technologies/libraries]
+**Goal:** [One sentence]
+**Architecture:** [2-3 sentences]
+**Tech Stack:** [Key libraries/tools]
 
 ---
 ```
 
-## Task Structure
+## Mode `swarm` Workflow
+
+1. Research architecture and constraints.
+2. Define atomic tasks with explicit dependencies.
+3. Ensure each task is independently executable by one agent.
+4. Define validation per task.
+5. Save to `/private/tmp/<topic>-plan.md` by default.
+   - verify destination parent with `test -w`
+   - fallback to `$CODEX_HOME/tmp/<topic>-plan.md`
+   - copy into repo only when user asks
+6. Run plan review pass (subagent preferred, local fallback):
+   - missing dependencies
+   - ordering issues
+   - edge-case gaps
+7. Revise with review evidence before yielding.
+
+### Swarm Task Format (required)
+
+Every task must include:
+- `id`
+- `depends_on`
+- `location`
+- `description`
+- `validation`
+- `status`
+- `log`
+- `files edited/created`
+
+Example:
+
+```text
+T1: [depends_on: []] Create database migration
+T2: [depends_on: []] Install dependencies
+T3: [depends_on: [T1]] Create repository layer
+T4: [depends_on: [T1]] Create service interfaces
+T5: [depends_on: [T3, T4]] Implement business logic
+```
+
+## Task Structure Baseline
 
 ```markdown
 ### Task N: [Component Name]
 
 **Files:**
 - Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
+- Modify: `exact/path/to/existing.py`
 - Test: `tests/exact/path/to/test.py`
 
-**Step 1: Write the failing test**
-
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
-```
-
-**Step 2: Run test to verify it fails**
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
-
+**Step 1: Write failing test**
+**Step 2: Run test and confirm fail**
 **Step 3: Write minimal implementation**
-
-```python
-def function(input):
-    return expected
-```
-
-**Step 4: Run test to verify it passes**
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
-
+**Step 4: Run test and confirm pass**
 **Step 5: Commit**
-
-```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
 ```
-```
-
-## Remember
-- Exact file paths always
-- Complete code in plan (not "add validation")
-- Exact commands with expected output
-- Reference relevant skills with @ syntax
-- DRY, YAGNI, TDD, frequent commits
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan, offer execution strategy:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
+1. `strategy=subagent-loop`
+- same-session task-by-task delivery with review loops
+- use `executing-plans`
 
-**1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
+2. `strategy=batch-checkpoint`
+- checkpointed delivery with feedback between batches
+- use `executing-plans`
 
-**2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
+## Remember
 
-**Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
-- Stay in this session
-- Fresh subagent per task + code review
-
-**If Parallel Session chosen:**
-- Guide them to open new session in worktree
-- **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
+- include exact file paths
+- include concrete commands and expected results
+- keep plan actionable and minimal
+- do not start implementation in this skill

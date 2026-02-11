@@ -12,6 +12,10 @@ from pathlib import Path
 
 
 CORE_FILES = ("README.md", "CODEX.md", "prd.json", "progress.txt", "ralph.sh")
+DEFAULT_REVIEW_MODEL = "gpt-5.2"
+DEFAULT_REVIEW_REASONING = "xhigh"
+DEFAULT_FIX_MODEL = "gpt-5.3-codex"
+DEFAULT_FIX_REASONING = "high"
 
 
 def slugify(value: str) -> str:
@@ -55,8 +59,7 @@ def build_audit_stories(workspace: str, purpose: str) -> list[dict]:
                 "priority": idx,
                 "passes": False,
                 "notes": (
-                    "DO NOT FIX ANYTHING. Read-only audit only. "
-                    f"Objective: {purpose}. Output only markdown content for "
+                    f"Objective: {purpose}. Output markdown content for "
                     f".codex/{workspace}/audit/{report_name}."
                 ),
             }
@@ -87,7 +90,7 @@ def build_delivery_stories(workspace: str, purpose: str) -> list[dict]:
                 "priority": idx,
                 "passes": False,
                 "notes": (
-                    f"Implement only story scope for {story_id}. "
+                    f"Focus on story scope for {story_id}. "
                     "Keep verification evidence explicit in report output."
                 ),
             }
@@ -95,21 +98,171 @@ def build_delivery_stories(workspace: str, purpose: str) -> list[dict]:
     return stories
 
 
-def build_prd(workspace: str, purpose: str, mode: str, base_ref: str) -> dict:
+def apply_mutation_policy_to_stories(stories: list[dict], read_only: bool) -> None:
+    policy_note = (
+        "Mutation policy: read-only. Do not apply code changes."
+        if read_only
+        else "Mutation policy: read-write. Apply code changes only when required by story scope."
+    )
+    for story in stories:
+        existing = story.get("notes")
+        if isinstance(existing, str) and existing.strip():
+            story["notes"] = f"{policy_note} {existing}"
+        else:
+            story["notes"] = policy_note
+
+
+def require_non_empty(value: str, label: str) -> str:
+    trimmed = value.strip()
+    if not trimmed:
+        raise ValueError(f"{label} must be a non-empty string")
+    return trimmed
+
+
+def build_model_policy(
+    read_only: bool,
+    review_model: str,
+    review_reasoning_effort: str,
+    fix_model: str,
+    fix_reasoning_effort: str,
+) -> dict:
+    review_profile = {
+        "model": require_non_empty(review_model, "review model"),
+        "reasoningEffort": require_non_empty(review_reasoning_effort, "review reasoning effort"),
+    }
+    fix_profile = {
+        "model": require_non_empty(fix_model, "fix model"),
+        "reasoningEffort": require_non_empty(fix_reasoning_effort, "fix reasoning effort"),
+    }
+    default_label = "review" if read_only else "fix"
+    fallback_label = "fix" if read_only else "review"
+    return {
+        "profiles": {"review": review_profile, "fix": fix_profile},
+        "defaultLabel": default_label,
+        "fallbackLabel": fallback_label,
+        "defaultProfile": review_profile if read_only else fix_profile,
+        "fallbackProfile": fix_profile if read_only else review_profile,
+    }
+
+
+def parse_story_model_overrides(raw_value: str) -> dict[str, dict[str, str]]:
+    source = raw_value.strip()
+    if not source:
+        return {}
+
+    payload_text = source
+    source_path = Path(source)
+    if source_path.exists():
+        if not source_path.is_file():
+            raise ValueError(f"--story-model-overrides path is not a file: {source_path}")
+        payload_text = source_path.read_text(encoding="utf-8")
+
+    try:
+        payload = json.loads(payload_text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON for --story-model-overrides: {exc}") from exc
+
+    if not isinstance(payload, dict):
+        raise ValueError("--story-model-overrides must be a JSON object keyed by story id")
+
+    overrides: dict[str, dict[str, str]] = {}
+    for raw_story_id, raw_profile in payload.items():
+        if not isinstance(raw_story_id, str) or not raw_story_id.strip():
+            raise ValueError("Story override keys must be non-empty story id strings")
+        story_id = raw_story_id.strip()
+        if isinstance(raw_profile, str):
+            profile = {"model": raw_profile.strip()}
+        elif isinstance(raw_profile, dict):
+            model = raw_profile.get("model")
+            if not isinstance(model, str) or not model.strip():
+                raise ValueError(f"{story_id}: override must include non-empty `model`")
+            profile = {"model": model.strip()}
+            reasoning = raw_profile.get("reasoningEffort", raw_profile.get("reasoning_effort"))
+            if reasoning is not None:
+                if not isinstance(reasoning, str) or not reasoning.strip():
+                    raise ValueError(f"{story_id}: `reasoningEffort` must be a non-empty string")
+                profile["reasoningEffort"] = reasoning.strip()
+        else:
+            raise ValueError(f"{story_id}: override must be an object or string")
+
+        if not profile.get("model"):
+            raise ValueError(f"{story_id}: override `model` cannot be blank")
+        overrides[story_id] = profile
+
+    return overrides
+
+
+def apply_story_model_profiles(
+    stories: list[dict],
+    default_profile: dict[str, str],
+    story_model_overrides: dict[str, dict[str, str]],
+) -> None:
+    indexed = {
+        story.get("id"): story
+        for story in stories
+        if isinstance(story, dict) and isinstance(story.get("id"), str)
+    }
+    unknown_story_ids = sorted(story_id for story_id in story_model_overrides if story_id not in indexed)
+    if unknown_story_ids:
+        raise ValueError(
+            "Unknown story ids in --story-model-overrides: " + ", ".join(unknown_story_ids)
+        )
+
+    for story in stories:
+        story_id = story.get("id")
+        if not isinstance(story_id, str):
+            continue
+        profile = dict(default_profile)
+        source = "default"
+        override = story_model_overrides.get(story_id)
+        if override:
+            profile.update(override)
+            source = "story_override"
+        story["modelProfile"] = {
+            "model": profile["model"],
+            "reasoningEffort": profile.get("reasoningEffort", ""),
+            "source": source,
+        }
+
+
+def build_prd(
+    workspace: str,
+    purpose: str,
+    mode: str,
+    base_ref: str,
+    read_only: bool,
+    model_policy: dict,
+    story_model_overrides: dict[str, dict[str, str]],
+) -> dict:
     if mode == "audit":
         stories = build_audit_stories(workspace, purpose)
-        description = (
-            "Read-only audit loop for delegation integrity, xenon safety, and "
-            "branch diff/LOC reduction."
-        )
+        description = "Audit-focused loop for delegation integrity, xenon safety, and branch diff/LOC reduction."
     else:
         stories = build_delivery_stories(workspace, purpose)
         description = "Implementation loop with one-story-at-a-time delivery and quality gates."
 
+    apply_mutation_policy_to_stories(stories=stories, read_only=read_only)
+
+    default_profile = model_policy["defaultProfile"]
+    apply_story_model_profiles(
+        stories=stories,
+        default_profile=default_profile,
+        story_model_overrides=story_model_overrides,
+    )
+
     return {
         "project": f"{workspace} Ralph Loop",
         "branchName": derive_branch_name(base_ref),
-        "description": f"{description} Purpose: {purpose}",
+        "description": (
+            f"{description} Mutation policy: {'read-only' if read_only else 'read-write'}. "
+            f"Purpose: {purpose}"
+        ),
+        "workspaceSettings": {
+            "mode": mode,
+            "readOnly": read_only,
+            "baseRef": base_ref,
+            "modelPolicy": model_policy,
+        },
         "verificationCommands": {
             "typecheck": "echo 'Ralph loop: capture verification evidence per story output'",
             "lint": "echo 'Ralph loop: capture verification evidence per story output'",
@@ -135,12 +288,25 @@ def build_progress(stories: list[dict], purpose: str) -> str:
     return "\n".join(lines)
 
 
-def build_readme(workspace: str, purpose: str, mode: str, base_ref: str) -> str:
+def build_readme(
+    workspace: str,
+    purpose: str,
+    mode: str,
+    base_ref: str,
+    read_only: bool,
+    model_policy: dict,
+) -> str:
+    default_profile = model_policy["defaultProfile"]
+    fallback_profile = model_policy["fallbackProfile"]
+    mutation_label = "read-only" if read_only else "read-write"
     return f"""# Ralph Workspace ({workspace})
 
 Purpose: {purpose}
 Mode: {mode}
 Base Ref: {base_ref}
+Mutation Policy: {mutation_label}
+Default Model: {default_profile['model']} ({default_profile['reasoningEffort']})
+Fallback Model: {fallback_profile['model']} ({fallback_profile['reasoningEffort']})
 
 This workspace is generated by `ralph-loop-builder`.
 
@@ -159,12 +325,20 @@ cd .codex/{workspace}
 """
 
 
-def build_codex_md(workspace: str, purpose: str, mode: str, base_ref: str) -> str:
-    mode_guardrail = (
+def build_codex_md(
+    workspace: str,
+    purpose: str,
+    base_ref: str,
+    read_only: bool,
+    model_policy: dict,
+) -> str:
+    mutation_guardrail = (
         "DO NOT APPLY CODE CHANGES. Read-only evidence and decision-quality output only."
-        if mode == "audit"
+        if read_only
         else "Implement exactly one story per cycle and keep verification evidence explicit."
     )
+    default_profile = model_policy["defaultProfile"]
+    fallback_profile = model_policy["fallbackProfile"]
     return f"""# Ralph Instructions ({workspace})
 
 You are an autonomous Ralph operator for this workspace.
@@ -173,9 +347,20 @@ You are an autonomous Ralph operator for this workspace.
 
 {purpose}
 
+## Mutation Policy
+
+- Read-only: {str(read_only).lower()}
+- Rule: {mutation_guardrail}
+
+## Model Routing
+
+- Default profile: `{default_profile['model']}` with `{default_profile['reasoningEffort']}`
+- Fallback profile: `{fallback_profile['model']}` with `{fallback_profile['reasoningEffort']}`
+- Story-level override: use `userStories[].modelProfile` from `prd.json` when present.
+
 ## Core Rules
 
-1. {mode_guardrail}
+1. {mutation_guardrail}
 2. Evidence before claims.
 3. Keep base ref explicit as `{base_ref}` when reporting diff metrics.
 4. Keep xenon state non-regressive across cycles.
@@ -232,6 +417,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-ref", default="origin/main")
     parser.add_argument("--template", default=".codex/ralph-audit", help="Template workspace path")
     parser.add_argument("--max-iterations", type=int, default=20)
+    mutation_group = parser.add_mutually_exclusive_group()
+    mutation_group.add_argument(
+        "--read-only",
+        dest="read_only",
+        action="store_true",
+        help="Force read-only workspace policy",
+    )
+    mutation_group.add_argument(
+        "--allow-write",
+        dest="read_only",
+        action="store_false",
+        help="Force read-write workspace policy",
+    )
+    parser.set_defaults(read_only=None)
+    parser.add_argument("--review-model", default=DEFAULT_REVIEW_MODEL)
+    parser.add_argument("--review-reasoning-effort", default=DEFAULT_REVIEW_REASONING)
+    parser.add_argument("--fix-model", default=DEFAULT_FIX_MODEL)
+    parser.add_argument("--fix-reasoning-effort", default=DEFAULT_FIX_REASONING)
+    parser.add_argument(
+        "--story-model-overrides",
+        default="",
+        help="JSON object or JSON file path mapping story ids to model profiles",
+    )
     parser.add_argument("--force", action="store_true", help="Overwrite target workspace files if needed")
     return parser.parse_args()
 
@@ -254,12 +462,57 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
+    read_only = args.read_only if args.read_only is not None else args.mode == "audit"
+
+    try:
+        story_model_overrides = parse_story_model_overrides(args.story_model_overrides)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    try:
+        model_policy = build_model_policy(
+            read_only=read_only,
+            review_model=args.review_model,
+            review_reasoning_effort=args.review_reasoning_effort,
+            fix_model=args.fix_model,
+            fix_reasoning_effort=args.fix_reasoning_effort,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
     audit_dir.mkdir(parents=True, exist_ok=True)
 
-    prd_payload = build_prd(workspace=workspace, purpose=args.purpose, mode=args.mode, base_ref=args.base_ref)
+    try:
+        prd_payload = build_prd(
+            workspace=workspace,
+            purpose=args.purpose,
+            mode=args.mode,
+            base_ref=args.base_ref,
+            read_only=read_only,
+            model_policy=model_policy,
+            story_model_overrides=story_model_overrides,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     progress_text = build_progress(prd_payload["userStories"], args.purpose)
-    readme_text = build_readme(workspace=workspace, purpose=args.purpose, mode=args.mode, base_ref=args.base_ref)
-    codex_text = build_codex_md(workspace=workspace, purpose=args.purpose, mode=args.mode, base_ref=args.base_ref)
+    readme_text = build_readme(
+        workspace=workspace,
+        purpose=args.purpose,
+        mode=args.mode,
+        base_ref=args.base_ref,
+        read_only=read_only,
+        model_policy=model_policy,
+    )
+    codex_text = build_codex_md(
+        workspace=workspace,
+        purpose=args.purpose,
+        base_ref=args.base_ref,
+        read_only=read_only,
+        model_policy=model_policy,
+    )
 
     write_json(target_dir / "prd.json", prd_payload)
     (target_dir / "progress.txt").write_text(progress_text, encoding="utf-8")
@@ -273,6 +526,11 @@ def main() -> int:
     print(f"[OK] Created workspace: {target_dir}")
     print(f"[OK] Stories: {len(prd_payload['userStories'])} ({args.mode})")
     print(f"[OK] Base ref: {args.base_ref}")
+    default_profile = model_policy["defaultProfile"]
+    print(f"[OK] Read-only: {str(read_only).lower()}")
+    print(f"[OK] Default model: {default_profile['model']} ({default_profile['reasoningEffort']})")
+    if story_model_overrides:
+        print(f"[OK] Story model overrides: {len(story_model_overrides)}")
     print(f"[NEXT] cd {target_dir} && ./ralph.sh {args.max_iterations}")
     return 0
 
