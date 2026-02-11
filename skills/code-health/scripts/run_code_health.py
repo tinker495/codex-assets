@@ -78,8 +78,6 @@ def resolve_main_ref() -> str:
     candidates = [
         "refs/remotes/origin/main",
         "refs/heads/main",
-        "refs/remotes/origin/master",
-        "refs/heads/master",
     ]
     for ref in candidates:
         result = subprocess.run(["git", "show-ref", "--verify", "--quiet", ref])
@@ -165,7 +163,7 @@ def write_report(
     lines.append(f"- Coverage hotspots: {'skipped' if coverage_skipped else 'included'}")
     lines.append("")
 
-    lines.append("## Diff Summary (upstream/working)")
+    lines.append(f"## Diff Summary (main: {main_ref}...HEAD)")
     lines.append("```text")
     lines.append(diff_out or "(no diff output)")
     lines.append("```")
@@ -209,6 +207,12 @@ def write_json(output_path: Path, data: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run repo code health and write a report")
     parser.add_argument("--mode", choices=["summary", "full"], default="summary")
+    parser.add_argument(
+        "--base",
+        type=str,
+        default=None,
+        help="Diff base ref (default: origin/main when present, else main)",
+    )
     parser.add_argument("--top", type=int, default=20)
     parser.add_argument("--top-files", type=int, default=10)
     parser.add_argument("--skip-coverage", action="store_true")
@@ -221,8 +225,11 @@ def main() -> None:
     branch = slugify(get_branch_name())
     out_dir = args.out_dir if args.out_dir else default_output_dir()
     output_path, json_path = build_report_paths(out_dir, project, branch)
-    diff_out = run_python_script(skill_dir / "diff_summary_compact.py", [])
-    main_ref = resolve_main_ref()
+    main_ref = args.base if args.base else resolve_main_ref()
+    diff_out = run_python_script(
+        skill_dir / "diff_summary_compact.py",
+        ["--base", main_ref],
+    )
     main_diff_out = run_python_script(
         skill_dir / "diff_summary_compact.py",
         [

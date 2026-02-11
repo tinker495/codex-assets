@@ -12,10 +12,10 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 ## Workflow
 1. Confirm repo root (the script expects to run from the repository root).
 2. Ensure tools exist in the environment: `pytest`, `coverage`, `vulture`, `radon`, `xenon`, and `jscpd` (via `npx` or global install). Use `uv` if available.
-3. Run pipeline (preferred):
+3. Run pipeline (preferred, origin/main baseline):
    - `test -f /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py || rg --files /Users/mrx-ksjung/.codex/skills/code-health -g 'run_code_health.py'`
-   - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20`
-   - Use `--mode full` for deeper scans.
+   - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20 --base origin/main`
+   - Use `--mode full` for deeper scans (keep origin/main baseline).
    - Use `--top-files 20` to expand the main-branch churn list.
    - Use `--skip-coverage` only if tests are too heavy; ask before skipping coverage when accuracy matters.
    - Before using `--out-dir`, verify writability: `test -w /tmp` or `test -d "$CODEX_HOME/shared/code-health"`.

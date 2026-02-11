@@ -10,22 +10,17 @@ TEST_RE = re.compile(r"(^|/)(tests?|__tests__)/|\.test\.|\.spec\.")
 
 
 def get_base_ref() -> str:
-    """Resolve base ref: upstream -> origin/HEAD -> main/master."""
-    cmds = [
-        ["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"],
-        ["git", "symbolic-ref", "-q", "--short", "refs/remotes/origin/HEAD"],
+    """Resolve base ref: origin/main -> main -> HEAD."""
+    candidates = [
+        "refs/remotes/origin/main",
+        "refs/heads/main",
     ]
-    for cmd in cmds:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+    for ref in candidates:
+        result = subprocess.run(["git", "show-ref", "--verify", "--quiet", ref], check=False)
         if result.returncode == 0:
-            ref = result.stdout.strip()
-            if ref:
-                return ref
-    # Fallback to main/master
-    for branch in ["main", "master"]:
-        result = subprocess.run(["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch}"])
-        if result.returncode == 0:
-            return branch
+            if ref.startswith("refs/remotes/"):
+                return ref.replace("refs/remotes/", "")
+            return ref.replace("refs/heads/", "")
     return "HEAD"
 
 
