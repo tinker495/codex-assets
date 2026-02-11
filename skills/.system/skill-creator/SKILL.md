@@ -318,15 +318,6 @@ Only include other optional interface fields when the user explicitly provides t
 
 When editing the (newly-generated or existing) skill, remember that the skill is being created for another instance of Codex to use. Include information that would be beneficial and non-obvious to Codex. Consider what procedural knowledge, domain-specific details, or reusable assets would help another Codex instance execute these tasks more effectively.
 
-#### Learn Proven Design Patterns
-
-Consult these helpful guides based on your skill's needs:
-
-- **Multi-step processes**: See references/workflows.md for sequential workflows and conditional logic
-- **Specific output formats or quality standards**: See references/output-patterns.md for template and example patterns
-
-These files contain established best practices for effective skill design.
-
 #### Start with Reusable Skill Contents
 
 To begin implementation, start with the reusable resources identified above: `scripts/`, `references/`, and `assets/` files. Note that this step may require user input. For example, when implementing a `brand-guidelines` skill, the user may need to provide brand assets or templates to store in `assets/`, or documentation to store in `references/`.
@@ -350,7 +341,6 @@ Write the YAML frontmatter with `name` and `description`:
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
 
 Do not include any other fields in YAML frontmatter.
-If any frontmatter value contains `:`, quote the value explicitly.
 
 ##### Body
 
@@ -361,16 +351,10 @@ Write instructions for using the skill and its bundled resources.
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
 ```bash
-uv run --with pyyaml scripts/quick_validate.py <path/to/skill-folder>
+scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-Validation guardrails:
-- Before writing any skill file, verify destination parent directory with `test -w`.
-- If parent is not writable, fallback to current repo root or `$CODEX_HOME`; if neither is writable, stop and report.
-- Run quick validation once.
-- If it fails, rerun once with the same `uv run --with pyyaml` command.
-- If it fails twice, stop and report.
-- If yaml import fails, do not switch to plain `python`; keep `uv run --with pyyaml`.
+The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
 
 ### Step 6: Iterate
 
