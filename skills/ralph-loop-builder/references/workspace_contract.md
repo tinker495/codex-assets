@@ -25,6 +25,21 @@ Create a repeatable `.codex/<workspace>` loop scaffold that can be executed imme
 - Persist explicit mutation policy under `prd.json.workspaceSettings.readOnly`.
 - Prefix every story note with the active mutation policy.
 - Generated `CODEX.md` must repeat the same policy to prevent execution ambiguity.
+- In `audit` mode, `CODEX.md` must also include explicit no-fix/no-plan language.
+
+## Strict Audit Instruction Rule
+
+When `mode=audit`, generated `CODEX.md` must include all of:
+- `Safety Notice`
+- `Web Research Policy`
+- `Critical Rules` with `DO NOT FIX ANYTHING`
+- `Output Format` with required finding fields (`severity`, `file`, `lines`, `category`, `code`, `impact`)
+- stop condition for one-task-per-iteration output
+
+And generated `prd.json` audit stories must enforce:
+- exhaustive scope read requirement (no skipped files in story scope)
+- finding-level evidence requirement (line numbers + code snippets)
+- explicit ban on fix proposals
 
 ## Model Routing Rule
 

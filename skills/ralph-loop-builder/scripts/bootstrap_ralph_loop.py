@@ -43,6 +43,7 @@ def build_audit_stories(workspace: str, purpose: str) -> list[dict]:
         ("AUDIT-005", "One-Cycle Dry-Run Verdict", "05-dry-run-verdict.md"),
         ("AUDIT-006", "Guardrails and Unknowns", "06-guardrail-unknowns.md"),
         ("AUDIT-007", "Final Backlog Index", "07-backlog-index.md"),
+        ("AUDIT-008", "Executive Summary and Go/No-Go", "08-exec-summary-go-no-go.md"),
     ]
     stories: list[dict] = []
     for idx, (story_id, title, report_name) in enumerate(entries, start=1):
@@ -53,14 +54,15 @@ def build_audit_stories(workspace: str, purpose: str) -> list[dict]:
                 "description": f"{purpose} 관점의 audit step {idx}.",
                 "acceptanceCriteria": [
                     f"Created .codex/{workspace}/audit/{report_name} with ALL findings",
-                    "Report cites gate evidence and explicit reason codes",
-                    "Report keeps xenon non-regression and diff/LOC direction explicit",
+                    "Report includes severity summary and explicit finding counts",
+                    "Every finding includes file path, exact lines, category, and code snippet",
+                    "Report does not include fix proposals or implementation plans",
                 ],
                 "priority": idx,
                 "passes": False,
                 "notes": (
-                    f"Objective: {purpose}. Output markdown content for "
-                    f".codex/{workspace}/audit/{report_name}."
+                    "Audit discipline: no code edits, no fix plans, no skipped files in story scope. "
+                    f"Objective: {purpose}. Output markdown content for .codex/{workspace}/audit/{report_name}."
                 ),
             }
         )
@@ -74,6 +76,9 @@ def build_delivery_stories(workspace: str, purpose: str) -> list[dict]:
         ("US-003", "Secondary Integration Slice", "03-integration-slice.md"),
         ("US-004", "Quality Gate Stabilization", "04-quality-gates.md"),
         ("US-005", "Final Validation and Wrap-Up", "05-final-wrap-up.md"),
+        ("US-006", "Refinement and Edge-Case Coverage", "06-edge-case-coverage.md"),
+        ("US-007", "Operational Readiness and Docs", "07-operational-readiness.md"),
+        ("US-008", "Release Decision and Handoff", "08-release-handoff.md"),
     ]
     stories: list[dict] = []
     for idx, (story_id, title, report_name) in enumerate(entries, start=1):
@@ -329,6 +334,7 @@ def build_codex_md(
     workspace: str,
     purpose: str,
     base_ref: str,
+    mode: str,
     read_only: bool,
     model_policy: dict,
 ) -> str:
@@ -339,6 +345,199 @@ def build_codex_md(
     )
     default_profile = model_policy["defaultProfile"]
     fallback_profile = model_policy["fallbackProfile"]
+    if mode == "audit":
+        return f"""# Ralph Audit Agent Instructions (OpenAI Codex)
+
+## Workspace Context
+
+- Workspace: `.codex/{workspace}`
+- Purpose: {purpose}
+- Base Ref: `{base_ref}`
+- Mode: `{mode}`
+- Mutation Policy: `read-only`
+- Default profile: `{default_profile['model']}` with `{default_profile['reasoningEffort']}`
+- Fallback profile: `{fallback_profile['model']}` with `{fallback_profile['reasoningEffort']}`
+
+---
+
+## Safety Notice (Customize)
+
+If this codebase is production, handles money, or touches sensitive data: treat this audit loop as high-risk.
+Run with least privilege, avoid exporting long-lived credentials in shell, and keep this agent in read-only mode.
+
+---
+
+You are an autonomous CODE AUDITOR. Your ONLY job is to find problems and document them.
+You DO NOT fix anything.
+
+## Web Research Policy (Use When Appropriate)
+
+This repository may depend on fast-moving tools and specs. Use web research selectively to avoid outdated assumptions.
+
+1. Use web research when validating claims about:
+- Next.js / React / Tailwind / Vercel / Netlify behavior or deprecations (especially 2025-2026 changes)
+- MCP spec / OpenClaw / other agent frameworks
+- Third-party integrations and webhooks (Stripe, Coinbase Commerce, ProxyPics, etc.)
+- Any library/API surface likely changed since 2024
+2. Do not use web research for timeless basics (JSON, HTTP fundamentals, TypeScript syntax, etc.).
+3. Prefer primary sources (official docs, upstream GitHub repos/releases).
+4. Validate against the exact version used in this repository first (`package.json`, lockfiles, configs).
+5. If web research supports a finding, append **External References** with:
+- URL
+- Date accessed (use today's runner date)
+
+## Critical Rules
+
+1. **DO NOT FIX ANYTHING** - No code changes, no edits, no patches.
+2. **DO NOT PLAN FIXES** - Do not suggest implementation approaches.
+3. **DO NOT SKIP SCOPE FILES** - Read every file in the active story scope.
+4. **BE DETAILED** - Include file paths, line numbers, code snippets, and severity.
+
+## Your Task
+
+1. Read the PRD at `.codex/{workspace}/prd.json`
+2. Pick the highest priority story where `passes: false` (or use the runner-provided story id)
+3. Read every file in the selected story scope
+4. Scan each file line-by-line for all required issue categories
+5. Output the full markdown report content for `.codex/{workspace}/audit/XX-name.md`
+6. Do not modify any repository file
+7. End turn after one task report
+
+## Allowed Changes (Strict)
+
+Do not modify any files in this repository. Output only.
+
+## What To Look For (Every Task)
+
+### broken-logic
+- Code that does not do what it claims to do
+- Conditions that are always true or always false
+- Functions returning incorrect values
+- Off-by-one errors
+- Null/undefined not handled
+- Race conditions
+- Infinite loop risks
+- Dead code paths that can never execute
+
+### unfinished
+- TODO/FIXME/HACK/XXX comments
+- Placeholder early returns
+- `throw new Error('not implemented')`
+- Empty function bodies
+- Commented-out code blocks
+- Debug `console.log` left in
+- Features claimed in comments but not implemented
+
+### slop
+- Copy-paste duplication
+- Magic numbers without context
+- Unclear names
+- Overlong functions (roughly >50 lines)
+- Deep nesting (>3 levels)
+- Mixed concerns in one function
+- Inconsistent patterns vs rest of codebase
+- Unused imports/variables/parameters
+
+### dead-end
+- Functions defined but never called
+- Files never imported
+- Components never rendered
+- API routes disconnected from call paths
+- Types/interfaces never referenced
+- Exports with no consumers
+
+### stub
+- Hardcoded/mock return data in runtime paths
+- API routes returning fake responses
+- Placeholder UI content
+- Lorem ipsum/sample text left in
+- `TODO: implement` with no implementation
+
+### will-break
+- Missing async error handling
+- Missing try/catch around failing operations
+- Missing input validation
+- Missing auth checks on protected paths
+- Promises without error handling
+- Side effects without cleanup
+- Memory leak patterns
+- State sync hazards
+
+### Comments and JSDoc (Signal, not truth)
+
+- Use comments/JSDoc as intent clues.
+- If comments/JSDoc and implementation disagree, record it as a finding.
+- Treat runtime behavior as source of truth.
+
+## Output Format
+
+Write report markdown using this structure:
+
+````markdown
+```markdown
+# [Audit Name] Findings
+
+Audit Date: [timestamp]
+Files Examined: [count]
+Total Findings: [count]
+
+## Summary by Severity
+- Critical: X
+- High: X
+- Medium: X
+- Low: X
+
+---
+
+## Findings
+
+### [SEVERITY] Finding #1: [Short description]
+
+**File:** `path/to/file.ts`
+**Lines:** 42-48
+**Category:** [broken-logic | unfinished | slop | dead-end | stub | will-break]
+
+**Description:**
+[Detailed explanation]
+
+**Code:**
+```typescript
+// problematic snippet
+```
+
+**Why this matters:**
+[Impact/risk]
+```
+````
+
+## Severity Levels
+
+- **CRITICAL**: Will definitely break in production, data loss risk, or security risk
+- **HIGH**: Likely bug or major behavior break
+- **MEDIUM**: Potential issue, incomplete behavior, or inconsistency
+- **LOW**: Code smell or minor debt
+
+## Stop Condition
+
+After documenting all findings for one task:
+1. End response
+2. Wait for next iteration
+
+If explicitly asked for final completion signal:
+
+```xml
+<promise>COMPLETE</promise>
+```
+
+## Important Reminders
+
+- No fixes
+- No fix plans
+- No skipped files in scope
+- Include code snippets for every finding
+- Include exact line numbers for every finding
+- When uncertain, document with evidence
+"""
     return f"""# Ralph Instructions ({workspace})
 
 You are an autonomous Ralph operator for this workspace.
@@ -510,6 +709,7 @@ def main() -> int:
         workspace=workspace,
         purpose=args.purpose,
         base_ref=args.base_ref,
+        mode=args.mode,
         read_only=read_only,
         model_policy=model_policy,
     )

@@ -10,6 +10,7 @@ description: Use when a user wants a new purpose-specific Ralph workspace under 
 Build a fresh Ralph workspace quickly and consistently so the team can start purpose-focused loops without hand-authoring boilerplate files.
 This skill creates scaffolding only; actual story execution belongs to `ralph-driven-development`.
 It also sets mutation policy (`read-only` vs `read-write`) and model routing defaults for the workspace.
+For `audit` mode, generated `CODEX.md` must include strict audit instructions (no-fix, no-fix-plan, exhaustive scope read, structured severity report output).
 
 ## Ownership and Delegation
 
@@ -54,6 +55,7 @@ python ~/.codex/skills/ralph-loop-builder/scripts/bootstrap_ralph_loop.py \
 - every story has `modelProfile` (default or story override).
 - `progress.txt` checklist matches story IDs/titles.
 - `README.md`/`CODEX.md` mention the requested `purpose` and `base_ref`.
+- in `audit` mode, `CODEX.md` includes: `Safety Notice`, `Web Research Policy`, `Critical Rules`, `Output Format`, and explicit `DO NOT FIX ANYTHING`.
 
 4. Hand off execution:
 - If user asks to run the loop, delegate to `ralph-driven-development`.
@@ -94,6 +96,8 @@ Required generated files:
 - Keep per-story model decisions explicit via `userStories[].modelProfile`.
 - Keep path references self-consistent (`.codex/<workspace>/...`) after generation.
 - Keep base ref explicit in diff-related guidance to avoid ambiguous metrics.
+- For `audit` mode, enforce read-only audit language in both `CODEX.md` and `userStories[].notes` (`no edits`, `no fix plan`, `no skipped scope files`).
+- For `audit` mode, acceptance criteria must require finding-level evidence (`file`, `line`, `snippet`, `severity`).
 
 ## References
 
