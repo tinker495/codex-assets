@@ -33,3 +33,8 @@
 - 수정: 캐시 키에 `global_rows`/`global_tiers`를 tuple로 포함.
 - 검증: `uv run pytest tests/tui/test_widget_factory.py -q`.
 - Run time: 2026-02-11 01:32:11 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 SPP builder 변경(`src/stowage/planner/spp/builder.py`)과 관련 테스트를 점검.
+- 결과: `pytest tests/stowage/dataclasses/blocked_plan/test_spp_output.py -q` 통과(22 passed); 최근 변경과 직접 연관된 재현 가능한 버그 미발견.
+- 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
+- 검증: `pytest tests/stowage/dataclasses/blocked_plan/test_spp_output.py -q`.
+- Run time: 2026-02-12 01:31:25 UTC

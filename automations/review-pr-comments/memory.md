@@ -1,2 +1,2 @@
-Summary: Authentication and connectivity now pass. Found 1 open PR authored by @me in current repo (#96). Fetched full conversation comments, reviews, and review thread via fallback script /Users/mrx-ksjung/.codex/skills/gh-address-comments/scripts/fetch_comments.py (repo-local script missing). Actionable review appears already resolved and replied; no unresolved required fix identified. Waiting for user selection of numbered items to address.
-LastRun: 2026-02-11 10:32:19 KST
+Summary: Preflight OK (gh found, repo OK). gh auth token succeeded but gh auth status reports invalid token. gh api user failed with network/connectivity error to api.github.com; per rules, stopped without asking for login. No PR discovery performed due to connectivity stop.
+LastRun: 2026-02-12 10:30:50 KST
