@@ -72,8 +72,17 @@ Write each assumption as a concrete statement to confirm.
 
 - Broad statements without commands or paths
 - Missing `# AGENTS.md` as the first line
+- Header variants like `# AGENTS.md - <suffix>` instead of exact `# AGENTS.md`
 - Contradictory rules across sections
 - Sections that repeat README text without adding agent-specific guidance
 - Generic or obvious advice without repository evidence
 - Invented sections not backed by repository docs/rules
 - Non-actionable wording such as "follow best practices"
+
+## Cross-Agent Alignment Pass (When Present)
+
+If the repository has `CLAUDE.md` and/or `GEMINI.md`, run an explicit alignment pass:
+
+- Reconcile command lists with `Makefile`, CI workflows, and executable scripts.
+- Carry over non-negotiable constraints (naming, path policies, forbidden edit zones, verification gates).
+- If guidance conflicts, prefer executable repository evidence; document unresolved ambiguity in `Assumptions`.

@@ -46,6 +46,22 @@ out/
 - Keep `confidence` calibrated to evidence completeness.
 - Always include `artifacts` in the final JSON (`[]` when none).
 
+## Final Validation Gate (Required)
+
+Run a final contract check before reporting completion.
+
+- If `citations` is empty, `gaps` must contain at least one concrete reason.
+- If `content` claims citation coverage but `citations` is empty, treat it as failed reduce output and regenerate.
+- Do not return a success summary until `out/answer.json` passes these checks.
+
+```bash
+jq -e '
+  (.citations | type == "array") and
+  (.gaps | type == "array") and
+  ((.citations | length) > 0 or (.gaps | length) > 0)
+' out/answer.json
+```
+
 ## Standard Invocation
 
 ```bash

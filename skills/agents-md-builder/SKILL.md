@@ -16,12 +16,19 @@ Every generated AGENTS file must start with the exact first line: `# AGENTS.md`.
 - Always include concrete build, lint/format, and test commands.
 - Include at least one targeted single-test command when the toolchain supports it.
 - Include a high-level architecture section that explains multi-file flows and boundaries.
+- Validate the generated `AGENTS.md` header with exact match (`# AGENTS.md` only on line 1, no suffix/prefix).
 - Read and incorporate important constraints from:
   - `README*`
   - existing `AGENTS.md`
+  - `CLAUDE.md` (if present)
+  - `GEMINI.md` (if present)
   - `.cursor/rules/*` or `.cursorrules`
   - `.github/copilot-instructions.md`
   - CI workflow files when present
+- Run a cross-agent alignment pass when `CLAUDE.md` and/or `GEMINI.md` exists:
+  - Align command surface (setup/lint/test/targeted test commands)
+  - Align non-negotiable constraints (naming, path rules, forbidden edits, workflow gates)
+  - Resolve conflicts by preferring repository evidence (`Makefile`, CI, pyproject, executable scripts)
 - If `AGENTS.md` already exists, suggest specific improvements before (or alongside) applying edits.
 - Avoid repetition and avoid obvious generic guidance.
 - Do not enumerate every file/component that is easily discoverable.
@@ -32,7 +39,7 @@ Every generated AGENTS file must start with the exact first line: `# AGENTS.md`.
 
 1. Collect repository context.
 - Detect languages, package managers, build/test/lint tools, and key folders.
-- Read existing docs if present: `README*`, `CONTRIBUTING*`, existing `AGENTS.md`, CI config.
+- Read existing docs if present: `README*`, `CONTRIBUTING*`, existing `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, CI config.
 - Check for agent-rule files: `.cursor/rules/*`, `.cursorrules`, `.github/copilot-instructions.md`.
 - Infer conservatively when data is missing and mark assumptions explicitly.
 
@@ -52,7 +59,9 @@ Every generated AGENTS file must start with the exact first line: `# AGENTS.md`.
 
 4. Validate before delivery.
 - Run the checklist in `references/quality-checklist.md`.
+- Run the cross-agent alignment checks in `references/alignment-sources.md` when `CLAUDE.md` or `GEMINI.md` exists.
 - Confirm each command exists in the repository or label it as an assumption.
+- Confirm the final `AGENTS.md` first line is exactly `# AGENTS.md`.
 - Remove contradictions and duplicate guidance.
 - Keep sections short and scannable.
 
@@ -87,3 +96,4 @@ Read `references/sections-guide.md` and include at minimum:
 - Use `assets/AGENTS.template.md` as a reusable starter.
 - Use `references/sections-guide.md` for section-level guidance.
 - Use `references/quality-checklist.md` for final validation.
+- Use `references/alignment-sources.md` for `CLAUDE.md`/`GEMINI.md` alignment rules.

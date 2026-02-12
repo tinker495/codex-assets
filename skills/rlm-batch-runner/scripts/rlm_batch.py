@@ -21,6 +21,10 @@ DEFAULT_TIMEOUT_SEC = 600
 DEFAULT_RETRIES = 2
 LOC_PATTERN = re.compile(r"^.+:[0-9]+-[0-9]+$")
 JSONL_PATH_PATTERN = re.compile(r"(/[^\s]+\.jsonl)")
+MAX_SUMMARY_LEN = 1200
+MAX_LOC_LEN = 512
+MAX_QUOTE_LEN = 320
+MAX_NOTE_LEN = 400
 
 
 @dataclass(frozen=True)
@@ -245,17 +249,34 @@ def parse_json_payload(raw_text: str) -> tuple[dict[str, Any] | None, str | None
     return payload, None
 
 
+def clamp_text(value: Any, max_len: int, *, keep_right: bool = False) -> Any:
+    if not isinstance(value, str):
+        return value
+    if len(value) <= max_len:
+        return value
+    if keep_right:
+        return value[-max_len:]
+    return value[:max_len]
+
+
 def normalize_subagent_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if "gaps" not in payload:
         payload["gaps"] = []
     if "errors" not in payload:
         payload["errors"] = []
 
+    payload["summary"] = clamp_text(payload.get("summary"), MAX_SUMMARY_LEN)
+
     evidence = payload.get("evidence")
     if isinstance(evidence, list):
         for item in evidence:
-            if isinstance(item, dict) and "note" not in item and isinstance(item.get("quote"), str):
+            if not isinstance(item, dict):
+                continue
+            if "note" not in item and isinstance(item.get("quote"), str):
                 item["note"] = "Direct quote supporting the chunk-level claim."
+            item["loc"] = clamp_text(item.get("loc"), MAX_LOC_LEN, keep_right=True)
+            item["quote"] = clamp_text(item.get("quote"), MAX_QUOTE_LEN)
+            item["note"] = clamp_text(item.get("note"), MAX_NOTE_LEN)
 
     return payload
 
@@ -293,8 +314,8 @@ def validate_subagent_payload(payload: dict[str, Any]) -> list[str]:
     summary = payload.get("summary")
     if not isinstance(summary, str) or not summary.strip():
         errors.append("summary must be a non-empty string")
-    elif len(summary) > 1200:
-        errors.append("summary exceeds max length 1200")
+    elif len(summary) > MAX_SUMMARY_LEN:
+        errors.append(f"summary exceeds max length {MAX_SUMMARY_LEN}")
 
     confidence = payload.get("confidence")
     if not isinstance(confidence, (int, float)):
@@ -322,16 +343,20 @@ def validate_subagent_payload(payload: dict[str, Any]) -> list[str]:
             loc = item.get("loc")
             if not isinstance(loc, str) or not LOC_PATTERN.match(loc):
                 errors.append(f"{prefix}.loc must match path:start-end")
+            elif len(loc) > MAX_LOC_LEN:
+                errors.append(f"{prefix}.loc exceeds max length {MAX_LOC_LEN}")
 
             quote = item.get("quote")
             if not isinstance(quote, str) or not quote.strip():
                 errors.append(f"{prefix}.quote must be a non-empty string")
-            elif len(quote) > 320:
-                errors.append(f"{prefix}.quote exceeds max length 320")
+            elif len(quote) > MAX_QUOTE_LEN:
+                errors.append(f"{prefix}.quote exceeds max length {MAX_QUOTE_LEN}")
 
             note = item.get("note")
             if not isinstance(note, str) or not note.strip():
                 errors.append(f"{prefix}.note must be a non-empty string")
+            elif len(note) > MAX_NOTE_LEN:
+                errors.append(f"{prefix}.note exceeds max length {MAX_NOTE_LEN}")
 
     for key in ("gaps", "errors"):
         value = payload.get(key)

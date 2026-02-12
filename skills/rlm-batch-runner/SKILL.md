@@ -50,5 +50,9 @@ python3 ~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py \
 
 - Run jobs concurrently with isolated retries per job.
 - Preserve per-attempt JSONL logs under `logs/`.
+- Normalize outputs before validation:
+  - add missing `gaps`/`errors` as `[]`
+  - add missing `evidence[].note` default text
+  - clamp overlong text fields (`summary`, `evidence.loc`, `evidence.quote`, `evidence.note`) to schema limits
 - Validate each output JSON against required subagent constraints.
 - Continue processing when individual jobs fail; summarize failures in `summary.json`.

@@ -1,4 +1,4 @@
 interface:
   display_name: "AGENTS.md Builder"
-  short_description: "Draft and refine AGENTS.md files"
-  default_prompt: "Use $agents-md-builder to draft an AGENTS.md for this repository."
+  short_description: "Build AGENTS.md aligned with repo and agent rule docs"
+  default_prompt: "Use $agents-md-builder to create or improve AGENTS.md with exact \"# AGENTS.md\" header and align with README/CI plus CLAUDE.md or GEMINI.md when present."

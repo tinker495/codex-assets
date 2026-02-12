@@ -66,6 +66,9 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `parallel-task` | orchestrator | dependency-wave and independent-domain parallel execution policy |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
 | `ralph-driven-development` | meta-orchestrator | unified Ralph loop policy across PRD iterations and ordered spec-runner delivery |
+| `rlm-batch-runner` | utility | parallel `jobs.jsonl` execution, retry policy, and subresult/log summarization |
+| `rlm-controller` | orchestrator | large-context chunk/reduce orchestration and evidence-grounded final output gating |
+| `rlm-subagent` | specialist | single-chunk evidence extraction and strict schema-compliant JSON output |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
 
 ## Orchestration Layers
@@ -73,7 +76,8 @@ Define ownership and delegation boundaries across installed skills so specialist
 ```text
 Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, find-skills, automation-creator,
-  using-superpowers, codex-session-recall, codex-exec-sub-agent, ralph-driven-development
+  using-superpowers, codex-session-recall, codex-exec-sub-agent, ralph-driven-development,
+  rlm-batch-runner
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, brainstorming, executing-plans, finishing-a-development-branch,
@@ -83,14 +87,15 @@ Layer 1: Specialists (single-domain ownership)
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
   docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
-  notion-research-documentation, notion-spec-to-implementation, ralph-loop-builder
+  notion-research-documentation, notion-spec-to-implementation, ralph-loop-builder,
+  rlm-subagent
 
 Layer 2: Specialist-Orchestrators (protocol ownership + composed handoff)
   grepai-deep-analysis, refresh-branch-docs, non-test-bloat-reduction
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   branch-health-remediation-workflow, complexity-loc-balancer,
-  main-merge, parallel-task, pr-workflow, session-wrap-up
+  main-merge, parallel-task, pr-workflow, rlm-controller, session-wrap-up
 
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
   grepai-deep-analysis, branch-health-remediation-workflow,
@@ -138,6 +143,9 @@ flowchart LR
   PR["pr-workflow"] --> BOB
   PR --> CH
   PR --> GDA
+
+  RLMC["rlm-controller"] --> RLMB["rlm-batch-runner"]
+  RLMB --> RLMS["rlm-subagent"]
 
   GTNR["grepai-trace-noise-remediation"] --> TDD["test-driven-development"]
   GTNR --> VBC["verification-before-completion"]
@@ -205,6 +213,7 @@ flowchart TD
   ORCH --> MM["main-merge"]
   ORCH --> PT["parallel-task"]
   ORCH --> PR["pr-workflow"]
+  ORCH --> RLMC["rlm-controller"]
   ORCH --> SWU["session-wrap-up"]
 
   ROOT --> HYB["Specialist-Orchestrators"]
@@ -233,6 +242,9 @@ flowchart TD
   PR --> BOB
   PR --> CH
   PR --> GDA
+
+  RLMC --> RLMB["rlm-batch-runner"]
+  RLMB --> RLMS["rlm-subagent"]
 
   SWU --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
@@ -264,6 +276,7 @@ flowchart TD
   PROC --> VBC["verification-before-completion"]
   PROC --> WSK["writing-skills"]
   PROC --> RLB["ralph-loop-builder"]
+  PROC --> RLMS["rlm-subagent"]
 
   GTNR --> TDD
   GTNR --> VBC
@@ -286,6 +299,7 @@ flowchart TD
   META --> USP["using-superpowers"]
   META --> CSR["codex-session-recall"]
   META --> RDD["ralph-driven-development"]
+  META --> RLMB["rlm-batch-runner"]
   META --> CESA["codex-exec-sub-agent"]
   META --> GHF["gh-fix-ci"]
   META --> GHC["gh-address-comments"]

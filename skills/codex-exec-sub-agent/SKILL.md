@@ -44,6 +44,23 @@ Apply timeout when you want deterministic failure instead of hanging:
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
 ```
 
+## Shell-Safe Skill Invocation
+
+When your prompt text includes a skill token like `$rlm-controller`, do not pass it unescaped in a double-quoted shell string. Otherwise shell expansion can remove the token.
+
+Use one of these safe patterns:
+
+```bash
+# Preferred: prompt file
+cat > /tmp/prompt.txt <<'EOF'
+Use $rlm-controller. Reduce-only mode.
+EOF
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --prompt-file /tmp/prompt.txt
+
+# Or escape $ in inline strings
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh "Use \$rlm-controller. Reduce-only mode."
+```
+
 ## How to write the prompt
 
 Treat the sub-agent prompt as a mini-brief:
