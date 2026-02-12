@@ -1,0 +1,4 @@
+interface:
+  display_name: "RLM Controller"
+  short_description: "Large-context orchestration via chunk-and-reduce."
+  default_prompt: "Use $rlm-controller to orchestrate chunk planning, subagent dispatch, and evidence-grounded final JSON output."

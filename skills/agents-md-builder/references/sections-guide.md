@@ -2,13 +2,14 @@
 
 Use this guide to decide what to include and how detailed each section should be.
 Prefer repository-specific facts over generic instructions.
+Generated files must begin with `# AGENTS.md`.
 
 ## Recommended Order
 
 1. Scope
-2. Repository Map
-3. Setup
-4. Commands
+2. Setup
+3. Commands
+4. High-Level Architecture
 5. Editing Rules
 6. Verification
 7. Delivery Workflow
@@ -20,11 +21,6 @@ Prefer repository-specific facts over generic instructions.
 
 State what the file governs and what it does not.
 Include priorities (for example: correctness over speed, minimal diffs, preserve behavior).
-
-### Repository Map
-
-List high-value directories and ownership boundaries.
-Include only folders that affect implementation decisions.
 
 ### Setup
 
@@ -40,6 +36,12 @@ Provide copy-pasteable commands for:
 - Targeted test execution when useful
 
 Group commands by subproject if needed, with explicit paths.
+
+### High-Level Architecture
+
+Describe the big-picture structure that requires reading multiple files to understand.
+Capture cross-module flows, boundaries, and integration points.
+Avoid exhaustive folder trees or listing every component.
 
 ### Editing Rules
 
@@ -69,6 +71,9 @@ Write each assumption as a concrete statement to confirm.
 ## Anti-Patterns
 
 - Broad statements without commands or paths
+- Missing `# AGENTS.md` as the first line
 - Contradictory rules across sections
 - Sections that repeat README text without adding agent-specific guidance
+- Generic or obvious advice without repository evidence
+- Invented sections not backed by repository docs/rules
 - Non-actionable wording such as "follow best practices"

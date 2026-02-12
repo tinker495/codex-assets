@@ -1,0 +1,4 @@
+interface:
+  display_name: "RLM Subagent"
+  short_description: "Single-chunk evidence extraction with strict JSON."
+  default_prompt: "Use $rlm-subagent to analyze one chunk and return schema-compliant evidence JSON only."

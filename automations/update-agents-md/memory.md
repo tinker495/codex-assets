@@ -5,3 +5,5 @@
 - Runtime: 2026-02-10 10:36:29 +0900
 - Updated root AGENTS quick start with sync/git-lfs/editable/install-hooks, code-health-diff, clean, and python -m stowage commands.
 - Runtime: 2026-02-11 10:36:12 +0900
+- Updated root AGENTS quick start with sync/git-lfs/editable/install-hooks, code-health-diff, python -m stowage, and clean commands from Makefile/README.
+- Runtime: 2026-02-12 10:35:53 +0900

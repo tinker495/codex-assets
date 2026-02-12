@@ -14,3 +14,19 @@
 
 - Summary: Applied ranked updates to existing automations only. Updated `automatically-create-new-skills` with a new noise signal (`ls: /automations/automatically-create-new-skills`) and a CODEX_HOME path guardrail (`CODEX_HOME=${CODEX_HOME:-$HOME/.codex}`, no `/automations/...` absolute path). Updated `daily-automation-review` with a detection guardrail to count noise only from `response_item` + `function_call_output` entries. No new automation created.
 - Run time: 2026-02-11T11:04:18+0900
+
+- Summary: Scanned 2026-02-11 sessions and automation TOMLs. High-noise signals in function_call_output: xenon rank C (50 hits/16 sessions), date -I invalid (5/5), missing pytest (2/2). Recommended updating Automatically create new skills prompt to add these signals and guardrails (xenon non-retry handling, date fallback via python, pytest via uv run --with pytest). No automation files changed.
+- Run time: 2026-02-12T10:52:14.161287+09:00
+
+
+- Summary: Scanned 2026-02-11 sessions and automation TOMLs. Detected recurring sandbox permission-denied noise from uv/ruff cache paths (for example: ~/.cache/uv/sdists-v8/.git, /tmp/uv-cache, /tmp/ruff-cache, .ruff_cache) and BSD date usage error (date -I s). Recommended updating automation prompt (automatically-create-new-skills) with new noise signals plus guardrails to set cache env vars to writable paths and use python for date. No automation files changed.
+- Run time: 2026-02-12T10:52:34+09:00
+
+- Summary: Applied requested automation updates to existing source automation only. Updated `~/.codex/automations/automatically-create-new-skills/automation.toml` prompt with new HIGH-noise signals (`ERROR:xenon:block`, `ERROR:xenon:module`, `date: invalid argument 's' for -I`, `No module named pytest`) and added guardrails (xenon no-repeat retry/report once, `date -I` fallback to `python -c`, pytest fallback via `uv run --with pytest pytest`). Refreshed `updated_at` and verified TOML parse with `python3.11`.
+- Run time: 2026-02-12T10:54:13+0900
+
+- Summary: Ran session-wrap-up for this run. Distilled reusable insights: (1) TOML prompt string quote-escaping + parse validation is a recurring workflow gap, (2) Python interpreter drift (tomllib missing) requires explicit python3.11 fallback gate, (3) no skill topology/ownership change needed. Proposed update-existing-skill actions delegated to skill-creator; no create-new-skill recommendation.
+- Run time: 2026-02-12T10:54:46+0900
+
+- Summary: Implemented wrap-up follow-up by updating source skill guidance at `~/.codex/skills/automation-creator/SKILL.md`. Added two reusable guardrails: TOML prompt quote escaping (`\"`) when embedding command strings, and TOML parse validation with `tomllib` plus `python3.11` fallback when default python lacks tomllib. No topology or automation schedule changes.
+- Run time: 2026-02-12T10:56:34+0900

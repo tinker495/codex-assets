@@ -28,11 +28,13 @@ Translate user intent into Codex automation directives for creating, updating, o
 
 - `name`: Short, human-friendly label. Propose one if the user does not provide it.
 - `prompt`: Task only. Do not include schedule or workspace details.
+- `prompt` safety: If prompt text includes double quotes (for example `python -c "..."`), escape inner quotes as `\"` so the TOML string stays valid.
 - `rrule`: Use supported formats only:
   - Hourly interval: `FREQ=HOURLY;INTERVAL=<hours>[;BYDAY=MO,TU,...]`
   - Weekly schedule: `FREQ=WEEKLY;BYDAY=MO,TU,...;BYHOUR=<0-23>;BYMINUTE=<0-59>`
 - `cwds`: Comma-separated list or JSON array string of workspace paths.
 - `status`: Default to `ACTIVE` unless user requests paused.
+- `validation`: After editing an automation TOML, parse it once with `tomllib`. If default `python` lacks `tomllib`, use `python3.11` fallback.
 
 ### 4) Emit Directive
 

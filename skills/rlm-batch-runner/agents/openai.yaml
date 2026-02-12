@@ -1,0 +1,4 @@
+interface:
+  display_name: "RLM Batch Runner"
+  short_description: "Parallel codex-exec job runner with retries."
+  default_prompt: "Use $rlm-batch-runner to execute jobs.jsonl in parallel and validate subagent outputs."
