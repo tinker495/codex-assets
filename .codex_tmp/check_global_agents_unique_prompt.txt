@@ -1,0 +1,5 @@
+도구 호출/파일 읽기 없이 한 줄로만 답하라.
+현재 자동 주입된 시스템/개발자/AGENTS 지시문에 ~/.codex/AGENTS.md의 아래 라인 중 하나가 포함되어 있으면 exact line을 출력하고, 없으면 NONE을 출력하라.
+1) Preferred invocation: `run.sh --timeout-sec 600 --prompt-file <absolute-path>`
+2) If file write fails (`permission denied`, `read-only file system`), return full artifact inline with intended path, concrete error, and JSONL path.
+형식: HIT=<YES|NO>; LINE=<exact line or NONE>

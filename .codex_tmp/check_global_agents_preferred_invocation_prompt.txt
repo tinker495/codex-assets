@@ -1,0 +1,3 @@
+도구 호출/파일 읽기 없이 한 줄로만 답하라.
+~/.codex/AGENTS.md의 'Preferred invocation:' 항목에서 백틱(`) 안 명령 문자열만 정확히 출력하라. 모르면 NONE.
+형식: VALUE=<text or NONE>

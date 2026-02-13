@@ -1,0 +1,5 @@
+도구를 호출하지 말고 한 줄로만 답하라.
+현재 자동 주입된 시스템/개발자/AGENTS 규칙에 전역 AGENTS.md 규칙이 적용되어 있다면 다음 형식으로 답해라:
+STATUS=LOADED; EVIDENCE=<고유 문구 1개>
+없다면:
+STATUS=NOT_LOADED; EVIDENCE=NONE
