@@ -1,4 +1,4 @@
 interface:
-  display_name: "Refresh Branch Docs"
-  short_description: "Refresh docs from branch diff and deep grepai evidence."
-  default_prompt: "Use $refresh-branch-docs to fully refresh internal docs from current branch changes with onboarding and deep grepai analysis."
+  display_name: "Harness Branch Docs Refresh"
+  short_description: "Branch-wide docs refresh from diff evidence"
+  default_prompt: "Use $refresh-branch-docs to comprehensively refresh AGENTS/docs from current branch changes using onboarding, grepai evidence, and docs-check validation."

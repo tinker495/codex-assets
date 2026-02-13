@@ -1,6 +1,6 @@
 ---
 name: "doc"
-description: "Use when the task involves reading, creating, or editing `.docx` documents, especially when formatting or layout fidelity matters; prefer `python-docx` plus the bundled `scripts/render_docx.py` for visual checks."
+description: "Use only for `.docx` document workflows: read/create/edit Word files, preserve formatting/layout fidelity, and validate rendered pages. Do not use for repository Markdown docs or AGENTS/docs alignment tasks; route those to documentation-audit/refresh skills."
 ---
 
 

@@ -18,6 +18,7 @@ find src -type f -name AGENTS.md | sort
 
 1. Root -> Local entrypoint check
 - Root `AGENTS.md` should reference at least the major local entrypoints used in active work.
+- Root `AGENTS.md` should stay map-like and point to deeper docs instead of duplicating full policy text.
 
 2. Docs index -> Local AGENTS inventory check
 - `docs/index.md` Local AGENTS section should include every discovered local AGENTS path.
@@ -27,6 +28,10 @@ find src -type f -name AGENTS.md | sort
 
 4. SSOT contract check
 - `docs/_meta/docs-contract.md` (or equivalent) should include `src/**/AGENTS.md` in As-Is SSOT when local AGENTS are active.
+
+5. Progressive disclosure continuity
+- `AGENTS.md` should point to `docs/index.md`.
+- `docs/index.md` should expose guides/reference/specs plus Local AGENTS inventory.
 
 ## Fix Scope
 

@@ -29,7 +29,7 @@ grepai search "rotation history anomaly tiers render step" --json --compact \
   | jq 'map(select(.file_path|startswith("src/"))) | .[0:10]'
 grepai search "TUI overlay tooltip rotation detail state" --json --compact \
   | jq 'map(select(.file_path|startswith("src/"))) | .[0:10]'
-grepai search "hard constraints objective function canonical" --json --compact \
+grepai search "hard constraints objective functions docs reference constraints" --json --compact \
   | jq 'map(select(.file_path|startswith("docs/"))) | .[0:10]'
 ```
 
@@ -65,7 +65,15 @@ Focus on:
 - dict key shape and slot key format
 - cross-module assumptions between stowage/rotation/tui
 
-## Pass 4: Edge and test evidence
+## Pass 4: Harness map checks
+
+```bash
+rg -n "docs/index.md|docs/_meta/docs-contract.md|src/.*/AGENTS.md" AGENTS.md docs/index.md docs/_meta/docs-contract.md
+grepai search "docs-check Makefile CI docs integrity" --json --compact \
+  | jq 'map(select(.file_path|startswith("Makefile") or .file_path|startswith(".github/")))'
+```
+
+## Pass 5: Edge and test evidence
 
 ```bash
 grepai search "warning fallback default invalid" --json --compact

@@ -11,45 +11,78 @@ DOC_IMPACT_MAP: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "src/stowage/dataclasses/stowage_plan/",
         (
-            "docs/data-structure/stowage-plan.md",
-            "docs/data-structure/calculators.md",
-            "docs/anomaly-aggregation-analysis.md",
-            "docs/HardConstraints_Constraint_API_Spec.md",
-            "docs/Raw_objectiveFunction_Canonical_List.md",
+            "docs/reference/data-structure/stowage-plan.md",
+            "docs/reference/data-structure/calculators.md",
+            "docs/reference/anomaly/aggregation.md",
+            "docs/reference/constraints/hard-constraints.md",
+            "docs/reference/constraints/objective-functions.md",
+            "docs/reference/data-structure/index.md",
         ),
     ),
     (
         "src/stowage/dataclasses/rotation_history/",
         (
-            "docs/data-structure/rotation-history.md",
-            "docs/anomaly-aggregation-analysis.md",
-            "docs/data-structure-analysis.md",
+            "docs/reference/data-structure/rotation-history.md",
+            "docs/reference/anomaly/aggregation.md",
+            "docs/reference/data-structure/index.md",
         ),
     ),
     (
         "src/stowage/dataclasses/vessel_define/",
         (
-            "docs/data-structure/cargo.md",
-            "docs/data-structure/infrastructure.md",
-            "docs/data-structure/stability.md",
+            "docs/reference/data-structure/cargo.md",
+            "docs/reference/data-structure/infrastructure.md",
+            "docs/reference/data-structure/stability.md",
+            "docs/reference/data-structure/index.md",
         ),
     ),
     (
         "src/tui/",
         (
-            "docs/data-structure/stowage-plan.md",
-            "docs/data-structure/rotation-history.md",
-            "docs/data-structure/infrastructure.md",
+            "docs/reference/data-structure/stowage-plan.md",
+            "docs/reference/data-structure/rotation-history.md",
+            "docs/reference/data-structure/infrastructure.md",
+            "docs/reference/data-structure/index.md",
+        ),
+    ),
+    (
+        "src/stowage/config/",
+        (
+            "docs/reference/constraints/hard-constraints.md",
+            "docs/reference/constraints/objective-functions.md",
+            "docs/reference/data-structure/index.md",
+        ),
+    ),
+    (
+        "scripts/",
+        (
+            "docs/guides/development.md",
+            "docs/guides/testing.md",
+            "docs/guides/code-search.md",
+            "docs/index.md",
+        ),
+    ),
+    (
+        ".github/workflows/",
+        (
+            "docs/guides/development.md",
+            "docs/index.md",
         ),
     ),
 )
+
+ROOT_DOC_FILES: tuple[str, ...] = ("AGENTS.md", "README.md", "CLAUDE.md")
+HARNESS_CORE_DOCS: tuple[str, ...] = ("AGENTS.md", "docs/index.md", "docs/_meta/docs-contract.md")
 
 AREA_PREFIXES: tuple[tuple[str, str], ...] = (
     ("docs", "docs/"),
     ("stowage_plan", "src/stowage/dataclasses/stowage_plan/"),
     ("rotation_history", "src/stowage/dataclasses/rotation_history/"),
     ("vessel_define", "src/stowage/dataclasses/vessel_define/"),
+    ("stowage_config", "src/stowage/config/"),
     ("tui", "src/tui/"),
+    ("scripts", "scripts/"),
+    ("ci", ".github/workflows/"),
     ("tests", "tests/"),
 )
 
@@ -79,9 +112,13 @@ def parse_numstat(text: str) -> list[NumstatRow]:
 
 def area_counts(paths: list[str]) -> dict[str, int]:
     counts = {name: 0 for name, _ in AREA_PREFIXES}
+    counts["agents"] = 0
     counts["other"] = 0
     for path in paths:
         matched = False
+        if path == "AGENTS.md" or path.endswith("/AGENTS.md"):
+            counts["agents"] += 1
+            matched = True
         for name, prefix in AREA_PREFIXES:
             if path.startswith(prefix):
                 counts[name] += 1
@@ -108,18 +145,38 @@ def compute_doc_impact(
     *,
     repo: Path,
 ) -> tuple[list[str], list[dict[str, object]], list[str], list[str]]:
+    direct_root_docs = sorted(
+        path for path in changed_files if path in ROOT_DOC_FILES and (repo / path).exists()
+    )
+    direct_agents = sorted(
+        path
+        for path in changed_files
+        if path.startswith("src/") and path.endswith("AGENTS.md") and (repo / path).exists()
+    )
     direct_docs = sorted(
         path
         for path in changed_files
         if path.startswith("docs/") and path.endswith(".md") and (repo / path).exists()
     )
-    mapped_docs = set(direct_docs)
+    mapped_docs = set(direct_docs + direct_root_docs + direct_agents)
     mapped_sources: list[dict[str, object]] = []
     unmapped_code: list[str] = []
     missing_doc_targets: set[str] = set()
 
+    if any(
+        path.startswith("src/")
+        or path.startswith("docs/")
+        or path.startswith("scripts/")
+        or path.startswith(".github/")
+        or path.endswith("AGENTS.md")
+        for path in changed_files
+    ):
+        existing_core_docs, missing_core_docs = _existing_docs(repo, HARNESS_CORE_DOCS)
+        mapped_docs.update(existing_core_docs)
+        missing_doc_targets.update(missing_core_docs)
+
     for path in changed_files:
-        if path.startswith("docs/"):
+        if path.startswith("docs/") or path in ROOT_DOC_FILES or path.endswith("AGENTS.md"):
             continue
         matched = False
         for prefix, doc_paths in DOC_IMPACT_MAP:
