@@ -19,12 +19,14 @@ from typing import Any
 DEFAULT_PARALLEL_CAP = 8
 DEFAULT_TIMEOUT_SEC = 600
 DEFAULT_RETRIES = 2
+DEFAULT_SUBAGENT_MODEL = "gpt-5.1-codex-mini"
 LOC_PATTERN = re.compile(r"^.+:[0-9]+-[0-9]+$")
 JSONL_PATH_PATTERN = re.compile(r"(/[^\s]+\.jsonl)")
 MAX_SUMMARY_LEN = 1200
 MAX_LOC_LEN = 512
 MAX_QUOTE_LEN = 320
 MAX_NOTE_LEN = 400
+USAGE_KEYS = ("input_tokens", "cached_input_tokens", "output_tokens")
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,39 @@ def parse_args() -> argparse.Namespace:
         "--runner-script",
         default=str(Path.home() / ".codex/skills/codex-exec-sub-agent/scripts/run.sh"),
         help="Path to codex-exec-sub-agent run.sh",
+    )
+    parser.add_argument(
+        "--model",
+        default=os.environ.get("CODEX_SUBAGENT_MODEL", DEFAULT_SUBAGENT_MODEL),
+        help="Subagent model id (default: CODEX_SUBAGENT_MODEL or gpt-5.1-codex-mini)",
+    )
+    parser.add_argument(
+        "--profile",
+        default=os.environ.get("CODEX_SUBAGENT_PROFILE", ""),
+        help="Codex profile for subagent runs (optional)",
+    )
+    parser.add_argument(
+        "--codex-home",
+        default=os.environ.get("CODEX_SUBAGENT_CODEX_HOME", ""),
+        help="Isolated CODEX_HOME for worker runs (optional)",
+    )
+    parser.add_argument(
+        "--worker-cwd",
+        default=os.environ.get("CODEX_SUBAGENT_CWD", ""),
+        help="Working directory for worker codex exec calls (optional)",
+    )
+    parser.add_argument(
+        "--skip-git-repo-check",
+        dest="skip_git_repo_check",
+        action="store_true",
+        default=True,
+        help="Pass --skip-git-repo-check to worker codex exec (default: enabled)",
+    )
+    parser.add_argument(
+        "--no-skip-git-repo-check",
+        dest="skip_git_repo_check",
+        action="store_false",
+        help="Do not pass --skip-git-repo-check to worker codex exec",
     )
     return parser.parse_args()
 
@@ -161,6 +196,27 @@ def to_output_path(run_dir: Path, output_path: str) -> Path:
     return path.resolve()
 
 
+def empty_usage() -> dict[str, int]:
+    return {key: 0 for key in USAGE_KEYS}
+
+
+def as_non_negative_int(value: Any) -> int:
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, int):
+        return value if value >= 0 else 0
+    if isinstance(value, float):
+        if value < 0:
+            return 0
+        return int(value)
+    return 0
+
+
+def add_usage(target: dict[str, int], usage: dict[str, int]) -> None:
+    for key in USAGE_KEYS:
+        target[key] = target.get(key, 0) + usage.get(key, 0)
+
+
 def build_prompt(job: Job, output_path: Path) -> str:
     return (
         "Use $rlm-subagent.\n"
@@ -181,9 +237,41 @@ def build_prompt(job: Job, output_path: Path) -> str:
     )
 
 
-def run_once(runner_script: Path, prompt_path: Path, timeout_sec: int) -> tuple[int, str, str, Path | None]:
-    cmd = [str(runner_script), "--timeout-sec", str(timeout_sec), "--prompt-file", str(prompt_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+def run_once(
+    runner_script: Path,
+    prompt_path: Path,
+    timeout_sec: int,
+    model: str,
+    profile: str,
+    worker_cwd: str,
+    skip_git_repo_check: bool,
+    codex_home: str,
+) -> tuple[int, str, str, Path | None]:
+    cmd = [
+        str(runner_script),
+        "--timeout-sec",
+        str(timeout_sec),
+        "--model",
+        model,
+    ]
+    if profile:
+        cmd.extend(["--profile", profile])
+    if worker_cwd:
+        cmd.extend(["--cd", worker_cwd])
+    if skip_git_repo_check:
+        cmd.append("--skip-git-repo-check")
+    cmd.extend(
+        [
+            "--prompt-file",
+            str(prompt_path),
+        ]
+    )
+
+    env = os.environ.copy()
+    if codex_home:
+        env["CODEX_HOME"] = codex_home
+
+    proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     stdout = proc.stdout or ""
     stderr = proc.stderr or ""
@@ -231,6 +319,34 @@ def extract_agent_message(log_path: Path) -> str | None:
                     message = text.strip()
 
     return message
+
+
+def extract_usage_from_log(log_path: Path) -> dict[str, int]:
+    usage_total = empty_usage()
+
+    with log_path.open("r", encoding="utf-8") as handle:
+        for raw in handle:
+            line = raw.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if not isinstance(obj, dict):
+                continue
+            if obj.get("type") != "turn.completed":
+                continue
+
+            usage = obj.get("usage")
+            if not isinstance(usage, dict):
+                continue
+
+            for key in USAGE_KEYS:
+                usage_total[key] += as_non_negative_int(usage.get(key))
+
+    return usage_total
 
 
 def parse_json_payload(raw_text: str) -> tuple[dict[str, Any] | None, str | None]:
@@ -372,6 +488,11 @@ def run_job(
     job: Job,
     run_dir: Path,
     runner_script: Path,
+    model: str,
+    profile: str,
+    worker_cwd: str,
+    skip_git_repo_check: bool,
+    codex_home: str,
     retries: int,
     prompts_dir: Path,
     logs_dir: Path,
@@ -381,13 +502,23 @@ def run_job(
 
     attempt_logs: list[str] = []
     attempt_errors: list[str] = []
+    usage_total = empty_usage()
 
     for attempt in range(1, retries + 2):
         prompt = build_prompt(job, output_path)
         prompt_path = prompts_dir / f"{job.job_id}.attempt{attempt}.txt"
         prompt_path.write_text(prompt, encoding="utf-8")
 
-        code, stdout, stderr, upstream_jsonl = run_once(runner_script, prompt_path, job.timeout_sec)
+        code, stdout, stderr, upstream_jsonl = run_once(
+            runner_script,
+            prompt_path,
+            job.timeout_sec,
+            model,
+            profile,
+            worker_cwd,
+            skip_git_repo_check,
+            codex_home,
+        )
 
         local_log = logs_dir / f"{job.job_id}.attempt{attempt}.jsonl"
         if upstream_jsonl is not None and upstream_jsonl.exists():
@@ -395,6 +526,7 @@ def run_job(
         else:
             local_log.write_text(stdout, encoding="utf-8")
         attempt_logs.append(str(local_log))
+        add_usage(usage_total, extract_usage_from_log(local_log))
 
         if code != 0:
             reason = f"attempt {attempt}: runner exit code {code}"
@@ -428,6 +560,7 @@ def run_job(
             "attempts": attempt,
             "output_path": str(output_path),
             "log_paths": attempt_logs,
+            "usage": usage_total,
             "errors": [],
         }
 
@@ -437,6 +570,7 @@ def run_job(
         "attempts": retries + 1,
         "output_path": str(output_path),
         "log_paths": attempt_logs,
+        "usage": usage_total,
         "errors": attempt_errors,
     }
 
@@ -445,6 +579,11 @@ def write_summary(run_dir: Path, started_at: float, results: list[dict[str, Any]
     duration_sec = round(time.time() - started_at, 3)
     succeeded = sum(1 for item in results if item["status"] == "success")
     failed = len(results) - succeeded
+    usage_totals = empty_usage()
+    for item in results:
+        usage = item.get("usage")
+        if isinstance(usage, dict):
+            add_usage(usage_totals, {key: as_non_negative_int(usage.get(key)) for key in USAGE_KEYS})
 
     summary = {
         "run_dir": str(run_dir),
@@ -452,6 +591,7 @@ def write_summary(run_dir: Path, started_at: float, results: list[dict[str, Any]
         "jobs_succeeded": succeeded,
         "jobs_failed": failed,
         "duration_sec": duration_sec,
+        "usage_totals": usage_totals,
         "results": results,
     }
 
@@ -466,6 +606,8 @@ def main() -> int:
     jobs_path = Path(args.jobs).expanduser().resolve()
     run_dir = Path(args.run_dir).expanduser().resolve()
     runner_script = Path(args.runner_script).expanduser().resolve()
+    worker_cwd_resolved = ""
+    codex_home_resolved = ""
 
     if args.parallel <= 0:
         print("--parallel must be a positive integer", file=sys.stderr)
@@ -476,6 +618,19 @@ def main() -> int:
     if args.timeout_sec <= 0:
         print("--timeout-sec must be > 0", file=sys.stderr)
         return 1
+    if not isinstance(args.model, str) or not args.model.strip():
+        print("--model must be a non-empty string", file=sys.stderr)
+        return 1
+    if args.worker_cwd:
+        worker_cwd_path = Path(args.worker_cwd).expanduser().resolve()
+        if not worker_cwd_path.exists() or not worker_cwd_path.is_dir():
+            print(f"--worker-cwd must be an existing directory: {worker_cwd_path}", file=sys.stderr)
+            return 1
+        worker_cwd_resolved = str(worker_cwd_path)
+    if args.codex_home:
+        codex_home_path = Path(args.codex_home).expanduser().resolve()
+        codex_home_path.mkdir(parents=True, exist_ok=True)
+        codex_home_resolved = str(codex_home_path)
 
     if not runner_script.exists() or not runner_script.is_file():
         print(f"runner script not found: {runner_script}", file=sys.stderr)
@@ -505,6 +660,11 @@ def main() -> int:
                 job,
                 run_dir,
                 runner_script,
+                args.model.strip(),
+                args.profile.strip(),
+                worker_cwd_resolved,
+                bool(args.skip_git_repo_check),
+                codex_home_resolved,
                 args.retries,
                 prompts_dir,
                 logs_dir,
@@ -522,6 +682,7 @@ def main() -> int:
                     "attempts": args.retries + 1,
                     "output_path": "",
                     "log_paths": [],
+                    "usage": empty_usage(),
                     "errors": [f"internal runner error: {exc}"],
                 }
             results.append(result)
@@ -534,6 +695,12 @@ def main() -> int:
 
     print(f"summary: {summary_path}")
     print(f"jobs_total={len(results)} jobs_succeeded={succeeded} jobs_failed={failed}")
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    usage_totals = summary.get("usage_totals", {})
+    print(
+        "usage_totals="
+        + " ".join(f"{key}={as_non_negative_int(usage_totals.get(key))}" for key in USAGE_KEYS)
+    )
 
     if failed == 0:
         return 0

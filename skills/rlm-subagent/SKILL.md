@@ -11,6 +11,7 @@ description: Analyze a single chunk for evidence extraction and structured scori
 - Do not explore unrelated files or the full repository.
 - Do not guess; mark uncertainty explicitly.
 - Return structured JSON only.
+- Keep output terse; avoid any explanatory prose outside schema fields.
 
 ## Required Output Shape
 
@@ -27,10 +28,18 @@ description: Analyze a single chunk for evidence extraction and structured scori
 3. Use lower `confidence` when evidence is weak, ambiguous, or incomplete.
 4. Put parsing/format or instruction issues in `errors`.
 
+## Token Efficiency Rules
+
+- Use low-effort worker profile (`model_reasoning_effort=minimal`, `model_verbosity=low`).
+- Keep static instruction prefix unchanged across jobs; append chunk content last.
+- Prefer extraction over synthesis: cite only direct evidence from the chunk.
+- Never call tools from subagent prompts unless explicitly required by controller.
+
 ## Example Invocation
 
 ```bash
 codex exec \
+  --model gpt-5.1-codex-mini \
   --sandbox read-only \
   --output-schema ~/.codex/skills/rlm-subagent/schemas/subagent.schema.json \
   -o sessions/<run_id>/subresults/<job_id>.json \

@@ -11,10 +11,16 @@ Use the bundled runner script to avoid manually picking filenames/paths for the 
 
 - Script: `~/.codex/skills/codex-exec-sub-agent/scripts/run.sh`
 - Default runs dir: `~/.codex/sub_agent_runs/` (override with `CODEX_SUBAGENT_RUNS_DIR`)
+- Default model: `gpt-5.3-codex-spark` (override with `CODEX_SUBAGENT_MODEL`)
 - Print: the full path to `run.jsonl` as the last line on stdout
 - Options:
   - `--prompt-file <path>`: read prompt from file (recommended for long/complex prompts)
   - `--timeout-sec <n>`: hard timeout in seconds (returns exit code `124` on timeout)
+  - `--model <id>`: override model per run
+  - `--profile <name>`: apply Codex profile (for worker-specific low-token config)
+  - `--cd <dir>`: run `codex exec` from a specific directory
+  - `--skip-git-repo-check`: bypass git repo requirement (useful for temp worker dirs)
+  - `--codex-home <dir>`: run with isolated `CODEX_HOME`
 
 ## How to call
 
@@ -43,6 +49,49 @@ Apply timeout when you want deterministic failure instead of hanging:
 ```bash
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --timeout-sec 600 --prompt-file /full/path/prompt.txt
 ```
+
+Override model only when needed:
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --model gpt-5.3-codex-spark --prompt-file /full/path/prompt.txt
+```
+
+Apply worker profile and isolated context for token efficiency:
+
+```bash
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh \
+  --model gpt-5.3-codex-spark \
+  --profile rlm-worker \
+  --codex-home /tmp/codex_worker_home \
+  --cd /tmp/rlm_worker \
+  --skip-git-repo-check \
+  --prompt-file /full/path/prompt.txt
+```
+
+## Model Smoke Tests
+
+Run these checks after changing runner options or model policy.
+
+```bash
+mkdir -p .codex_tmp/subagent-smoke
+cat > .codex_tmp/subagent-smoke/prompt.txt <<'EOF'
+Reply exactly: OK
+EOF
+
+# 1) Default model path (no --model, no CODEX_SUBAGENT_MODEL)
+env -u CODEX_SUBAGENT_MODEL \
+  ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh \
+  --timeout-sec 90 \
+  --prompt-file "$PWD/.codex_tmp/subagent-smoke/prompt.txt"
+
+# 2) Explicit override path
+~/.codex/skills/codex-exec-sub-agent/scripts/run.sh \
+  --model gpt-5.3-codex-spark \
+  --timeout-sec 90 \
+  --prompt-file "$PWD/.codex_tmp/subagent-smoke/prompt.txt"
+```
+
+Expected: both commands exit `0` and print a `run.jsonl` path as the last line.
 
 ## Shell-Safe Skill Invocation
 

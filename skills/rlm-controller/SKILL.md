@@ -12,6 +12,42 @@ description: Orchestrate large-context tasks with chunk-and-reduce execution usi
 - Use `$rlm-batch-runner` for all chunk-level execution.
 - Ingest only subagent JSON outputs and short summaries into context.
 - Enforce evidence-first outputs: unresolved claims must become `gaps` entries.
+- Keep worker prompts stable at the prefix and append chunk payloads at the end.
+
+## Token Budget Baseline (Required)
+
+Before large runs, sample one worker call and inspect `turn.completed.usage`.
+
+```bash
+codex exec --json "noop" \
+  | jq -r 'select(.type=="turn.completed") | .usage'
+```
+
+Interpretation:
+
+- `output_tokens` high but final text short: reasoning token overhead is dominant.
+- `input_tokens` high and similar across calls: repeated fixed prefix/context is dominant.
+- `cached_input_tokens` high: caching is active; it reduces cost/latency, not token count.
+
+## Worker Isolation Profile (Required)
+
+Run workers with an isolated `CODEX_HOME` and a dedicated profile to minimize repeated
+project instructions.
+
+```toml
+# /tmp/codex_worker_home/config.toml
+[profiles.rlm-worker]
+model = "gpt-5.3-codex-spark"
+model_reasoning_effort = "minimal"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+web_search = "disabled"
+tool_output_token_limit = 1500
+project_doc_max_bytes = 0
+project_root_markers = []
+history.persistence = "none"
+hide_agent_reasoning = true
+```
 
 ## Session Layout
 
@@ -32,12 +68,14 @@ out/
 1. Generate `run_id` and create the session tree.
 2. Normalize inputs into chunk files under `chunks/` and create a chunk manifest.
 3. Convert task goals into explicit evidence questions.
-4. Build `jobs.jsonl` with one job per chunk or targeted chunk-group.
-5. Run batch execution via:
+4. Prefilter chunks in Python (regex/BM25/vector) and keep only top-k evidence candidates.
+5. Build `jobs.jsonl` with one job per chunk or targeted chunk-group.
+6. Pack multiple short chunks per job when possible to amortize fixed prompt overhead.
+7. Run batch execution via:
    - `python3 ~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py --jobs <jobs.jsonl> --run-dir <session_dir>`
-6. Reduce results: merge evidence, resolve conflicts, and list unresolved gaps.
-7. If gaps remain, run targeted follow-up jobs (max 2 additional passes).
-8. Emit `out/answer.json` conforming to `schemas/final.schema.json`.
+7. Reduce results: merge evidence, resolve conflicts, and list unresolved gaps.
+8. If gaps remain, run targeted follow-up jobs (max 2 additional passes).
+9. Emit `out/answer.json` conforming to `schemas/final.schema.json`.
 
 ## Output Policy
 
@@ -66,8 +104,27 @@ jq -e '
 
 ```bash
 codex exec \
+  --model gpt-5.3-codex-spark \
   --sandbox workspace-write \
   --output-schema ~/.codex/skills/rlm-controller/schemas/final.schema.json \
   -o out/answer.json \
   "Use $rlm-controller. Task file: tasks/TASK.md. Input root: inputs/."
+```
+
+## Cost-Optimized Worker Invocation
+
+Use the batch runner with isolated worker context and git-repo check disabled for chunk jobs.
+
+```bash
+python3 ~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py \
+  --jobs sessions/<run_id>/jobs.jsonl \
+  --run-dir sessions/<run_id> \
+  --model gpt-5.3-codex-spark \
+  --profile rlm-worker \
+  --codex-home /tmp/codex_worker_home \
+  --worker-cwd /tmp/rlm_worker \
+  --skip-git-repo-check \
+  --parallel 8 \
+  --timeout-sec 600 \
+  --retries 2
 ```
