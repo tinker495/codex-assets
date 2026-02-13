@@ -46,6 +46,8 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `spreadsheet` | specialist | spreadsheet modeling/editing workflow |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
 | `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
+| `interface-design` | specialist | intentional interface design workflow for product/app UI tasks |
+| `layer-boundary-test-scaffold` | specialist | scaffold and extend AST-based architecture boundary tests |
 | `ralph-loop-builder` | specialist | scaffold purpose-fit `.codex/<workspace>` Ralph loop workspaces |
 | `systematic-debugging` | specialist | root-cause-first debugging protocol |
 | `screenshot` | specialist | OS-level screenshot capture |
@@ -86,7 +88,8 @@ Layer 1: Specialists (single-domain ownership)
   verification-before-completion, writing-plans, writing-skills,
   branch-onboarding-brief, code-health, rpg-loop-reasoning, gh-fix-ci,
   gh-address-comments, pdf, doc, spreadsheet, jupyter-notebook, screenshot,
-  docs-codebase-alignment-audit, notion-knowledge-capture, notion-meeting-intelligence,
+  docs-codebase-alignment-audit, interface-design, layer-boundary-test-scaffold,
+  notion-knowledge-capture, notion-meeting-intelligence,
   notion-research-documentation, notion-spec-to-implementation, ralph-loop-builder,
   rlm-subagent
 
@@ -171,6 +174,8 @@ flowchart LR
   SDBG["systematic-debugging"]
   SHOT["screenshot"]
   DCAA["docs-codebase-alignment-audit"]
+  IFD["interface-design"]
+  LBTS["layer-boundary-test-scaffold"]
   TDD["test-driven-development"]
   UGW["using-git-worktrees"]
   VBC["verification-before-completion"]
@@ -258,6 +263,7 @@ flowchart TD
   DOCOPS --> PDF["pdf"]
   DOCOPS --> SS["spreadsheet"]
   DOCOPS --> JNB["jupyter-notebook"]
+  DOCOPS --> IFD["interface-design"]
   DOCOPS --> SHOT["screenshot"]
   DOCOPS --> DCAA["docs-codebase-alignment-audit"]
 
@@ -272,6 +278,7 @@ flowchart TD
   PROC --> GTNR["grepai-trace-noise-remediation"]
   PROC --> SDBG["systematic-debugging"]
   PROC --> TDD["test-driven-development"]
+  PROC --> LBTS["layer-boundary-test-scaffold"]
   PROC --> UGW["using-git-worktrees"]
   PROC --> VBC["verification-before-completion"]
   PROC --> WSK["writing-skills"]

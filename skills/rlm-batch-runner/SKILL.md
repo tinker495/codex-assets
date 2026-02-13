@@ -7,6 +7,11 @@ description: Execute `jobs.jsonl` workloads for RLM chunk scanning with parallel
 
 Use the bundled script to dispatch chunk jobs in parallel and validate outputs.
 
+## Delegation Boundary
+
+- This utility executes fan-out batches and writes normalized artifacts.
+- Delegate chunk-level reasoning to `$rlm-subagent` workers via the runner script.
+
 ## Script
 
 - Path: `~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py`

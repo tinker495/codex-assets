@@ -1,6 +1,6 @@
 ---
 name: docs-codebase-alignment-audit
-description: Audit and fix documentation alignment against the current repository codebase with minimal diffs. Use when users ask to sync `docs/` with real code paths, verify Markdown links, validate `make` commands in docs, or run end-to-end docs consistency checks.
+description: Audit and fix documentation alignment against the current repository codebase with minimal diffs. Use when users ask to sync `docs/` with real code paths, verify Markdown links, validate `make` commands in docs, check AGENTS.md reference chains, or run end-to-end docs consistency checks.
 ---
 
 # Docs Codebase Alignment Audit
@@ -38,18 +38,30 @@ Keep As-Is runtime docs aligned to code, and avoid forcing To-Be spec docs to ma
   - If still missing, skip with note and continue.
   - Run: `python3 scripts/check_md_links.py <docs_root>`
 
-4. Classify findings
+4. Verify AGENTS reference chain (when AGENTS files exist)
+- Detect local AGENTS: `find src -type f -name AGENTS.md | sort`.
+- Check hub/index references:
+  - root `AGENTS.md` should reference key local AGENTS entry points.
+  - `docs/index.md` Local AGENTS section should include discovered local AGENTS paths.
+- Check parent-child references:
+  - parent AGENTS files (for example `src/stowage/AGENTS.md`) should list direct child-context AGENTS where applicable.
+- Classify missing AGENTS references as `fix-now` unless the doc explicitly states a temporary exception.
+
+5. Classify findings
 - `fix-now`: broken path, missing make target, broken relative link, stale direct code reference.
+- `fix-now`: missing AGENTS chain reference (index or parent-child).
 - `keep-with-note`: intentional To-Be mismatch with explicit boundary text.
 - `ignore`: examples/placeholders that are explicitly marked as template syntax.
 
-5. Apply minimal fixes
+6. Apply minimal fixes
 - Prefer path normalization over paragraph rewrites.
 - Replace non-existent file references with existing canonical paths.
 - Preserve document intent and section structure.
+- For AGENTS chain fixes, update only reference lists; avoid rewriting policy paragraphs.
 
-6. Re-run checks and report
+7. Re-run checks and report
 - Re-run all three baseline checks.
+- If AGENTS chain checks were in scope, re-run the chain checklist before reporting.
 - Before writing transient reports, verify destination: `test -w /private/tmp`.
 - If not writable, fallback to a writable repo-root temp dir (for example, `<repo_root>/.codex_tmp`) or `$CODEX_HOME`, and report the fallback.
 - Report exact files changed and unresolved items (if any).
@@ -74,3 +86,4 @@ Keep As-Is runtime docs aligned to code, and avoid forcing To-Be spec docs to ma
 ## References
 
 - Scope policy and boundary rules: `references/scope_and_boundary.md`
+- AGENTS chain checklist: `references/agents_chain.md`

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layer Boundary Test Scaffold"
+  short_description: "Scaffold and extend layer-boundary tests"
+  default_prompt: "Use $layer-boundary-test-scaffold to add or extend AST-based architecture boundary tests from AGENTS.md rules."

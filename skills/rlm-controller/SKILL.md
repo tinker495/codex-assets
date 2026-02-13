@@ -14,6 +14,11 @@ description: Orchestrate large-context tasks with chunk-and-reduce execution usi
 - Enforce evidence-first outputs: unresolved claims must become `gaps` entries.
 - Keep worker prompts stable at the prefix and append chunk payloads at the end.
 
+## Delegation Contract
+
+- Delegate chunk execution and retry orchestration to `$rlm-batch-runner`.
+- Handoff only reduced evidence and unresolved gaps back to controller reduce logic.
+
 ## Token Budget Baseline (Required)
 
 Before large runs, sample one worker call and inspect `turn.completed.usage`.

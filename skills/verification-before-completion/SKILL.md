@@ -37,6 +37,25 @@ BEFORE claiming any status or expressing satisfaction:
 Skip any step = lying, not verifying
 ```
 
+## Revalidation Claims Gate
+
+When a user reports prior verification ("already fixed", "already verified", "review says resolved"),
+run this mini-gate before accepting the claim:
+
+1. Validate file state directly.
+- Confirm claimed files exist: `test -f <path>` / `ls <dir>`.
+- Confirm stale filenames are absent when rename/delete is claimed.
+
+2. Validate the current assertion surface.
+- Re-open the exact files/sections the claim depends on.
+- Do not rely on prior message summaries.
+
+3. Re-run the minimal proving command.
+- Example: targeted `pytest` path, `ruff` file check, or docs check command.
+
+4. Report result with concrete evidence.
+- State what was present/absent and command exit status.
+
 ## Common Failures
 
 | Claim | Requires | Not Sufficient |
@@ -103,6 +122,12 @@ Skip any step = lying, not verifying
 ```
 ✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
 ❌ Trust agent report
+```
+
+**User revalidation claim:**
+```
+✅ Check file presence/absence → Re-run proof command → Report evidence
+❌ Accept previous summary without current file/command verification
 ```
 
 ## Why This Matters

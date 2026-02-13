@@ -225,6 +225,10 @@ Skill creation involves these steps:
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
+## Topology Handoff
+
+When a skill create/update/remove changes role ownership or delegation edges, delegate topology reconciliation to `skill-topology-adjuster` instead of re-deriving topology policy inline.
+
 ### Skill Naming
 
 - Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
