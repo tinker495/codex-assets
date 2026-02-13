@@ -74,9 +74,7 @@ Run these checks after changing runner options or model policy.
 
 ```bash
 mkdir -p .codex_tmp/subagent-smoke
-cat > .codex_tmp/subagent-smoke/prompt.txt <<'EOF'
-Reply exactly: OK
-EOF
+printf '%s\n' "Reply exactly: OK" > .codex_tmp/subagent-smoke/prompt.txt
 
 # 1) Default model path (no --model, no CODEX_SUBAGENT_MODEL)
 env -u CODEX_SUBAGENT_MODEL \
@@ -101,14 +99,20 @@ Use one of these safe patterns:
 
 ```bash
 # Preferred: prompt file
-cat > /tmp/prompt.txt <<'EOF'
-Use $rlm-controller. Reduce-only mode.
-EOF
+printf '%s\n' "Use \$rlm-controller. Reduce-only mode." > /tmp/prompt.txt
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh --prompt-file /tmp/prompt.txt
 
 # Or escape $ in inline strings
 ~/.codex/skills/codex-exec-sub-agent/scripts/run.sh "Use \$rlm-controller. Reduce-only mode."
 ```
+
+## Operational Noise Controls
+
+- Search-as-discovery first: inspect `run.jsonl` for `error`, `failed`, and `unknown flag` before opening broad logs.
+- Apply path filtering: restrict `rg` to the current run directory (`~/.codex/sub_agent_runs/<timestamp>/`) before wider search.
+- Use trace-plus-rg evidence gating: only widen scan scope when concrete error lines exist in `run.jsonl`.
+- If Codex rejects `--json` (`Error: unknown flag: --json`), rerun once without `--json` and keep appending to the same `run.jsonl`.
+- Avoid here-doc shell syntax for prompt creation and helper commands; use `printf`, `python -c`, or `--prompt-file`.
 
 ## How to write the prompt
 

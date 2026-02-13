@@ -24,3 +24,15 @@ Summary: Applied minimal high-noise guardrail update to /Users/mrx-ksjung/.codex
 Last run: 2026-02-12 10:48:46 KST
 Summary: Session wrap-up completed. Evidence shows drift between memory log and current /Users/mrx-ksjung/.codex/skills/.system/skill-creator/SKILL.md content (guardrail lines absent despite prior success note). Classified as workflow/verification gap; recommended update-existing-skill handoff to re-apply patch and enforce post-edit persistence check before logging success.
 
+
+Last run: 2026-02-13 10:42:27
+Summary: Scanned last-24h ~/.codex/sessions (111 files). HIGH noise across all listed signals (>=2 sessions each). Skill attribution from session text is polluted by embedded skill lists, so no reliable per-skill mapping. ~/.codex/skills is not writable in this sandbox; no skill edits or validation run. Requested permission to write to ~/.codex/skills before applying guardrail updates.
+
+Last run: 2026-02-13 10:43:42 KST
+Summary: Scanned last-24h sessions; HIGH noise detected across YAML/quick_validate, missing paths/tools, unknown flags, TTY/jq, PR resolution, and xenon signals. Skills directory not writable, so no direct edits. Wrote remediation proposals to /Users/mrx-ksjung/.codex/worktrees/7195/snk2501o-sinokor-placement-optimization/skill-noise-remediation-proposals.md. Validation not run (no skill edits).
+
+Last run: 2026-02-13 10:49:52 KST
+Summary: HIGH noise confirmed in last-24h sessions. Applied minimal guardrail refinements to /Users/mrx-ksjung/.codex/skills/.system/skill-creator/SKILL.md and /Users/mrx-ksjung/.codex/skills/automation-creator/SKILL.md (YAML colon quoting, uv+pyyaml validate retry-once policy, CODEX_HOME/path/shell/date/json fallbacks). quick_validate passed for both via uv run --with pyyaml. Current run time: ~00:06.
+
+Last run: 2026-02-13 10:56:16 KST
+Summary: HIGH noise reconfirmed from last-24h sessions; refined recently touched skill codex-exec-sub-agent and path-sensitive automation automatically-create-new-skills. Updated run.sh to remove here-doc timeout path, added --json rejection fallback rerun without --json, and added scripts/run_with_timeout.py. Updated SKILL.md with no-here-doc examples and operational noise controls (search-as-discovery, path filtering, trace-plus-rg gating, fallback rules). Updated automation prompt with function_call_output-only detection guardrail to reduce false attribution from embedded prompt text. Validation passed: uv run --with pyyaml quick_validate.py on codex-exec-sub-agent; automation.toml parsed via python3.11 tomllib fallback. Run time: 2026-02-13 10:56:16 KST

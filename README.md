@@ -22,6 +22,24 @@ Use strict mirror mode only when needed:
 ./scripts/sync_and_push.sh --mode mirror --repo tinker495/codex-assets
 ```
 
+## Subagent model policy
+
+Team default subagent model:
+
+```bash
+export CODEX_SUBAGENT_MODEL="gpt-5.3-codex-spark"
+```
+
+Recommended placement:
+- shared zsh profile (for example, `~/.zshrc` or team-managed shell bootstrap)
+- CI/automation shell env where `codex-exec-sub-agent` or `rlm-batch-runner` runs
+
+Quick check:
+
+```bash
+echo "$CODEX_SUBAGENT_MODEL"
+```
+
 ## One-time setup + sync
 
 ```bash

@@ -73,9 +73,9 @@ out/
 6. Pack multiple short chunks per job when possible to amortize fixed prompt overhead.
 7. Run batch execution via:
    - `python3 ~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py --jobs <jobs.jsonl> --run-dir <session_dir>`
-7. Reduce results: merge evidence, resolve conflicts, and list unresolved gaps.
-8. If gaps remain, run targeted follow-up jobs (max 2 additional passes).
-9. Emit `out/answer.json` conforming to `schemas/final.schema.json`.
+8. Reduce results: merge evidence, resolve conflicts, and list unresolved gaps.
+9. If gaps remain, run targeted follow-up jobs (max 2 additional passes).
+10. Emit `out/answer.json` conforming to `schemas/final.schema.json`.
 
 ## Output Policy
 

@@ -39,7 +39,7 @@ description: Analyze a single chunk for evidence extraction and structured scori
 
 ```bash
 codex exec \
-  --model gpt-5.1-codex-mini \
+  --model gpt-5.3-codex-spark \
   --sandbox read-only \
   --output-schema ~/.codex/skills/rlm-subagent/schemas/subagent.schema.json \
   -o sessions/<run_id>/subresults/<job_id>.json \

@@ -19,7 +19,7 @@ from typing import Any
 DEFAULT_PARALLEL_CAP = 8
 DEFAULT_TIMEOUT_SEC = 600
 DEFAULT_RETRIES = 2
-DEFAULT_SUBAGENT_MODEL = "gpt-5.1-codex-mini"
+DEFAULT_SUBAGENT_MODEL = "gpt-5.3-codex-spark"
 LOC_PATTERN = re.compile(r"^.+:[0-9]+-[0-9]+$")
 JSONL_PATH_PATTERN = re.compile(r"(/[^\s]+\.jsonl)")
 MAX_SUMMARY_LEN = 1200
@@ -71,7 +71,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model",
         default=os.environ.get("CODEX_SUBAGENT_MODEL", DEFAULT_SUBAGENT_MODEL),
-        help="Subagent model id (default: CODEX_SUBAGENT_MODEL or gpt-5.1-codex-mini)",
+        help="Subagent model id (default: CODEX_SUBAGENT_MODEL or gpt-5.3-codex-spark)",
     )
     parser.add_argument(
         "--profile",

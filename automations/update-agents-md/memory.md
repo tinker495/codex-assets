@@ -7,3 +7,5 @@
 - Runtime: 2026-02-11 10:36:12 +0900
 - Updated root AGENTS quick start with sync/git-lfs/editable/install-hooks, code-health-diff, python -m stowage, and clean commands from Makefile/README.
 - Runtime: 2026-02-12 10:35:53 +0900
+- Added setup sync/install-hooks, expanded core commands, added single-test examples, ops commands, and mermaid architecture overview in root AGENTS.
+- Runtime: 2026-02-13 10:37:15 +0900

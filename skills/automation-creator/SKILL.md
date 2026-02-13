@@ -13,6 +13,7 @@ Translate user intent into Codex automation directives for creating, updating, o
 
 ### 1) Gather Inputs
 
+- Set `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` before any automation file access.
 - Identify the task objective and expected output.
 - Identify schedule requirements (frequency, days, time) and confirm the user's local time zone.
 - Identify which workspaces (`cwds`) the automation should use.
@@ -35,6 +36,12 @@ Translate user intent into Codex automation directives for creating, updating, o
 - `cwds`: Comma-separated list or JSON array string of workspace paths.
 - `status`: Default to `ACTIVE` unless user requests paused.
 - `validation`: After editing an automation TOML, parse it once with `tomllib`. If default `python` lacks `tomllib`, use `python3.11` fallback.
+- `path checks`: Before reading or writing automation files, verify with `test -d` and `test -w` on the parent directory.
+  If the parent is not writable, fallback outputs to repo root or `$CODEX_HOME`; if neither is writable, stop and report.
+- `path convention`: Never use `/automations/...` absolute paths. Always use `$CODEX_HOME/automations/<id>`.
+- `shell guardrail`: Avoid here-doc syntax and prefer `python -c` or single-line commands.
+- `date guardrail`: If `date -I` fails, use `python -c "import datetime; print(datetime.date.today().isoformat())"`.
+- `flag fallback`: If a tool rejects `--json`, rerun without it and parse plain-text output.
 
 ### 4) Emit Directive
 

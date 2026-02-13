@@ -38,3 +38,8 @@
 - 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
 - 검증: `pytest tests/stowage/dataclasses/blocked_plan/test_spp_output.py -q`.
 - Run time: 2026-02-12 01:31:25 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 no-hatch-cover 처리 리팩터(2026-02-06) 이후 lift overlay clearance 계산 경로 점검.
+- 버그: hatch cover row/clearance가 비어있는 bay에서도 clearance 계산이 수행되어 `clearance_ratio_by_bay`/`clearance_over_by_bay`에 잘못된 항목이 생성됨(결과적으로 no-hatch-cover bay에서 clearance over가 뜸).
+- 수정: `LiftOverlayCalculator._prepare_bay_config`에서 `hatch_cover_clearance`가 비어있으면 계산을 건너뛰도록 가드 추가.
+- 테스트: `pytest tests/calculators/test_lift_overlay.py -q`.
+- Run time: 2026-02-13 01:35:13 UTC

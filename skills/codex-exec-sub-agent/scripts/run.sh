@@ -148,101 +148,67 @@ if grep -Eq '(^|[^[:alnum:]_])(/tmp/|/var/tmp/)' "$prompt_file"; then
 fi
 
 build_codex_cmd() {
-	local -n _cmd_ref=$1
-	_cmd_ref=(codex exec --json --model "$model")
+	local use_json="${1:-1}"
+	cmd=(codex exec --model "$model")
+	if [[ "$use_json" -eq 1 ]]; then
+		cmd=(codex exec --json --model "$model")
+	fi
 	if [[ -n "$profile" ]]; then
-		_cmd_ref+=(--profile "$profile")
+		cmd+=(--profile "$profile")
 	fi
 	if [[ -n "$worker_cwd" ]]; then
-		_cmd_ref+=(--cd "$worker_cwd")
+		cmd+=(--cd "$worker_cwd")
 	fi
 	if [[ "$skip_git_repo_check" -eq 1 ]]; then
-		_cmd_ref+=(--skip-git-repo-check)
+		cmd+=(--skip-git-repo-check)
 	fi
-	_cmd_ref+=(-)
+	cmd+=(-)
 }
 
-set +e
-if [[ -n "$timeout_sec" && "$timeout_sec" -gt 0 ]]; then
-	python3 - "$timeout_sec" "$prompt_file" "$jsonl_file" "$model" "$profile" "$worker_cwd" "$skip_git_repo_check" "$codex_home_override" <<'PY'
-import os
-import subprocess
-import sys
-import time
+run_once() {
+	local use_json="$1"
+	local append_log="${2:-0}"
+	if [[ -n "$timeout_sec" && "$timeout_sec" -gt 0 ]]; then
+		python3 "$(dirname "$0")/run_with_timeout.py" \
+			"$timeout_sec" \
+			"$prompt_file" \
+			"$jsonl_file" \
+			"$model" \
+			"$profile" \
+			"$worker_cwd" \
+			"$skip_git_repo_check" \
+			"$codex_home_override" \
+			"$use_json" \
+			"$append_log"
+		return $?
+	fi
 
-timeout_sec = int(sys.argv[1])
-prompt_path = sys.argv[2]
-jsonl_path = sys.argv[3]
-model = sys.argv[4]
-profile = sys.argv[5]
-worker_cwd = sys.argv[6]
-skip_git_repo_check = sys.argv[7] == "1"
-codex_home_override = sys.argv[8]
-start = time.monotonic()
-
-cmd = ["codex", "exec", "--json", "--model", model]
-if profile:
-    cmd.extend(["--profile", profile])
-if worker_cwd:
-    cmd.extend(["--cd", worker_cwd])
-if skip_git_repo_check:
-    cmd.append("--skip-git-repo-check")
-cmd.append("-")
-
-env = os.environ.copy()
-if codex_home_override:
-    env["CODEX_HOME"] = codex_home_override
-
-with open(prompt_path, "rb") as prompt_stream, open(jsonl_path, "wb") as jsonl_stream:
-    proc = subprocess.Popen(
-        cmd,
-        stdin=prompt_stream,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        env=env,
-    )
-
-    while True:
-        line = proc.stdout.readline() if proc.stdout is not None else b""
-        if line:
-            sys.stdout.buffer.write(line)
-            sys.stdout.buffer.flush()
-            jsonl_stream.write(line)
-            jsonl_stream.flush()
-
-        if proc.poll() is not None:
-            if proc.stdout is not None:
-                rest = proc.stdout.read()
-                if rest:
-                    sys.stdout.buffer.write(rest)
-                    sys.stdout.buffer.flush()
-                    jsonl_stream.write(rest)
-                    jsonl_stream.flush()
-            sys.exit(proc.returncode)
-
-        if time.monotonic() - start > timeout_sec:
-            proc.kill()
-            timeout_line = (
-                '{"type":"error","error":"sub-agent timeout","timeout_sec":'
-                + str(timeout_sec)
-                + "}\n"
-            ).encode("utf-8")
-            sys.stdout.buffer.write(timeout_line)
-            sys.stdout.buffer.flush()
-            jsonl_stream.write(timeout_line)
-            jsonl_stream.flush()
-            sys.exit(124)
-PY
-	status=$?
-else
 	cmd=()
-	build_codex_cmd cmd
+	build_codex_cmd "$use_json"
+	if [[ "$append_log" -eq 1 ]]; then
+		if [[ -n "$codex_home_override" ]]; then
+			CODEX_HOME="$codex_home_override" "${cmd[@]}" <"$prompt_file" | tee -a "$jsonl_file"
+		else
+			"${cmd[@]}" <"$prompt_file" | tee -a "$jsonl_file"
+		fi
+		return ${PIPESTATUS[0]}
+	fi
+
 	if [[ -n "$codex_home_override" ]]; then
 		CODEX_HOME="$codex_home_override" "${cmd[@]}" <"$prompt_file" | tee "$jsonl_file"
 	else
 		"${cmd[@]}" <"$prompt_file" | tee "$jsonl_file"
 	fi
-	status=${PIPESTATUS[0]}
+	return ${PIPESTATUS[0]}
+}
+
+set +e
+run_once 1 0
+status=$?
+if [[ "$status" -ne 0 ]] && rg -q -F "Error: unknown flag: --json" "$jsonl_file"; then
+	printf '%s\n' "Warning: codex rejected --json; rerunning once without --json." | tee -a "$jsonl_file" >&2
+	run_once 0 1
+	status=$?
 fi
 set -e
 
