@@ -43,3 +43,9 @@
 - 수정: `LiftOverlayCalculator._prepare_bay_config`에서 `hatch_cover_clearance`가 비어있으면 계산을 건너뛰도록 가드 추가.
 - 테스트: `pytest tests/calculators/test_lift_overlay.py -q`.
 - Run time: 2026-02-13 01:35:13 UTC
+
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 rotation_history render/crane intensity 관련 경로 점검.
+- 결과: 최근 변경과 직접 연관된 재현 가능한 버그 미발견(가설 시나리오 테스트 패스).
+- 조치: 수정 없음(자격 조건 충족 버그 없음).
+- 검증: uv run pytest tests/routing/test_rotation_history_render.py::test_render_crane_intensity_handles_bay_without_moves -q 실행 결과 통과.
+- Run time: 2026-02-14 01:33:22 UTC
