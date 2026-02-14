@@ -36,3 +36,10 @@ Summary: HIGH noise confirmed in last-24h sessions. Applied minimal guardrail re
 
 Last run: 2026-02-13 10:56:16 KST
 Summary: HIGH noise reconfirmed from last-24h sessions; refined recently touched skill codex-exec-sub-agent and path-sensitive automation automatically-create-new-skills. Updated run.sh to remove here-doc timeout path, added --json rejection fallback rerun without --json, and added scripts/run_with_timeout.py. Updated SKILL.md with no-here-doc examples and operational noise controls (search-as-discovery, path filtering, trace-plus-rg gating, fallback rules). Updated automation prompt with function_call_output-only detection guardrail to reduce false attribution from embedded prompt text. Validation passed: uv run --with pyyaml quick_validate.py on codex-exec-sub-agent; automation.toml parsed via python3.11 tomllib fallback. Run time: 2026-02-13 10:56:16 KST
+
+Last run: 2026-02-14 10:43:06
+Summary: Scanned last-24h sessions for noise signals in function_call_output; HIGH noise across many signals (missing paths/tools, YAML/quick_validate/PyYAML, unknown flags, TTY/jq/PR resolution, xenon, Ollama). No reliable skill usage markers found in session text, so no per-skill attribution. ~/.codex/skills not writable in this sandbox; no skill edits or validation run. Proposed updates listed in response.
+
+Last run: 2026-02-14 10:44:41
+Summary: Scanned last-24h sessions (62 JSONL). HIGH noise across all listed signals. Skills directory not writable, so no direct edits; wrote proposed minimal guardrail updates for recently touched, path-sensitive skills to /Users/mrx-ksjung/.codex/worktrees/87e3/snk2501o-sinokor-placement-optimization/skill-noise-remediation-proposals.md. No automation prompt changes.
+

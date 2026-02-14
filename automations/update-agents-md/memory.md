@@ -9,3 +9,5 @@
 - Runtime: 2026-02-12 10:35:53 +0900
 - Added setup sync/install-hooks, expanded core commands, added single-test examples, ops commands, and mermaid architecture overview in root AGENTS.
 - Runtime: 2026-02-13 10:37:15 +0900
+- Updated root AGENTS: added git-lfs/editable to setup; added code-health-diff and clean commands.
+- Runtime: 2026-02-14 10:35:57 +0900
