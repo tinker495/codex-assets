@@ -43,3 +43,6 @@ Summary: Scanned last-24h sessions for noise signals in function_call_output; HI
 Last run: 2026-02-14 10:44:41
 Summary: Scanned last-24h sessions (62 JSONL). HIGH noise across all listed signals. Skills directory not writable, so no direct edits; wrote proposed minimal guardrail updates for recently touched, path-sensitive skills to /Users/mrx-ksjung/.codex/worktrees/87e3/snk2501o-sinokor-placement-optimization/skill-noise-remediation-proposals.md. No automation prompt changes.
 
+
+Last run: 2026-02-15 10:43:08 KST
+Summary: Scanned last-24h sessions (9 JSONL). HIGH noise signals in function_call_output: 'No such file or directory' (13/6 sessions), 'ModuleNotFoundError: No module named' (8/4), 'ERROR collecting' (6/3), 'Error: could not open a new TTY' (5/3). Detected skills from SKILL.md outputs: using-superpowers, test-driven-development, brainstorming, writing-plans, plus others. Skills dir not writable in this sandbox, so no skill edits or validation run.

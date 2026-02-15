@@ -42,3 +42,6 @@
 - Summary: Completed session_recall spot-check and yesterday session scan; no new automation prompt deltas beyond existing signals/guardrails.
 
 - Run time: 2026-02-14T10:53:39.656117
+
+- Summary: Scanned 2026-02-14 sessions (10 JSONL files) and existing automations. Noise signals in function_call_output were mostly already covered by existing prompt signals/guardrails (No such file or directory, Sandbox Denied, ModuleNotFoundError). New repeated lines were jq Cannot iterate over null (4 hits/1 session) and TypeError load_rotation_histories missing vessel (4 hits/2 sessions), which look repo-specific test failures rather than operational noise; no automation prompt updates recommended.
+- Run time: 2026-02-15T01:51:41.499269+00:00
