@@ -34,6 +34,12 @@ If user explicitly chooses mode, follow that choice.
 3. For external APIs/dependencies, confirm latest docs first.
 4. Use exact file paths and verifiable commands.
 5. Keep plan DRY, YAGNI, TDD-aligned.
+6. Use search-as-discovery before path reads (`rg --files`, then `rg` patterns).
+7. For each referenced script/path, verify existence with `test -f` / `test -d` first.
+8. If a path is missing, do not keep retrying the same command; fallback to:
+   - `git log --since=1.week --name-only`
+   - `git diff --stat`
+9. Require trace-plus-rg evidence in plan rationale for risky or ambiguous file targeting.
 
 ## Mode `single` Workflow
 

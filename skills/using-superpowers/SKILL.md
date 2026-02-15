@@ -85,3 +85,13 @@ The skill itself tells you which.
 ## User Instructions
 
 Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.
+
+## Operational Noise Guardrails
+
+Before broad or path-specific exploration, run search-as-discovery first:
+- prefer `rg --files` / `rg <pattern>` to narrow target files before `cat`/`sed`
+- verify target paths with `test -f` or `test -d` before reading/executing
+- when a path is missing, report it once and fallback to repo context:
+  - `git log --since=1.week --name-only`
+  - `git diff --stat`
+- gate claims with trace-plus-rg evidence, and avoid repeated retries on the same failing command
