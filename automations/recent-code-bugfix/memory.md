@@ -49,3 +49,8 @@
 - 조치: 수정 없음(자격 조건 충족 버그 없음).
 - 검증: uv run pytest tests/routing/test_rotation_history_render.py::test_render_crane_intensity_handles_bay_without_moves -q 실행 결과 통과.
 - Run time: 2026-02-14 01:33:22 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 SPP blocked plan/builder 경로와 관련 테스트를 점검.
+- 결과: 최신 변경과 직접 연관된 재현 가능한 버그 미발견(테스트 통과).
+- 조치: 수정 없음(자격 조건 충족 버그 없음).
+- 검증: `uv run pytest tests/stowage/dataclasses/blocked_plan/test_spp_output.py -q`.
+- Run time: 2026-02-15 01:31:54 UTC

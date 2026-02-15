@@ -11,3 +11,5 @@
 - Runtime: 2026-02-13 10:37:15 +0900
 - Updated root AGENTS: added git-lfs/editable to setup; added code-health-diff and clean commands.
 - Runtime: 2026-02-14 10:35:57 +0900
+- Added `make code-health-diff` and `make clean` to root AGENTS additional ops commands list.
+- Runtime: 2026-02-15 10:35:52 +0900
