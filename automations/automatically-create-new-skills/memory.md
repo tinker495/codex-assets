@@ -49,3 +49,10 @@ Summary: Scanned last-24h sessions (9 JSONL). HIGH noise signals in function_cal
 
 Last run: 2026-02-15 12:34:49 KST
 Summary: Scanned last-24h sessions and confirmed HIGH noise from function_call_output signals (No such file or directory, ModuleNotFoundError: No module named, ERROR collecting, Error: could not open a new TTY). Applied minimal guardrail refinements to recently touched skills /Users/mrx-ksjung/.codex/skills/using-superpowers/SKILL.md and /Users/mrx-ksjung/.codex/skills/writing-plans/SKILL.md (search-as-discovery, path checks, trace+rg gating, retry-to-fallback rule). Updated path-sensitive automation prompt at /Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/automation.toml with discovery narrowing and retry-cap fallback rule. Validation: uv run --with pyyaml quick_validate.py passed for both skills after one initial usage-error rerun; automation.toml parse OK via python3.11 tomllib. Current run time: 2026-02-15 12:34:49 KST.
+Last run: 2026-02-16 10:42:12
+Summary: Scanned last-24h sessions (16 JSONL; 9 with noise). HIGH noise signals in function_call_output: No such file or directory (19/8 sessions), Error: could not open a new TTY (5/3), failed to send request to Ollama (3/2), ERROR collecting (13/6), ModuleNotFoundError: No module named (14/6). Low signals: Error: unknown flag: --json (1/1), No module named pytest (1/1). No SKILL.md frontmatter outputs detected in last 24h, so no per-skill attribution; no skill edits or automation updates.
+Current run time: 2026-02-16 10:42:12.
+
+
+Last run: 2026-02-16 10:42:51 KST
+Summary: Scanned last-24h ~/.codex/sessions (16 JSONL). HIGH noise signals detected in function_call_output: No such file or directory, Error: unknown flag: --json, Error: could not open a new TTY, No module named pytest, failed to send request to Ollama, ERROR collecting, ModuleNotFoundError: No module named. No skill usage markers detected in assistant messages or function_call_output frontmatter, so no skill edits or validation run. Left /tmp/scan_sessions.py for traceability.
