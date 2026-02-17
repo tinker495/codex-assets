@@ -56,3 +56,10 @@ Current run time: 2026-02-16 10:42:12.
 
 Last run: 2026-02-16 10:42:51 KST
 Summary: Scanned last-24h ~/.codex/sessions (16 JSONL). HIGH noise signals detected in function_call_output: No such file or directory, Error: unknown flag: --json, Error: could not open a new TTY, No module named pytest, failed to send request to Ollama, ERROR collecting, ModuleNotFoundError: No module named. No skill usage markers detected in assistant messages or function_call_output frontmatter, so no skill edits or validation run. Left /tmp/scan_sessions.py for traceability.
+
+Last run: 2026-02-17 10:41:35
+Summary: Scanned last-24h sessions (function_call_output only) and found HIGH noise across many signals (quick_validate/YAML/PyYAML, missing paths/tools, unknown flags, tty/jq/PR resolution, xenon, Ollama, pytest/ModuleNotFound/ERROR collecting). Skill usage attribution is polluted by embedded skill lists, so no per-skill mapping. ~/.codex/skills not writable in this sandbox; no skill edits or validation run.
+
+Last run: 2026-02-17 10:42:04
+Summary: Scanned last-24h ~/.codex/sessions (47 JSONL). HIGH noise in function_call_output: No such file or directory (14/5 sessions), ERROR collecting (15/3), ModuleNotFoundError: No module named (18/3), failed to send request to Ollama (10/3), Error: unknown flag: --json (8/3), Error: could not open a new TTY (11/2), No module named pytest (8/2), quick_validate/frontmatter/PyYAML signals present (3-11/1-3). No skill usage markers detected and no SKILL.md modified in last 24h; ~/.codex/skills not writable, so no edits or validation.
+Current run time: 2026-02-17 10:42:04.

@@ -59,3 +59,8 @@
 - 조치: 추가 수정 없음(자격 조건 충족 버그 없음).
 - 검증: `uv run pytest tests/stowage/dataclasses/blocked_plan/test_spp_output.py -q`.
 - Run time: 2026-02-16 01:32:25 UTC
+- 범위: 최근 1주일 내 작성자(tinker495) 변경분 중 `stowage_plan_from_json` overlay 출력 경로를 점검.
+- 버그: `--bay` 미지정 시 기본 `limit=3`에서도 오버레이 패널을 출력하지 않음(조건이 `limit > 3`으로 좁혀지고, 출력 범위도 상위 3개를 건너뜀).
+- 수정: `--bay` 미지정 시 상위 `limit`개를 출력하도록 분기/슬라이스를 `else` + `[:limit]`로 수정.
+- 검증: `make test PYTEST_ARGS="tests/scripts/test_stowage_plan_from_json.py::test_main_renders_top_bays_when_bay_option_is_missing -q"`.
+- Run time: 2026-02-17 01:33:02 UTC

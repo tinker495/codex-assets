@@ -15,3 +15,5 @@
 - Runtime: 2026-02-15 10:35:52 +0900
 - Added `make code-health-diff` and `make clean` to root AGENTS additional ops commands.
 - Runtime: 2026-02-16 10:36:04 +0900
+- Updated root AGENTS.md: added `uv run ruff format --check src tests` to core commands and added branch sync workflow with post-merge verification pointer.
+- Runtime: 2026-02-17 10:35:58 +0900
