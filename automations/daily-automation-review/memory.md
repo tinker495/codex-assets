@@ -54,3 +54,9 @@
 
 - Summary: Scanned 2026-02-16 sessions (43 JSONL files) and automation TOMLs. High-noise signal in function_call_output: write_stdin failed: stdin is closed (3 hits/3 sessions). Other hits (No such file/command not found) were singletons. Recommended updating automatically-create-new-skills prompt with new signal + guardrail to rerun exec_command with tty=true when write_stdin fails; no other prompt deltas.
 - Run time: 2026-02-17T10:52:25.029119
+
+- Summary: User requested plan revision. Confirmed scope via structured choice and locked to scanner+prompt dual-update path (no prompt-only downgrade, no signal-expansion add-on). Prepared decision-complete revised plan for implementation handoff in Plan Mode.
+- Run time: 2026-02-17T11:03:09.422391
+
+- Summary: Executed approved fix. Updated scanner SIGNALS in automatically-create-new-skills to include write_stdin stdin-closed signal, synced automation prompt Signals/Guardrails with explicit exec_command tty=true recovery, and refreshed updated_at. Validated with tomllib parse and scan_noise runs (single-file + 24h) confirming signal detection and HIGH classification in 24h view.
+- Run time: 2026-02-17T11:04:54.883138

@@ -46,6 +46,7 @@ SIGNALS: List[str] = [
     "failed to send request to Ollama",
     "ERROR collecting",
     "ModuleNotFoundError: No module named",
+    "write_stdin failed: stdin is closed",
 ]
 
 BACKTICK_SKILL_PATTERN = re.compile(r"`([a-z0-9-]+)`")
