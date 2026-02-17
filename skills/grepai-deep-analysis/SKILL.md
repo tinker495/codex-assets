@@ -9,6 +9,13 @@ description: Deep code comprehension using noise-aware, evidence-gated grepai wo
 Use a noise-aware multi-pass workflow to build a stable mental model of code behavior without wasting iterations. Repeat passes only while signal quality is improving, then synthesize a brief with explicit evidence and limitations.
 Treat `grepai search` as discovery only, and ground final claims with dual-view anchors: semantic + topology + validation.
 
+## Operational Noise Guardrails
+- Always run search-as-discovery first: narrow files with `rg --files`/`rg -n`, then verify exact paths with `test -f` before `cat`/`sed`.
+- Before repository git fallback commands, verify context: `git rev-parse --is-inside-work-tree`.
+- If `grepai` is unavailable (`command not found: grepai`), switch immediately to `rg`-only discovery and continue with explicit limitation notes.
+- If embeddings fail against local Ollama (`failed to send request to Ollama` / `localhost:11434`), skip embeddings-based steps and continue with `rg`/trace evidence.
+- Retry identical failing commands at most once, then move to the documented fallback (no retry loops).
+
 ```mermaid
 flowchart LR
   A["Scope + Seed Terms + Budget"] --> B["Pass 1: Surface Map"]

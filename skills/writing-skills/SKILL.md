@@ -19,6 +19,13 @@ You write test cases (pressure scenarios with subagents), watch them fail (basel
 
 **Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
 
+## Operational Noise Guardrails
+
+- When frontmatter values contain `:`, always wrap the value in quotes.
+- Validate edited skills with `uv run --with pyyaml python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill_dir>`.
+- If validation fails, retry once only; if it fails twice, stop and report instead of looping.
+- Before path-specific reads, run discovery + preflight: `rg --files`/`rg -n` then `test -f` before `cat`/`sed`.
+
 ## What is a Skill?
 
 A **skill** is a reference guide for proven techniques, patterns, or tools. Skills help future Claude instances find and apply effective approaches.

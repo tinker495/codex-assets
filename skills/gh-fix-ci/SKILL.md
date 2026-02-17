@@ -12,11 +12,13 @@ Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable fai
 - Draft the fix plan inline in this skill and request approval before implementing.
 
 Prereq:
+- First-step order is fixed: `command -v gh` -> `git rev-parse --is-inside-work-tree` -> `gh auth status`.
 - Ensure `gh` exists first: `command -v gh`.
 - Before git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
 - Authenticate with GitHub CLI once (for example, `gh auth login`) and confirm with `gh auth status`.
 - Use non-interactive gh env for all gh calls: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
 - If a `gh` command fails with `Error: could not open a new TTY`, rerun once with the same env and then report failure.
+- Retry the same failing command at most once, then switch to the documented fallback path.
 
 ## Inputs
 
@@ -98,6 +100,7 @@ Prereq:
 
 - Keep search-as-discovery order: inspect checks first, then open workflow/log files only for failing runs.
 - Apply path filtering to local lookup: restrict `rg` to `.github/workflows` before wider search.
+- For any local file access, enforce `rg --files` narrowing -> `test -f` existence check -> `sed/cat` read.
 - Use trace-plus-rg evidence gating: widen file search only after concrete failing check/job evidence.
 - If `--json` is rejected by `gh` or helper scripts, rerun without `--json` and parse text output.
 - If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument where supported.

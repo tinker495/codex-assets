@@ -10,6 +10,12 @@ description: Run deterministic docs integrity audits and minimal repairs for rep
 Run deterministic docs alignment checks and apply minimal, evidence-based fixes.
 Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-facing when boundary text is explicit.
 
+## Operational Noise Guardrails
+- Before direct file access (`sed`/`cat`/`rg` on explicit paths), run `test -f` or `rg --files -g` preflight.
+- For script/shared paths, run `test -f`/`test -d` first; if missing, report once and fallback to `git log --since=1.week --name-only` plus `git diff --stat`.
+- Keep command retry budget strict: one retry max for identical failures, then fallback.
+- Before git-based fallback, verify repo context with `git rev-parse --is-inside-work-tree`.
+
 ## Harness Principles (must enforce)
 
 1. Map-first AGENTS

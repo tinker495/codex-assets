@@ -51,3 +51,6 @@
 
 - Summary: Scanned 2026-02-15 session JSONL (10 files) and automation TOMLs. Noise signals in function_call_output: write_stdin stdin-closed (9 hits/4 sessions), missing file for sed/rg (12/4), jq error (10/2), ModuleNotFoundError (5/2), pytest collection errors (12/3). Recommended updating automatically-create-new-skills prompt to add write_stdin stdin-closed and jq: error signals with tty/one-retry guardrail; other signals already covered or are repo-test noise. No automation files changed.
 - Run time: 2026-02-16T01:52:40.283913+00:00
+
+- Summary: Scanned 2026-02-16 sessions (43 JSONL files) and automation TOMLs. High-noise signal in function_call_output: write_stdin failed: stdin is closed (3 hits/3 sessions). Other hits (No such file/command not found) were singletons. Recommended updating automatically-create-new-skills prompt with new signal + guardrail to rerun exec_command with tty=true when write_stdin fails; no other prompt deltas.
+- Run time: 2026-02-17T10:52:25.029119

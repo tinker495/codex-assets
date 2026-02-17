@@ -7,6 +7,13 @@ description: Execute `jobs.jsonl` workloads for RLM chunk scanning with parallel
 
 Use the bundled script to dispatch chunk jobs in parallel and validate outputs.
 
+## Operational Noise Guardrails
+- Run discovery before direct path reads: `rg --files`/`rg -n` -> `test -f`/`test -d` -> command execution.
+- Avoid here-doc syntax (`<<EOF`) in this workflow; use `python -c` or single-line commands for fixture creation.
+- If `timeout` is unavailable, rerun without timeout wrapper (or use `gtimeout` when available).
+- If `jq` parsing fails (`jq: parse error`), rerun without JSON parser dependency and continue in plain-text mode.
+- Retry identical failing commands at most once before fallback.
+
 ## Delegation Boundary
 
 - This utility executes fan-out batches and writes normalized artifacts.
@@ -81,38 +88,8 @@ Expected: exit non-zero with `--model must be a non-empty string`.
 
 ```bash
 mkdir -p .codex_tmp/rlm-regression
-cat > .codex_tmp/rlm-regression/chunk.txt <<'EOF'
-chunk
-EOF
-cat > .codex_tmp/rlm-regression/schema.json <<'EOF'
-{}
-EOF
-cat > .codex_tmp/rlm-regression/jobs.one.jsonl <<'EOF'
-{"job_id":"j-001","chunk_id":"c-001","chunk_path":".codex_tmp/rlm-regression/chunk.txt","question":"q","output_path":"subresults/j-001.json","schema_path":".codex_tmp/rlm-regression/schema.json","sandbox":"read-only","timeout_sec":30}
-EOF
-cat > .codex_tmp/rlm-regression/mock-runner.sh <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-expected="gpt-5.3-codex-spark"
-model=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --model) model="$2"; shift 2 ;;
-    --timeout-sec|--prompt-file) shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ "$model" != "$expected" ]]; then
-  echo "unexpected model: $model" >&2
-  exit 13
-fi
-run_dir="$(mktemp -d)"
-jsonl="$run_dir/run.jsonl"
-cat > "$jsonl" <<'JSONL'
-{"item":{"type":"agent_message","text":"{\"chunk_id\":\"c-001\",\"relevant\":true,\"summary\":\"ok\",\"confidence\":0.7,\"evidence\":[{\"loc\":\"x.md:1-1\",\"quote\":\"q\",\"note\":\"n\"}],\"gaps\":[],\"errors\":[]}"}}
-JSONL
-echo "$jsonl"
-EOF
+python3 -c "import json,pathlib; p=pathlib.Path('.codex_tmp/rlm-regression'); p.mkdir(parents=True, exist_ok=True); (p/'chunk.txt').write_text('chunk\\n', encoding='utf-8'); (p/'schema.json').write_text('{}\\n', encoding='utf-8'); job={'job_id':'j-001','chunk_id':'c-001','chunk_path':str(p/'chunk.txt'),'question':'q','output_path':'subresults/j-001.json','schema_path':str(p/'schema.json'),'sandbox':'read-only','timeout_sec':30}; (p/'jobs.one.jsonl').write_text(json.dumps(job)+'\\n', encoding='utf-8')"
+python3 -c "import pathlib; p=pathlib.Path('.codex_tmp/rlm-regression'); script='#!/usr/bin/env bash\\nset -euo pipefail\\nexpected=\"gpt-5.3-codex-spark\"\\nmodel=\"\"\\nwhile [[ $# -gt 0 ]]; do\\n  case \"$1\" in\\n    --model) model=\"$2\"; shift 2 ;;\n    --timeout-sec|--prompt-file) shift 2 ;;\n    *) shift ;;\n  esac\\ndone\\nif [[ \"$model\" != \"$expected\" ]]; then\\n  echo \"unexpected model: $model\" >&2\\n  exit 13\\nfi\\nrun_dir=\"$(mktemp -d)\"\\njsonl=\"$run_dir/run.jsonl\"\\nprintf %s \"{\\\"item\\\":{\\\"type\\\":\\\"agent_message\\\",\\\"text\\\":\\\"{\\\\\\\"chunk_id\\\\\\\":\\\\\\\"c-001\\\\\\\",\\\\\\\"relevant\\\\\\\":true,\\\\\\\"summary\\\\\\\":\\\\\\\"ok\\\\\\\",\\\\\\\"confidence\\\\\\\":0.7,\\\\\\\"evidence\\\\\\\":[{\\\\\\\"loc\\\\\\\":\\\\\\\"x.md:1-1\\\\\\\",\\\\\\\"quote\\\\\\\":\\\\\\\"q\\\\\\\",\\\\\\\"note\\\\\\\":\\\\\\\"n\\\\\\\"}],\\\\\\\"gaps\\\\\\\":[],\\\\\\\"errors\\\\\\\":[]}\\\"}}\" > \"$jsonl\"\\nprintf \"\\n\" >> \"$jsonl\"\\necho \"$jsonl\"\\n'; (p/'mock-runner.sh').write_text(script, encoding='utf-8')"
 chmod +x .codex_tmp/rlm-regression/mock-runner.sh
 python3 ~/.codex/skills/rlm-batch-runner/scripts/rlm_batch.py \
   --jobs .codex_tmp/rlm-regression/jobs.one.jsonl \

@@ -14,6 +14,13 @@ description: Orchestrate large-context tasks with chunk-and-reduce execution usi
 - Enforce evidence-first outputs: unresolved claims must become `gaps` entries.
 - Keep worker prompts stable at the prefix and append chunk payloads at the end.
 
+## Operational Noise Guardrails
+- Use search-as-discovery and path preflight before direct reads: `rg --files`/`rg -n` -> `test -f`/`test -d` -> execute.
+- Before git fallback commands, verify repo context with `git rev-parse --is-inside-work-tree`.
+- If `timeout` is unavailable, rerun without timeout wrapper (or use `gtimeout`).
+- If `jq` is unavailable or parsing fails (`jq: parse error`), rerun without `jq` and parse plain text.
+- Retry identical failing commands at most once, then switch to fallback mode.
+
 ## Delegation Contract
 
 - Delegate chunk execution and retry orchestration to `$rlm-batch-runner`.
@@ -26,6 +33,12 @@ Before large runs, sample one worker call and inspect `turn.completed.usage`.
 ```bash
 codex exec --json "noop" \
   | jq -r 'select(.type=="turn.completed") | .usage'
+```
+
+If `jq` is unavailable or fails, use plain-text fallback:
+
+```bash
+codex exec --json "noop"
 ```
 
 Interpretation:
