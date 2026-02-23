@@ -70,6 +70,23 @@ def print_section(title: str, lines: list[str]) -> None:
         print(f"  {ln}")
 
 
+def tracked_python_targets() -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files", "--", "*.py"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return ["."]
+    targets = [
+        line.strip()
+        for line in result.stdout.splitlines()
+        if line.strip() and not line.startswith("tests/")
+    ]
+    return targets or ["."]
+
+
 def run_python_module(module: str, args: list[str], check: bool = True) -> str:
     if shutil.which("uv"):
         cmd = ["uv", "run", "python", "-m", module, *args]
@@ -99,12 +116,14 @@ def main() -> None:
     print(f"  Clones found: {jscpd_data['clones']}")
     print(f"  Duplicated lines: {jscpd_data['dup_lines']} ({jscpd_data['pct']}%)")
 
+    targets = tracked_python_targets()
+
     # Vulture
     vulture_conf = "80" if args.mode == "summary" else "60"
     vulture_out = run_python_module(
         "vulture",
         [
-            ".",
+            *targets,
             "--min-confidence",
             vulture_conf,
             "--sort-by-size",
@@ -116,20 +135,20 @@ def main() -> None:
     print_section(f"[DEAD CODE] (confidence >= {vulture_conf}%, top {args.top})", vulture_lines)
 
     # Radon CC
-    radon_cc_out = run_python_module("radon", ["cc", "-s", "-o", "SCORE", ".", "-e", "tests/*"])
+    radon_cc_out = run_python_module("radon", ["cc", "-s", "-o", "SCORE", *targets])
     radon_cc_lines = parse_radon_cc(radon_cc_out, args.top)
     grade = "C" if args.mode == "summary" else "A"
     print_section(f"[COMPLEXITY] (cyclomatic >= {grade}, top {args.top})", radon_cc_lines)
 
     # Radon MI
-    radon_mi_out = run_python_module("radon", ["mi", "-s", "--sort", ".", "-e", "tests/*"])
+    radon_mi_out = run_python_module("radon", ["mi", "-s", "--sort", *targets])
     radon_mi_lines = parse_radon_mi(radon_mi_out, args.top)
     print_section(f"[MAINTAINABILITY] (lowest MI, top {args.top})", radon_mi_lines)
 
     # Xenon (threshold check)
     xenon_out = run_python_module(
         "xenon",
-        ["--max-absolute", "B", "--max-average", "A", "--max-modules", "A", ".", "-e", "tests/*"],
+        ["--max-absolute", "B", "--max-average", "A", "--max-modules", "A", *targets],
         check=False,
     )
     xenon_ok = "PASS" if "thresholds exceeded" not in xenon_out.lower() and xenon_out.strip() == "" else "FAIL"

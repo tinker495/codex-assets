@@ -261,6 +261,7 @@ def main() -> None:
                 "70",
                 "--mode",
                 "weak",
+                "--gitignore",
                 "--silent",
                 "--ignore",
                 IGNORE,
