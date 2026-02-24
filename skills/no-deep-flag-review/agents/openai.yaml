@@ -1,0 +1,4 @@
+interface:
+  display_name: "No Deep Flag Review"
+  short_description: "Review deep flag passing and strategy injection issues"
+  default_prompt: "Review code for deep control-flag propagation and enforce top-level strategy injection. Report violations with file/line evidence and concrete refactor direction."
