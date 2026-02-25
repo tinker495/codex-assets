@@ -225,10 +225,6 @@ Skill creation involves these steps:
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
-## Topology Handoff
-
-When a skill create/update/remove changes role ownership or delegation edges, delegate topology reconciliation to `skill-topology-adjuster` instead of re-deriving topology policy inline.
-
 ### Skill Naming
 
 - Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
@@ -343,7 +339,6 @@ Write the YAML frontmatter with `name` and `description`:
   - Include both what the Skill does and specific triggers/contexts for when to use it.
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
-- Quote any frontmatter value that contains `:` to avoid YAML parsing errors.
 
 Do not include any other fields in YAML frontmatter.
 
@@ -356,13 +351,10 @@ Write instructions for using the skill and its bundled resources.
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
 ```bash
-uv run --with pyyaml scripts/quick_validate.py <path/to/skill-folder>
+scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-The validation script checks YAML frontmatter format, required fields, and naming rules.
-If validation fails, rerun once with the same `uv run --with pyyaml` command.
-If it fails twice, stop and report without further retries.
-If yaml import fails, do not switch to plain python; rerun only via `uv run --with pyyaml`.
+The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
 
 ### Step 6: Iterate
 
