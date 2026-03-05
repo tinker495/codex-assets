@@ -72,14 +72,15 @@ Define ownership and delegation boundaries across installed skills so specialist
 | `rlm-controller` | orchestrator | large-context chunk/reduce orchestration and evidence-grounded final output gating |
 | `rlm-subagent` | specialist | single-chunk evidence extraction and strict schema-compliant JSON output |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
+| `omx-workspace-prune` | utility | safe `.omx` workspace pruning (sessions/logs/plans) with ACTIVE.md contract preservation |
 
 ## Orchestration Layers
 
 ```text
 Layer 0: Meta/Meta-Tool/Utility
   skill-creator, skill-topology-adjuster, skill-installer, find-skills, automation-creator,
-  using-superpowers, codex-session-recall, codex-exec-sub-agent, ralph-driven-development,
-  rlm-batch-runner
+  using-superpowers, codex-session-recall, codex-exec-sub-agent, omx-workspace-prune,
+  ralph-driven-development, rlm-batch-runner
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, brainstorming, executing-plans, finishing-a-development-branch,
@@ -157,6 +158,7 @@ flowchart LR
 
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
+  SWU --> OWP["omx-workspace-prune"]
 
   SC --> STA["skill-topology-adjuster"]
 
@@ -253,6 +255,7 @@ flowchart TD
 
   SWU --> SC["skill-creator"]
   SWU --> CSR["codex-session-recall"]
+  SWU --> OWP["omx-workspace-prune"]
   SC --> STA["skill-topology-adjuster"]
 
   GDA --> RLR["rpg-loop-reasoning"]
@@ -305,6 +308,7 @@ flowchart TD
   META --> AC["automation-creator"]
   META --> USP["using-superpowers"]
   META --> CSR["codex-session-recall"]
+  META --> OWP["omx-workspace-prune"]
   META --> RDD["ralph-driven-development"]
   META --> RLMB["rlm-batch-runner"]
   META --> CESA["codex-exec-sub-agent"]

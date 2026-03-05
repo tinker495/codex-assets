@@ -1,0 +1,4 @@
+interface:
+  display_name: "OMX Workspace Prune"
+  short_description: "Safely prune stale .omx sessions/logs/plans with dry-run or apply"
+  default_prompt: "Prune stale .omx workspace state safely. Run dry-run first, then apply only on explicit instruction. Preserve current session and ACTIVE.md plan contract."

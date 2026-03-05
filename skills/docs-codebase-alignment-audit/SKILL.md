@@ -67,7 +67,17 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
   - If still missing, skip with note and continue.
   - Run: `python3 scripts/check_md_links.py <docs_root>`
 
-5. Verify AGENTS reference chain (when AGENTS files exist)
+5. Verify relocation-drift (moved paths) and remediate deterministically
+- Detect stale path mentions that point to moved files.
+- Build candidate moves using git evidence (`git log --follow --name-status -- <old_or_new_path>` when available) and current path checks.
+- Apply minimal replacements only when both are true:
+  - old path does not exist
+  - new path exists and is the canonical replacement
+- Run a focused `rg` on docs/AGENTS files for the stale path before editing.
+- Explicit recurring guard: treat `src/stowage/planner/spp/types.py` -> `src/stowage/planner/spp/domain/types.py` as a known relocation; fix stale references immediately when found.
+- If evidence is ambiguous (multiple valid targets), keep-with-note instead of guessing.
+
+6. Verify AGENTS reference chain (when AGENTS files exist)
 - Detect local AGENTS: `find src -type f -name AGENTS.md | sort`.
 - Check hub/index references:
   - root `AGENTS.md` should reference key local AGENTS entry points.
@@ -76,25 +86,25 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
   - parent AGENTS files (for example `src/stowage/AGENTS.md`) should list direct child-context AGENTS where applicable.
 - Classify missing AGENTS references as `fix-now` unless the doc explicitly states a temporary exception.
 
-6. Verify harness mechanical guards
+7. Verify harness mechanical guards
 - Check `Makefile` for `docs-check` (or equivalent) target.
 - Check CI (for example `.github/workflows/`) for docs integrity execution.
 - If missing, classify as `fix-now` unless user scope excludes tooling updates.
 
-7. Classify findings
+8. Classify findings
 - `fix-now`: broken path, missing make target, broken relative link, stale direct code reference.
 - `fix-now`: missing AGENTS chain reference (index or parent-child), missing docs mechanical guard.
-- `keep-with-note`: intentional To-Be mismatch with explicit boundary text.
+- `keep-with-note`: intentional To-Be mismatch with explicit boundary text, or ambiguous relocation targets.
 - `ignore`: examples/placeholders that are explicitly marked as template syntax.
 - `doc-gardening`: stale but non-blocking drift candidates safe for follow-up PR.
 
-8. Apply minimal fixes
+9. Apply minimal fixes
 - Prefer path normalization over paragraph rewrites.
 - Replace non-existent file references with existing canonical paths.
 - Preserve document intent and section structure.
 - For AGENTS chain fixes, update reference lists first; avoid rewriting policy paragraphs.
 
-9. Re-run checks and report
+10. Re-run checks and report
 - Re-run all three baseline checks.
 - If AGENTS chain checks were in scope, re-run the chain checklist before reporting.
 - Before writing transient reports, verify destination: `test -w /private/tmp`.
