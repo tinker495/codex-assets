@@ -53,3 +53,21 @@ Classification:
 
 Reporting:
 - Always report `fix-now` and `doc-gardening` separately.
+
+## 6) Metric SSOT and baseline wording
+
+Goal:
+- State evaluation/performance metrics from code-defined SSOT with an explicit comparison baseline.
+
+Guidance:
+- Do: verify the evaluator's current metrics from code, name the SSOT positively (for example `performance SSOT is X + Y`), and spell out the comparison baseline pair (`after_discharge -> rebuilt_plan`, `after_load vs rebuilt`).
+- Don't Do: describe internal heuristic counters as performance SSOT when they are not evaluator outputs, or use ambiguous wording like `also sees anomaly_counts` without saying what is actually compared.
+
+## 7) Deletion-first refresh wording
+
+Goal:
+- Keep refreshed docs aligned to the current scope without tombstone prose.
+
+Guidance:
+- Do: when a statement is no longer current or in scope, delete it outright and rewrite the surrounding doc so the stale content no longer exists.
+- Don't Do: leave wording like "this was removed/deleted" unless the document is explicitly a changelog, migration guide, or retirement record.

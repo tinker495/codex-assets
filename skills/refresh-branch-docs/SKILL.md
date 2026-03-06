@@ -26,6 +26,7 @@ flowchart LR
 3. Preserve progressive disclosure (`AGENTS.md` -> `docs/index.md` -> leaf docs).
 4. Enforce docs integrity with machine checks (`docs-check` or equivalent).
 5. Separate blocking fixes from doc-gardening backlog.
+6. Anchor evaluation/performance docs to code-defined metric SSOT and explicit baselines.
 
 ## Workflow (required order)
 
@@ -73,7 +74,12 @@ For each target doc:
 - align names/signatures with current symbols
 - update data shape tables and invariants
 - update constraint/objective sections when rule semantics changed
+- verify evaluation/performance metric definitions from code before rewriting metric narratives
+- state the metric SSOT positively and name the comparison baseline pair explicitly
+- keep internal heuristic counters distinct from evaluation/performance SSOT unless the evaluator emits them
 - keep root AGENTS concise and pointer-oriented when touched
+- Do: when a statement is no longer current or in scope, delete it outright and rewrite the surrounding doc cleanly.
+- Don't Do: leave tombstone prose like "this was removed/deleted" unless the doc is explicitly a changelog, migration guide, or retirement record.
 
 Avoid speculative text. If uncertain, mark it as unresolved and list missing evidence.
 
