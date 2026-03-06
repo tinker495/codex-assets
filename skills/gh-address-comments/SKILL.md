@@ -37,13 +37,35 @@ Prereq:
   - reviews
   - inline review threads
   - `resolution` metadata (`repo`, `pr`, `source`, `url`)
+- When the user already has final reply text and wants it posted to an existing review thread, identify the target review `comment_id` first:
+  - Preferred: use the inline review thread/comment ids returned by `scripts/fetch_comments.py`.
+  - If needed, confirm with gh directly: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`
 
 ## 2) Ask the user for clarification
-- Number all the review threads and comments and provide a short summary of what would be required to apply a fix for it
-- Ask the user which numbered comments should be addressed
+- Default path: number all the review threads and comments, summarize the required fix briefly, and ask which numbered comments should be addressed.
+- Fast path: if the user already provides final reply text plus a target review comment/thread, skip the drafting loop and move directly to posting.
 
 ## 3) If user chooses comments
 - Apply fixes for the selected comments
+
+## 4) Fast path: drafted reply -> post to existing review thread
+Use this when the user already has final comment text and wants it uploaded to a specific PR review comment thread.
+
+1. Find the target PR with Step 0 and keep the resolved `owner/repo` + PR number.
+2. Identify the target review `comment_id` from `scripts/fetch_comments.py` output or `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`.
+3. If the user only gives the drafted reply text, do not redraft it; preserve the final Korean text exactly as provided, including line breaks.
+4. Post the reply non-interactively with the required gh env:
+   ```bash
+   GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat \
+   gh api \
+     repos/{owner}/{repo}/pulls/{pr}/comments/{comment_id}/replies \
+     --method POST \
+     --raw-field body="$(cat /absolute/path/to/reply.txt)"
+   ```
+   - This `gh api repos/{owner}/{repo}/pulls/{pr}/comments/{comment_id}/replies` pattern is the preferred reliable method for replying to an existing PR review comment thread.
+   - For short single-line replies, `--raw-field body='final reply text'` is acceptable.
+   - Keep the env prefix on every gh retry to avoid interactive TTY failures.
+5. Report the posted reply target (`owner/repo`, PR number, review comment id) and the API result. If the API returns a reply URL or id, include it in the handoff.
 
 ## Operational Noise Controls
 
