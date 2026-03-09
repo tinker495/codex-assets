@@ -104,6 +104,7 @@ ASCII flow format:
 
 - `session-wrap-up` owns end-of-session synthesis, prioritization, and orchestration decisions.
 - `skill-creator` owns skill initialization/editing/validation procedures.
+- `omx-workspace-prune` owns safe `.omx` cleanup and retention policy when wrap-up includes workspace pruning or retirement follow-through.
 - `codex-session-recall` owns historical session retrieval when prior-session evidence is required.
 - `codex-exec-sub-agent` is optional execution utility for long-running or fresh-context scans; keep delegation one-hop and bounded by timeout.
 - This skill must not duplicate `skill-creator` internals; delegate instead.

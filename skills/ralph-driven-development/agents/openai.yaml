@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ralph Driven Development"
-  short_description: "Run Ralph-style one-story PRD loops or ordered spec-runner iterations"
-  default_prompt: "Execute Ralph Driven Development for one iteration: validate prd.json, implement only next pending story or next pending spec, run quality checks, and update progress artifacts."

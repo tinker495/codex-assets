@@ -1,4 +1,0 @@
-interface:
-  display_name: "RPG Loop Reasoning"
-  short_description: "Closed-loop RPG reasoning for repo understanding and generation"
-  default_prompt: "Use $rpg-loop-reasoning to run dual-view repo analysis and draft an incremental RPG update plan."
