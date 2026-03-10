@@ -356,9 +356,6 @@ scripts/quick_validate.py <path/to/skill-folder>
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
 
-After validation passes for any new or updated installed skill, delegate topology ownership to `skill-topology-adjuster`.
-That handoff keeps the installed role map, orchestration layers, and delegation graph synchronized with the actual skill set.
-
 ### Step 6: Iterate
 
 After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
