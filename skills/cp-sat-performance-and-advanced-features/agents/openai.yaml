@@ -1,0 +1,4 @@
+interface:
+  display_name: "CP-SAT Advanced"
+  short_description: "Tune and scale advanced OR-Tools CP-SAT models"
+  default_prompt: "Use $cp-sat-performance-and-advanced-features to analyze logs, tune performance, or scale this OR-Tools CP-SAT model."

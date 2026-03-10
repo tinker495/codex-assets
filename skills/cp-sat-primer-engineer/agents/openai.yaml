@@ -1,0 +1,4 @@
+interface:
+  display_name: "CP-SAT Engineer"
+  short_description: "Model and debug OR-Tools CP-SAT optimization problems"
+  default_prompt: "Use $cp-sat-primer-engineer to model, debug, or improve this OR-Tools CP-SAT optimization problem."

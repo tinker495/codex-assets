@@ -225,8 +225,6 @@ Skill creation involves these steps:
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
-If the skill is new, renamed, removed, or its delegation edges change, delegate topology reconciliation to `skill-topology-adjuster` before finalizing. `skill-creator` owns the skill contents; `skill-topology-adjuster` owns role-map and delegation-graph updates.
-
 ### Skill Naming
 
 - Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
@@ -357,6 +355,9 @@ scripts/quick_validate.py <path/to/skill-folder>
 ```
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
+
+After validation passes for any new or updated installed skill, delegate topology ownership to `skill-topology-adjuster`.
+That handoff keeps the installed role map, orchestration layers, and delegation graph synchronized with the actual skill set.
 
 ### Step 6: Iterate
 

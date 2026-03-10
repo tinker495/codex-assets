@@ -42,15 +42,15 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
 | `interface-design` | specialist | intentional interface design workflow for app/product UI tasks |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
+| `cp-sat-performance-and-advanced-features` | specialist | advanced CP-SAT performance tuning, log forensics, and scaling workflow |
+| `cp-sat-primer-engineer` | specialist | OR-Tools CP-SAT modeling, debugging, and productionization workflow |
 | `layer-boundary-test-scaffold` | specialist | scaffold and extend AST-based architecture boundary tests |
 | `no-deep-flag-review` | specialist | review deep flag-passing violations and minimal fix direction |
 | `pdf` | specialist | PDF rendering and visual QA |
 | `reverse-doc` | specialist | code-to-As-Is documentation workflow |
 | `screenshot` | specialist | OS-level screenshot capture |
-| `slides` | specialist | artifact-tool presentation authoring workflow |
 | `spec-diff` | specialist | Tobe/As-Is drift comparison workflow |
 | `spreadsheet` | specialist | Python/openpyxl spreadsheet modeling and editing workflow |
-| `spreadsheets` | specialist | artifact-tool workbook authoring workflow |
 | `yeet` | specialist | explicit stage/commit/push/PR one-shot workflow |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with bounded augmentation handoff |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
@@ -69,11 +69,13 @@ Layer 0: Meta / Utility
   automation-creator, omx-workspace-prune
 
 Layer 1: Specialists (single-domain ownership)
-  agents-md-builder, branch-onboarding-brief, code-health, desloppify, doc,
-  doc-separator, docs-codebase-alignment-audit, gh-address-comments,
-  gh-fix-ci, interface-design, jupyter-notebook, layer-boundary-test-scaffold,
-  no-deep-flag-review, pdf, reverse-doc, screenshot, slides, spec-diff,
-  spreadsheet, spreadsheets, yeet
+  agents-md-builder, branch-onboarding-brief, code-health,
+  cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
+  desloppify, doc, doc-separator,
+  docs-codebase-alignment-audit, gh-address-comments, gh-fix-ci,
+  interface-design, jupyter-notebook, layer-boundary-test-scaffold,
+  no-deep-flag-review, pdf, reverse-doc, screenshot, spec-diff,
+  spreadsheet, yeet
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
   grepai-deep-analysis, refresh-branch-docs, non-test-bloat-reduction
@@ -137,6 +139,8 @@ flowchart LR
 
   AMB["agents-md-builder"]
   AC["automation-creator"]
+  CSPA["cp-sat-performance-and-advanced-features"]
+  CPS["cp-sat-primer-engineer"]
   DES["desloppify"]
   DCAA["docs-codebase-alignment-audit"]
   FS["find-skills"]
@@ -147,8 +151,6 @@ flowchart LR
   LBTS["layer-boundary-test-scaffold"]
   NDF["no-deep-flag-review"]
   SHOT["screenshot"]
-  SLI["slides"]
-  SPS["spreadsheets"]
   SI["skill-installer"]
   YEET["yeet"]
 
@@ -187,6 +189,8 @@ flowchart TD
   SPEC --> AMB["agents-md-builder"]
   SPEC --> BOB["branch-onboarding-brief"]
   SPEC --> CH["code-health"]
+  SPEC --> CSPA["cp-sat-performance-and-advanced-features"]
+  SPEC --> CPS["cp-sat-primer-engineer"]
   SPEC --> DES["desloppify"]
   SPEC --> DOC["doc"]
   SPEC --> DSEP["doc-separator"]
@@ -200,10 +204,8 @@ flowchart TD
   SPEC --> PDF["pdf"]
   SPEC --> RD["reverse-doc"]
   SPEC --> SHOT["screenshot"]
-  SPEC --> SLI["slides"]
   SPEC --> SPD["spec-diff"]
   SPEC --> SS["spreadsheet"]
-  SPEC --> SPS["spreadsheets"]
   SPEC --> YEET["yeet"]
 
   META --> SC["skill-creator"]
