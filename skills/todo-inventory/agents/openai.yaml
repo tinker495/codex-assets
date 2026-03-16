@@ -1,4 +1,4 @@
 interface:
   display_name: "TODO Inventory"
-  short_description: "List remaining TODOs and diff-added TODOs"
-  default_prompt: "Use $todo-inventory to list remaining TODOs in this repo and summarize any TODOs newly added in the current diff."
+  short_description: "List TODOs with git-aware current and diff scans"
+  default_prompt: "Use $todo-inventory to list remaining TODOs in this repo with the default git-aware current scan and summarize any TODOs newly added in the current diff."

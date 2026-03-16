@@ -155,6 +155,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Scan all UTF-8 text files instead of only common source/config files.",
     )
+    parser.add_argument(
+        "--scan-basis",
+        choices=("auto", "filesystem", "git"),
+        default="auto",
+        help="Choose filesystem walk, git-tracked file listing, or auto-detect git-aware scanning.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     return parser.parse_args()
 
@@ -180,6 +186,31 @@ def iter_candidate_files(root: Path, all_text: bool) -> Iterable[Path]:
             yield path
 
 
+def iter_git_candidate_files(root: Path, repo_root: Path, all_text: bool) -> Iterable[Path]:
+    if root.is_file():
+        yield root
+        return
+
+    command = ["git", "ls-files", "--cached", "--others", "--exclude-standard"]
+    if root != repo_root:
+        command.extend(["--", str(root.relative_to(repo_root))])
+    result = subprocess.run(
+        command,
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    for relative_repo_path in result.stdout.splitlines():
+        if not relative_repo_path:
+            continue
+        path = (repo_root / relative_repo_path).resolve()
+        if not path.is_file():
+            continue
+        if all_text or should_scan_file(path):
+            yield path
+
+
 def should_scan_file(path: Path) -> bool:
     return path.suffix in SOURCE_SUFFIXES or path.name in SOURCE_FILENAMES
 
@@ -198,11 +229,31 @@ def read_text_lines(path: Path) -> tuple[list[str] | None, str | None]:
     return text.splitlines(), None
 
 
-def collect_scan_todos(root: Path, all_text: bool) -> tuple[list[TodoItem], list[SkippedFile]]:
+def resolve_scan_basis(root: Path, requested_basis: str) -> tuple[str, Path | None]:
+    if requested_basis == "filesystem" or root.is_file():
+        return "filesystem", None
+
+    repo_root = find_git_repo_root(root)
+    if requested_basis == "git":
+        if repo_root is None:
+            raise SystemExit(f"Git scan requested but no git repository was found for: {root}")
+        return "git", repo_root
+    if requested_basis == "auto" and repo_root is not None:
+        return "git", repo_root
+    return "filesystem", None
+
+
+def collect_scan_todos(root: Path, all_text: bool, requested_basis: str) -> tuple[list[TodoItem], list[SkippedFile], str]:
     items: list[TodoItem] = []
     skipped: list[SkippedFile] = []
     base_root = root.parent if root.is_file() else root
-    for path in iter_candidate_files(root, all_text):
+    scan_basis, repo_root = resolve_scan_basis(root, requested_basis)
+    candidate_paths = (
+        iter_git_candidate_files(root, repo_root, all_text)
+        if scan_basis == "git" and repo_root is not None
+        else iter_candidate_files(root, all_text)
+    )
+    for path in candidate_paths:
         lines, skip_reason = read_text_lines(path)
         relative_path = str(path.relative_to(base_root))
         if skip_reason is not None:
@@ -219,7 +270,7 @@ def collect_scan_todos(root: Path, all_text: bool) -> tuple[list[TodoItem], list
                         source="current",
                     )
                 )
-    return items, skipped
+    return items, skipped, scan_basis
 
 
 def find_git_repo_root(root: Path) -> Path | None:
@@ -344,11 +395,13 @@ def build_summary(
     diff_status: str,
     all_text: bool,
     mode: str,
+    scan_basis: str,
 ) -> dict[str, object]:
     return {
         "root": str(root),
         "mode": mode,
         "scan_scope": "all-text" if all_text else "source-and-config",
+        "scan_basis": scan_basis,
         "current_todo_count": len(current_items),
         "current_todo_file_count": len({item.path for item in current_items}),
         "added_todo_count": len(diff_items),
@@ -368,6 +421,7 @@ def render_text(
         f"- Root: {summary['root']}",
         f"- Mode: {summary['mode']}",
         f"- Scan scope: {summary['scan_scope']}",
+        f"- Scan basis: {summary['scan_basis']}",
         f"- Current TODOs: {summary['current_todo_count']} across {summary['current_todo_file_count']} files",
         f"- Added TODOs in current diff: {summary['added_todo_count']} ({summary['diff_status']})",
         f"- Skipped files: {summary['skipped_file_count']}",
@@ -403,8 +457,9 @@ def main() -> None:
 
     current_items: list[TodoItem] = []
     skipped_files: list[SkippedFile] = []
+    scan_basis = "not-requested"
     if args.mode in {"scan", "both"}:
-        current_items, skipped_files = collect_scan_todos(root, args.all_text)
+        current_items, skipped_files, scan_basis = collect_scan_todos(root, args.all_text, args.scan_basis)
 
     diff_items: list[TodoItem] = []
     diff_status = "not-requested"
@@ -419,6 +474,7 @@ def main() -> None:
         diff_status=diff_status,
         all_text=args.all_text,
         mode=args.mode,
+        scan_basis=scan_basis,
     )
 
     if args.json:

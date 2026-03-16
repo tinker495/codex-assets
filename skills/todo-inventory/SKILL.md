@@ -21,7 +21,7 @@ metadata:
 
 ## Overview
 
-Use this skill to inventory remaining `TODO` markers in source/config files and to report TODOs newly introduced in the current git diff. The scan includes comment-style TODOs and explicit string-literal placeholders such as `"TODO: ..."`, `"### TODO"`, or `"1. **TODO** ..."`. Prefer the bundled script for deterministic output and use `--json` when another skill, report, or automation needs structured data.
+Use this skill to inventory remaining `TODO` markers in source/config files and to report TODOs newly introduced in the current git diff. The scan includes comment-style TODOs and explicit string-literal placeholders such as `"TODO: ..."`, `"### TODO"`, or `"1. **TODO** ..."`. Prefer the bundled script for deterministic output and use `--json` when another skill, report, or automation needs structured data. In a git repo, the default scan is now git-aware and skips gitignored files unless you force a filesystem walk.
 
 ## Workflow
 
@@ -46,11 +46,21 @@ Use this skill to inventory remaining `TODO` markers in source/config files and 
   ```bash
   python3 ~/.codex/skills/todo-inventory/scripts/todo_inventory.py <root> --all-text
   ```
+- To force a filesystem walk even inside a git repo:
+  ```bash
+  python3 ~/.codex/skills/todo-inventory/scripts/todo_inventory.py <root> --scan-basis filesystem
+  ```
+- To require git-tracked/unignored scanning and fail fast when git metadata is unavailable:
+  ```bash
+  python3 ~/.codex/skills/todo-inventory/scripts/todo_inventory.py <root> --scan-basis git
+  ```
 
 3. Interpret the results conservatively.
 - `Current TODOs` means TODO markers presently found under the scan root.
+- `Scan basis` reports whether the current inventory used a filesystem walk or a git-aware file list.
 - `Added TODOs In Current Diff` means TODO markers introduced by staged or unstaged changes in the current git working tree.
 - If git metadata is unavailable, report that diff-based TODO status could not be computed instead of guessing.
+- If the default `auto` scan used `filesystem`, note that the root was outside a git repo or that git metadata was unavailable for the current scope.
 - If files were skipped because they are binary or non-UTF-8, mention that explicitly when it affects confidence.
 
 4. Report in a compact shape.
@@ -71,6 +81,7 @@ Use this skill to inventory remaining `TODO` markers in source/config files and 
 - Do not treat `FIXME`, `TBD`, or generic prose mentions like `"TODO Inventory"` as `TODO` unless the user explicitly asks for broader markers.
 - Do not infer ownership or prioritization from the presence of a TODO comment alone; only inventory and summarize.
 - Do not hide skipped files. Surface them so the caller can decide whether to rerun with a different scope.
+- When scanning a repo root, prefer the default git-aware path unless the user explicitly asks to include gitignored/generated files.
 
 ## Session Wrap-Up Handoff
 
@@ -87,10 +98,17 @@ When `session-wrap-up` or another reporting skill needs TODO status, provide:
 - Trigger on paraphrases about deferred follow-up markers or wrap-up TODO status.
 - Avoid triggering on unrelated debugging or implementation-only requests.
 - Test `--mode both` and `--mode diff` in a git repo.
+- Test `--scan-basis auto` in a git repo with ignored output files to confirm ignored artifacts are skipped.
+- Test `--scan-basis filesystem` on the same repo to confirm the override still works.
 - Test one non-repo directory to confirm diff-unavailable behavior is explicit.
+- Quick regression script:
+  ```bash
+  python3 ~/.codex/skills/todo-inventory/scripts/test_todo_inventory.py
+  ```
 
 ## Resources
 
 ### scripts/
 
 - `scripts/todo_inventory.py`: inventory current TODO markers and newly added TODOs in the current git diff with text or JSON output.
+- `scripts/test_todo_inventory.py`: small regression checks for git-aware current scanning, filesystem override, and non-git fallback behavior.
