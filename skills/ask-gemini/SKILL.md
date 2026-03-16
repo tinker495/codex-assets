@@ -6,6 +6,7 @@ description: Ask Gemini via local CLI and capture a reusable artifact
 # Ask Gemini (Local CLI)
 
 Use the locally installed Gemini CLI as a direct external advisor for brainstorming, design feedback, and second opinions.
+Prefer `ask-gemini` for ideation and broad design exploration; use `ask-claude` instead when the task needs tighter review-style analysis or focused critique.
 
 ## Usage
 

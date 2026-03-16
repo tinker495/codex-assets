@@ -6,6 +6,7 @@ description: Ask Claude via local CLI and capture a reusable artifact
 # Ask Claude (Local CLI)
 
 Use the locally installed Claude CLI as a direct external advisor for focused questions, reviews, or second opinions.
+Prefer `ask-claude` for tighter review-style analysis; use `ask-gemini` instead when the task is better framed as brainstorming, looser design exploration, or broader ideation.
 
 ## Usage
 

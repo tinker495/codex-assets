@@ -30,10 +30,25 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `skill-topology-adjuster` | utility | topology role classification, ownership boundaries, and delegation graph updates |
 | `find-skills` | utility | discover installable skills and recommend install paths |
 | `automation-creator` | utility | Codex automation directive authoring |
+| `ask-claude` | utility | local Claude CLI consultation with reusable artifact capture |
+| `ask-gemini` | utility | local Gemini CLI consultation with reusable artifact capture |
+| `cancel` | utility | active OMX mode cancellation and cleanup |
+| `configure-notifications` | utility | OMX notification configuration across supported platforms |
+| `doctor` | utility | oh-my-codex installation diagnostics and remediation |
+| `help` | utility | explain OMX behaviors, shortcuts, and user-facing operation |
+| `hud` | utility | HUD display/statusline configuration |
+| `note` | utility | durable note capture into `.omx/notepad.md` |
+| `omx-setup` | utility | oh-my-codex setup and refresh workflow |
 | `omx-workspace-prune` | utility | safe `.omx` workspace pruning and retention policy |
+| `ralplan` | utility | alias surface for `$plan --consensus` |
+| `skill` | utility | local skill management CLI workflow |
+| `trace` | utility | OMX trace timeline and summary reporting |
+| `worker` | utility | tmux team worker protocol and mailbox lifecycle |
 | `agents-md-builder` | specialist | AGENTS.md authoring and repo-specific instruction synthesis |
+| `ai-slop-cleaner` | specialist | anti-slop cleanup/refactor workflow with regression-safety bias |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
+| `code-review` | specialist | comprehensive code review with severity-rated findings |
 | `desloppify` | specialist | desloppify scanner-driven debt reduction workflow |
 | `doc` | specialist | DOCX editing and conversion workflow |
 | `doc-separator` | specialist | mixed-document Tobe/As-Is separation |
@@ -49,40 +64,54 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `pdf` | specialist | PDF rendering and visual QA |
 | `reverse-doc` | specialist | code-to-As-Is documentation workflow |
 | `screenshot` | specialist | OS-level screenshot capture |
+| `security-review` | specialist | focused security audit for code and configuration |
 | `spec-diff` | specialist | Tobe/As-Is drift comparison workflow |
 | `spreadsheet` | specialist | Python/openpyxl spreadsheet modeling and editing workflow |
+| `visual-verdict` | specialist | structured screenshot-to-reference visual QA verdicts |
 | `yeet` | specialist | explicit stage/commit/push/PR one-shot workflow |
+| `deep-interview` | specialist-orchestrator | ambiguity-gated requirement interview with bounded planning handoff |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with bounded augmentation handoff |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent compression and bloat reduction |
+| `web-clone` | specialist-orchestrator | URL-driven website cloning with iterative visual verification handoff |
+| `autopilot` | orchestrator | end-to-end autonomous delivery from idea to verified code |
 | `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
+| `plan` | orchestrator | strategic planning with direct or interview-driven intake |
 | `pr-workflow` | orchestrator | PR briefing/creation flow and release gating |
+| `ralph` | orchestrator | persistence loop with architect verification until completion |
 | `session-wrap-up` | orchestrator | session-end insight synthesis and skill/topology handoff |
+| `team` | orchestrator | tmux-based coordinated multi-agent execution |
+| `ultrawork` | orchestrator | parallel execution engine for independent task lanes |
 
 ## Orchestration Layers
 
 ```text
 Layer 0: Meta / Utility
   skill-creator, skill-installer, skill-topology-adjuster, find-skills,
-  automation-creator, omx-workspace-prune
+  automation-creator, ask-claude, ask-gemini, cancel,
+  configure-notifications, doctor, help, hud, note, omx-setup,
+  omx-workspace-prune, ralplan, skill, trace, worker
 
 Layer 1: Specialists (single-domain ownership)
-  agents-md-builder, branch-onboarding-brief, code-health,
+  agents-md-builder, ai-slop-cleaner, branch-onboarding-brief, code-health,
+  code-review,
   cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
   desloppify, doc, doc-separator,
   docs-codebase-alignment-audit, gh-address-comments, gh-fix-ci,
   interface-design, jupyter-notebook, layer-boundary-test-scaffold,
-  no-deep-flag-review, pdf, reverse-doc, screenshot, spec-diff,
-  spreadsheet, yeet
+  no-deep-flag-review, pdf, reverse-doc, screenshot, security-review,
+  spec-diff, spreadsheet, visual-verdict, yeet
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
-  grepai-deep-analysis, refresh-branch-docs, non-test-bloat-reduction
+  deep-interview, grepai-deep-analysis, refresh-branch-docs,
+  non-test-bloat-reduction, web-clone
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
-  branch-health-remediation-workflow, complexity-loc-balancer, main-merge,
-  pr-workflow, session-wrap-up
+  autopilot, branch-health-remediation-workflow, complexity-loc-balancer,
+  main-merge, plan, pr-workflow, ralph, session-wrap-up, team,
+  ultrawork
 
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
   branch-health-remediation-workflow, gh-fix-ci, grepai-deep-analysis,
@@ -131,6 +160,8 @@ flowchart LR
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> OWP["omx-workspace-prune"]
   SC --> STA["skill-topology-adjuster"]
+  TEAM["team"] --> WORKER["worker"]
+  WCL["web-clone"] --> VV["visual-verdict"]
 
   DOC["doc"] --> PDF["pdf"]
   SPD["spec-diff"] --> DSEP["doc-separator"]
@@ -138,21 +169,44 @@ flowchart LR
   SS["spreadsheet"] --> PDF
 
   AMB["agents-md-builder"]
+  AISC["ai-slop-cleaner"]
   AC["automation-creator"]
+  ACLA["ask-claude"]
+  AGEM["ask-gemini"]
+  AP["autopilot"]
+  CAN["cancel"]
   CSPA["cp-sat-performance-and-advanced-features"]
   CPS["cp-sat-primer-engineer"]
+  CR["code-review"]
+  CN["configure-notifications"]
   DES["desloppify"]
+  DI["deep-interview"]
+  DOCR["doctor"]
   DCAA["docs-codebase-alignment-audit"]
   FS["find-skills"]
   GHF["gh-fix-ci"]
   GHC["gh-address-comments"]
+  HELP["help"]
+  HUD["hud"]
   IFD["interface-design"]
   JNB["jupyter-notebook"]
   LBTS["layer-boundary-test-scaffold"]
   NDF["no-deep-flag-review"]
+  NOTE["note"]
+  OSET["omx-setup"]
+  PLAN["plan"]
+  RALPH["ralph"]
+  RLP["ralplan"]
+  SECR["security-review"]
   SHOT["screenshot"]
+  SKILL["skill"]
   SI["skill-installer"]
   YEET["yeet"]
+  TRC["trace"]
+  UW["ultrawork"]
+  VV["visual-verdict"]
+  WCL["web-clone"]
+  WORKER["worker"]
 
   ANY["Any Skill (Universal Access)"] --> CESA["codex-exec-sub-agent"]
   GDA --> CESA
@@ -179,16 +233,25 @@ flowchart TD
   ORCH --> BHRW["branch-health-remediation-workflow"]
   ORCH --> CLB["complexity-loc-balancer"]
   ORCH --> MM["main-merge"]
+  ORCH --> AP["autopilot"]
+  ORCH --> PLAN["plan"]
   ORCH --> PR["pr-workflow"]
+  ORCH --> RALPH["ralph"]
   ORCH --> SWU["session-wrap-up"]
+  ORCH --> TEAM["team"]
+  ORCH --> UW["ultrawork"]
 
+  HYB --> DI["deep-interview"]
   HYB --> GDA["grepai-deep-analysis"]
   HYB --> NTBR["non-test-bloat-reduction"]
   HYB --> RBD["refresh-branch-docs"]
+  HYB --> WCL["web-clone"]
 
   SPEC --> AMB["agents-md-builder"]
+  SPEC --> AISC["ai-slop-cleaner"]
   SPEC --> BOB["branch-onboarding-brief"]
   SPEC --> CH["code-health"]
+  SPEC --> CR["code-review"]
   SPEC --> CSPA["cp-sat-performance-and-advanced-features"]
   SPEC --> CPS["cp-sat-primer-engineer"]
   SPEC --> DES["desloppify"]
@@ -203,9 +266,11 @@ flowchart TD
   SPEC --> NDF["no-deep-flag-review"]
   SPEC --> PDF["pdf"]
   SPEC --> RD["reverse-doc"]
+  SPEC --> SECR["security-review"]
   SPEC --> SHOT["screenshot"]
   SPEC --> SPD["spec-diff"]
   SPEC --> SS["spreadsheet"]
+  SPEC --> VV["visual-verdict"]
   SPEC --> YEET["yeet"]
 
   META --> SC["skill-creator"]
@@ -213,7 +278,20 @@ flowchart TD
   META --> STA["skill-topology-adjuster"]
   META --> FS["find-skills"]
   META --> AC["automation-creator"]
+  META --> ACLA["ask-claude"]
+  META --> AGEM["ask-gemini"]
+  META --> CAN["cancel"]
+  META --> CN["configure-notifications"]
+  META --> DOCR["doctor"]
+  META --> HELP["help"]
+  META --> HUD["hud"]
+  META --> NOTE["note"]
+  META --> OSET["omx-setup"]
   META --> OWP["omx-workspace-prune"]
+  META --> RLP["ralplan"]
+  META --> SKILL["skill"]
+  META --> TRC["trace"]
+  META --> WORKER["worker"]
 
   BHRW --> BOB
   BHRW --> CH
@@ -240,6 +318,8 @@ flowchart TD
   SWU --> SC
   SWU --> OWP
   SC --> STA
+  TEAM --> WORKER
+  WCL --> VV
 
   DOC --> PDF
   SPD --> DSEP

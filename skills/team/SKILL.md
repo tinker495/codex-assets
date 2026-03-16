@@ -6,6 +6,7 @@ description: N coordinated agents on shared task list using tmux-based orchestra
 # Team Skill
 
 `$team` is the tmux-based parallel execution mode for OMX. It starts real worker Codex and/or Claude CLI sessions in split panes and coordinates them through `.omx/state/team/...` files plus CLI team interop (`omx team api ...`) and state files.
+Delegate pane-local execution and mailbox-driven task handling to `worker`; keep `team` focused on launch, monitoring, and shutdown orchestration.
 
 This skill is operationally sensitive. Treat it as an operator workflow, not a generic prompt pattern.
 
