@@ -6,7 +6,8 @@
 2. Confirm at least one reusable insight exists.
 3. Confirm ownership can be assigned without overlap.
 4. If any action retires/removes skill assets, require `mirror` sync mode.
-5. If no reusable insight survives review, mark the wrap-up as `no-op` and stop after reporting.
+5. If TODO or deferred-follow-up visibility matters, collect TODO status before synthesis.
+6. If no reusable insight survives review, mark the wrap-up as `no-op` and stop after reporting.
 
 ## Evidence Priority
 
@@ -15,6 +16,7 @@ Use evidence in this order:
 2. Changed files, command traces, validations, and failure/retry notes.
 3. User corrections or repeated steering.
 4. Local session artifacts such as `.omx/notepad.md` or saved reports.
+5. TODO inventory evidence (`todo-inventory` output, inline `TODO:` markers, or explicit deferred follow-up notes).
 
 Do not reference a non-installed recall skill to fill evidence gaps.
 
@@ -45,6 +47,7 @@ Provide:
 - `resources`: scripts/references/assets needs.
 - `interface`: whether `agents/openai.yaml` needs refresh.
 - `validation`: quick_validate + topology consistency when role/edges changed.
+- `todo_status`: new TODOs added, remaining scoped TODOs, and follow-up items reported without inline TODOs.
 
 If sub-agent execution is part of the proposed workflow, include:
 - `sub-agent invocation`: `--prompt-file` + `--timeout-sec` standard.
@@ -60,6 +63,14 @@ Update topology only when one of these changed:
 
 If none changed, record: `no topology change`.
 Never keep delegation notes that point to non-installed skills.
+
+## TODO Status Gate
+
+When wrap-up output mentions deferred follow-up work:
+1. Prefer concrete TODO evidence from `todo-inventory` over memory or guesswork.
+2. Distinguish current TODO inventory from TODOs newly added in the current diff.
+3. If work was deferred without an inline TODO comment, label it explicitly as `reported-without-inline-TODO`.
+4. If diff status is unavailable, say so instead of implying zero new TODOs.
 
 ## Retirement and Sync Mode Gate
 

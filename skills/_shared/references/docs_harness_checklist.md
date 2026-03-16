@@ -54,7 +54,17 @@ Classification:
 Reporting:
 - Always report `fix-now` and `doc-gardening` separately.
 
-## 6) Metric SSOT and baseline wording
+## 6) Agent legibility and repo-local artifacts
+
+Goal:
+- Keep critical operating knowledge discoverable from repository-local, versioned artifacts.
+
+Checks:
+- Important process/design/risk knowledge is not trapped only in chat, tickets, or handoff prose.
+- If the repository uses top-level design, execution-plan, quality, reliability, security, or tech-debt docs, the navigation map exposes them.
+- Refreshed docs encode durable external guidance back into the repository when it materially affects future agent runs.
+
+## 7) Metric SSOT and baseline wording
 
 Goal:
 - State evaluation/performance metrics from code-defined SSOT with an explicit comparison baseline.
@@ -63,7 +73,16 @@ Guidance:
 - Do: verify the evaluator's current metrics from code, name the SSOT positively (for example `performance SSOT is X + Y`), and spell out the comparison baseline pair (`after_discharge -> rebuilt_plan`, `after_load vs rebuilt`).
 - Don't Do: describe internal heuristic counters as performance SSOT when they are not evaluator outputs, or use ambiguous wording like `also sees anomaly_counts` without saying what is actually compared.
 
-## 7) Deletion-first refresh wording
+## 8) Promote recurring rules into tooling
+
+Goal:
+- Prefer mechanical enforcement when the same documentation drift or review feedback repeats.
+
+Checks:
+- Recurrent path/link/structure failures are backed by scripts, linters, structural tests, or CI jobs where feasible.
+- Reports separate immediate doc edits from `promote-to-tooling` follow-ups.
+
+## 9) Deletion-first refresh wording
 
 Goal:
 - Keep refreshed docs aligned to the current scope without tombstone prose.

@@ -1,6 +1,6 @@
 ---
 name: docs-codebase-alignment-audit
-description: Run deterministic docs integrity audits and minimal repairs for repository Markdown docs. Use when users ask to check/fix broken links, stale paths, missing make targets, AGENTS chain references, docs-check/CI guardrails, or map-first/SSOT/progressive-disclosure conformance. Prefer this for audit-and-fix passes, not full branch-wide narrative refresh.
+description: Run deterministic docs integrity audits and minimal repairs for repository Markdown docs. Use when users ask to check/fix broken links, stale paths, missing make targets, AGENTS chain references, docs-check/CI guardrails, or map-first/SSOT/progressive-disclosure and agent-legibility conformance. Prefer this for audit-and-fix passes, not full branch-wide narrative refresh.
 ---
 
 # Docs Codebase Alignment Audit
@@ -35,6 +35,13 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 5. Continuous doc-gardening
 - Classify stale docs and produce focused cleanup diffs instead of broad rewrites.
 
+6. Agent legibility
+- Prefer repository-local, versioned artifacts over chat-only or external context.
+- If critical operating knowledge is not discoverable from the repository, flag it as a documentation gap.
+
+7. Promote recurring rules into tooling
+- When the same drift keeps reappearing, prefer a checker, linter, script, or CI guard over more prose.
+
 ## Workflow
 
 1. Inventory scope
@@ -44,6 +51,7 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 2. Read repository map and contracts first
 - Prioritize: `AGENTS.md`, `docs/index.md`, `docs/_meta/docs-contract.md`, then local `src/**/AGENTS.md`.
 - Detect progressive-disclosure breaks (missing index links, missing layer entrypoints).
+- If the repo keeps design, execution-plan, quality, reliability, security, or tech-debt docs as first-class artifacts, verify the map exposes them and their index/status links remain valid.
 
 3. Detect document type boundary
 - Treat files under `docs/specs/` (and legacy `docs/full-plan/`) as potential To-Be design docs.
@@ -90,6 +98,7 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 - Check `Makefile` for `docs-check` (or equivalent) target.
 - Check CI (for example `.github/workflows/`) for docs integrity execution.
 - If missing, classify as `fix-now` unless user scope excludes tooling updates.
+- If a recurring documentation failure is only described in prose, classify a `promote-to-tooling` follow-up instead of expanding narrative guidance.
 
 8. Classify findings
 - `fix-now`: broken path, missing make target, broken relative link, stale direct code reference.
@@ -97,12 +106,14 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 - `keep-with-note`: intentional To-Be mismatch with explicit boundary text, or ambiguous relocation targets.
 - `ignore`: examples/placeholders that are explicitly marked as template syntax.
 - `doc-gardening`: stale but non-blocking drift candidates safe for follow-up PR.
+- `promote-to-tooling`: recurring or mechanically testable doc invariants that should become checks, linters, scripts, or CI wiring.
 
 9. Apply minimal fixes
 - Prefer path normalization over paragraph rewrites.
 - Replace non-existent file references with existing canonical paths.
 - Preserve document intent and section structure.
 - For AGENTS chain fixes, update reference lists first; avoid rewriting policy paragraphs.
+- When a problem is mechanically enforceable, prefer wiring or recommending the enforcement point over adding more explanatory prose.
 
 10. Re-run checks and report
 - Re-run all three baseline checks.
@@ -113,7 +124,9 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
   - map-first AGENTS
   - docs SSOT contract
   - progressive disclosure links
+  - agent legibility / repo-local artifact coverage
   - mechanical guard presence
+  - promote-to-tooling follow-ups
   - AGENTS chain integrity
 
 ## Guardrails

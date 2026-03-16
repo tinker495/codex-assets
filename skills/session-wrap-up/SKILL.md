@@ -1,17 +1,18 @@
 ---
 name: session-wrap-up
-description: Close an active coding session by distilling reusable insights, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
+description: Close an active coding session by distilling reusable insights, summarizing deferred TODO and follow-up status, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, capture session-end TODO status, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
 ---
 
 # Session Wrap Up
 
 ## Overview
 
-Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator` and keep topology edits conditional.
+Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator`, use `todo-inventory` when deferred-work evidence matters, and keep topology edits conditional.
 
 ```mermaid
 flowchart LR
-  A["Collect Session Evidence"] --> B["Extract Reusable Insights"]
+  A["Collect Session Evidence"] --> T["Inventory TODO Status (Optional)"]
+  T --> B["Extract Reusable Insights"]
   B --> C["Choose Action: None/Update/Create/Retire"]
   C --> D["Delegate Build Work to skill-creator"]
   D --> E["Update Topology (if edges changed)"]
@@ -28,6 +29,10 @@ Prefer concrete artifacts in this order:
 - user correction points or repeated prompt steering
 - local session artifacts (`.omx/notepad.md`, `.omx/state`, draft reports) when present
 Do not invent history and do not assume a missing recall skill exists.
+When deferred follow-up visibility matters, call `todo-inventory` to capture:
+- remaining TODO markers in the relevant repo or module
+- TODO markers newly added in the current diff
+- skipped files and diff-availability caveats
 
 2. Extract reusable insights.
 Classify each candidate into one of:
@@ -57,6 +62,7 @@ Provide a compact handoff packet:
 - required resources (`scripts/`, `references/`, `assets/`)
 - interface check (`agents/openai.yaml` refresh needed or not)
 - validation scope (`quick_validate.py` + topology consistency when role/edges changed)
+- TODO status note (new TODOs added, remaining scoped TODOs, and follow-up reported without inline TODOs)
 
 5. Adjust skill orchestration topology.
 Only involve `skill-topology-adjuster` when role map, ownership, or delegation edges changed.
@@ -96,16 +102,21 @@ Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets
 
 Always return, in order:
 1. Session result summary (answer-first, 3-5 lines).
-2. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
-3. Delegation plan (`orchestrator -> specialist`) for each action.
-4. Topology delta summary (if no change, say "no topology change").
-5. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
-If every action is `none`, still emit all sections and explicitly say `no-op wrap-up`.
+2. TODO status summary:
+   - TODOs newly added in the current diff
+   - remaining TODOs in scope
+   - follow-up items reported without inline TODO markers, if any
+3. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
+4. Delegation plan (`orchestrator -> specialist`) for each action.
+5. Topology delta summary (if no change, say "no topology change").
+6. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
+If every action is `none`, still emit all sections, include TODO status, and explicitly say `no-op wrap-up`.
 
 ## Delegation Boundaries
 
 - `session-wrap-up` owns end-of-session synthesis, prioritization, and orchestration decisions.
 - `skill-creator` owns skill initialization/editing/validation procedures.
+- `todo-inventory` owns TODO inventory and diff-added TODO evidence gathering.
 - `omx-workspace-prune` owns safe `.omx` cleanup and retention policy when wrap-up includes workspace pruning or retirement follow-through.
 - Historical session retrieval defaults to direct inspection of available local artifacts and current thread context.
 - `codex-exec-sub-agent` is optional execution utility for long-running or fresh-context scans; keep delegation one-hop and bounded by timeout.

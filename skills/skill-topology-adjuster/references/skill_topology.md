@@ -43,6 +43,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `ralplan` | utility | alias surface for `$plan --consensus` |
 | `skill` | utility | local skill management CLI workflow |
 | `trace` | utility | OMX trace timeline and summary reporting |
+| `todo-inventory` | utility | repository TODO inventory and diff-added TODO summaries |
 | `worker` | utility | tmux team worker protocol and mailbox lifecycle |
 | `agents-md-builder` | specialist | AGENTS.md authoring and repo-specific instruction synthesis |
 | `ai-slop-cleaner` | specialist | anti-slop cleanup/refactor workflow with regression-safety bias |
@@ -92,7 +93,7 @@ Layer 0: Meta / Utility
   skill-creator, skill-installer, skill-topology-adjuster, find-skills,
   automation-creator, ask-claude, ask-gemini, cancel,
   configure-notifications, doctor, help, hud, note, omx-setup,
-  omx-workspace-prune, ralplan, skill, trace, worker
+  omx-workspace-prune, ralplan, skill, trace, todo-inventory, worker
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, ai-slop-cleaner, branch-onboarding-brief, code-health,
@@ -158,6 +159,7 @@ flowchart LR
   PR --> GDA
 
   SWU["session-wrap-up"] --> SC["skill-creator"]
+  SWU --> TI["todo-inventory"]
   SWU --> OWP["omx-workspace-prune"]
   SC --> STA["skill-topology-adjuster"]
   TEAM["team"] --> WORKER["worker"]
@@ -203,6 +205,7 @@ flowchart LR
   SI["skill-installer"]
   YEET["yeet"]
   TRC["trace"]
+  TI["todo-inventory"]
   UW["ultrawork"]
   VV["visual-verdict"]
   WCL["web-clone"]
@@ -291,6 +294,7 @@ flowchart TD
   META --> RLP["ralplan"]
   META --> SKILL["skill"]
   META --> TRC["trace"]
+  META --> TI["todo-inventory"]
   META --> WORKER["worker"]
 
   BHRW --> BOB
@@ -316,6 +320,7 @@ flowchart TD
   PR --> GDA
 
   SWU --> SC
+  SWU --> TI
   SWU --> OWP
   SC --> STA
   TEAM --> WORKER
