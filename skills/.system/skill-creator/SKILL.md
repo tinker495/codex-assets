@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations.
+description: Create, review, and refine Codex-style skills with strong triggering, lean SKILL.md structure, reusable scripts/references/assets, and validation workflow guidance. Use when users ask to create a new skill, improve an existing skill, design frontmatter or trigger descriptions, add bundled resources, or troubleshoot skill triggering and validation issues.
 metadata:
   short-description: Create or update a skill
 ---
@@ -45,6 +45,10 @@ Match the level of specificity to the task's fragility and variability:
 
 Think of Codex as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
 
+### Skills Should Compose
+
+Multiple skills may load at the same time. Write skills so they cooperate with adjacent capabilities instead of assuming exclusive control of the conversation, tools, or output format.
+
 ### Anatomy of a Skill
 
 Every skill consists of a required SKILL.md file and optional bundled resources:
@@ -68,7 +72,7 @@ skill-name/
 
 Every SKILL.md consists of:
 
-- **Frontmatter** (YAML): Contains `name` and `description` fields. These are the only fields that Codex reads to determine when the skill gets used, thus it is very important to be clear and comprehensive in describing what the skill is, and when it should be used.
+- **Frontmatter** (YAML): `name` and `description` are required and control triggering. In this toolchain, `license`, `allowed-tools`, and `metadata` are also supported when they add real value, but keep frontmatter minimal.
 - **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
 
 #### Agents metadata (recommended)
@@ -134,7 +138,7 @@ Skills use a three-level loading system to manage context efficiently:
 
 #### Progressive Disclosure Patterns
 
-Keep SKILL.md body to the essentials and under 500 lines to minimize context bloat. Split content into separate files when approaching this limit. When splitting out content into other files, it is very important to reference them from SKILL.md and describe clearly when to read them, to ensure the reader of the skill knows they exist and when to use them.
+Keep SKILL.md body to the essentials and under 500 lines to minimize context bloat. As a rule of thumb, also keep it under roughly 5,000 words. Split content into separate files when approaching these limits. When splitting out content into other files, it is very important to reference them from SKILL.md and describe clearly when to read them, to ensure the reader of the skill knows they exist and when to use them.
 
 **Key principle:** When a skill supports multiple variations, frameworks, or options, keep only the core workflow and selection guidance in SKILL.md. Move variant-specific details (patterns, examples, configuration) into separate reference files.
 
@@ -217,11 +221,12 @@ Codex reads REDLINING.md or OOXML.md only when the user needs those features.
 Skill creation involves these steps:
 
 1. Understand the skill with concrete examples
-2. Plan reusable skill contents (scripts, references, assets)
-3. Initialize the skill (run init_skill.py)
-4. Edit the skill (implement resources and write SKILL.md)
-5. Validate the skill (run quick_validate.py)
-6. Iterate based on real usage
+2. Define success criteria and test cases
+3. Plan reusable skill contents (scripts, references, assets)
+4. Initialize the skill (run init_skill.py)
+5. Edit the skill (implement resources and write SKILL.md)
+6. Validate and test the skill
+7. Iterate based on real usage
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -234,6 +239,7 @@ When a skill update changes ownership, role classification, or delegation edges,
 - Prefer short, verb-led phrases that describe the action.
 - Namespace by tool when it improves clarity or triggering (e.g., `gh-address-comments`, `linear-address-issue`).
 - Name the skill folder exactly after the skill name.
+- Avoid reserved vendor names like `claude` or `anthropic` in the skill name.
 
 ### Step 1: Understanding the Skill with Concrete Examples
 
@@ -252,7 +258,28 @@ To avoid overwhelming users, avoid asking too many questions in a single message
 
 Conclude this step when there is a clear sense of the functionality the skill should support.
 
-### Step 2: Planning the Reusable Skill Contents
+### Step 2: Define Success Criteria and Test Cases
+
+Before choosing structure or writing resources, define what "working" means for this skill.
+
+At minimum, cover these three checks:
+
+1. **Triggering**: The skill should trigger on obvious requests and reasonable paraphrases, and stay off unrelated prompts.
+2. **Functionality**: The workflow should complete correctly, including any scripts or tool calls the skill depends on.
+3. **Comparison to baseline**: If the skill is meant to improve an existing workflow, note what should get better: fewer clarifying turns, fewer failed calls, lower token cost, or more consistent output.
+
+Start with one representative, slightly difficult task. Iterate until the skill handles that case reliably, then expand to paraphrases, edge cases, and negative cases.
+
+Example success checklist:
+
+- Triggers on obvious requests
+- Triggers on paraphrased requests
+- Does not trigger on unrelated requests
+- Completes the target workflow without user correction
+- Produces valid outputs or successful tool calls
+- Improves a measurable baseline when that comparison matters
+
+### Step 3: Planning the Reusable Skill Contents
 
 To turn concrete examples into an effective skill, analyze each example by:
 
@@ -276,7 +303,9 @@ Example: When building a `big-query` skill to handle queries like "How many user
 
 To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
 
-### Step 3: Initializing the Skill
+Before inventing a novel structure, inspect one or two similar high-quality skills and reuse the parts that already fit. Prefer adapting a proven pattern over creating a custom layout from scratch.
+
+### Step 4: Initializing the Skill
 
 At this point, it is time to actually create the skill.
 
@@ -316,7 +345,7 @@ scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 
 Only include other optional interface fields when the user explicitly provides them. For full field descriptions and examples, see references/openai_yaml.md.
 
-### Step 4: Edit the Skill
+### Step 5: Edit the Skill
 
 When editing the (newly-generated or existing) skill, remember that the skill is being created for another instance of Codex to use. Include information that would be beneficial and non-obvious to Codex. Consider what procedural knowledge, domain-specific details, or reusable assets would help another Codex instance execute these tasks more effectively.
 
@@ -334,21 +363,32 @@ If you used `--examples`, delete any placeholder files that are not needed for t
 
 ##### Frontmatter
 
-Write the YAML frontmatter with `name` and `description`:
+Write the YAML frontmatter with required `name` and `description`. In this local toolchain, `license`, `allowed-tools`, and `metadata` are the supported optional fields.
 
 - `name`: The skill name
 - `description`: This is the primary triggering mechanism for your skill, and helps Codex understand when to use the skill.
   - Include both what the Skill does and specific triggers/contexts for when to use it.
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
+  - Include concrete user language, likely trigger phrases, and file types if relevant.
+  - Prefer this shape: `[what it does] + [when to use it] + [key capabilities or scope]`
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
+  - Bad description example: "Helps with projects."
+- `license`: Optional. Use when the skill is intended for open-source distribution.
+- `allowed-tools`: Optional. Use only when the skill genuinely depends on restricted or explicitly scoped tools, and keep the list aligned with real commands or integrations.
+- `metadata`: Optional. Use for maintenance-oriented fields like version, author, category, or related MCP server name.
 
-Do not include any other fields in YAML frontmatter.
+Do not add unsupported frontmatter keys unless you also update the surrounding tooling. `scripts/quick_validate.py` currently validates `name`, `description`, `license`, `allowed-tools`, and `metadata`.
 
 ##### Body
 
 Write instructions for using the skill and its bundled resources.
 
-### Step 5: Validate the Skill
+- Put critical validations, decision points, and irreversible steps near the top.
+- Use concise imperative language.
+- Move detailed supporting material into `references/` instead of burying it inline.
+- Include concrete examples or expected outputs for fragile steps.
+
+### Step 6: Validate and Test the Skill
 
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
@@ -356,11 +396,38 @@ Once development of the skill is complete, validate the skill folder to catch ba
 scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
+The validation script checks YAML frontmatter format, supported fields, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
+
+Then test actual behavior. `quick_validate.py` does not prove the skill triggers correctly or completes the workflow correctly.
+
+Run tests in this order:
+
+1. **Triggering tests**
+   - Should trigger on obvious requests
+   - Should trigger on paraphrased requests
+   - Should not trigger on unrelated requests
+2. **Functional tests**
+   - Run the main workflow end to end
+   - Execute representative scripts, if any
+   - Verify tool calls, outputs, and error handling
+3. **Baseline comparison**
+   - Compare against doing the same task without the skill when improvement claims matter
+   - Measure fewer retries, fewer clarifying questions, fewer failed calls, or better consistency
+
+If the skill is new, start by hardening one challenging canonical task before expanding to a larger test set.
 
 If the change modified ownership boundaries or delegation edges, hand off topology updates to `skill-topology-adjuster` and verify its role map/graph/tree outputs stay synchronized before concluding.
 
-### Step 6: Iterate
+### Troubleshooting
+
+Use these fixes before adding more bulk to SKILL.md:
+
+- **Undertriggering**: Broaden `description` with realistic user phrasing, synonyms, and relevant file types.
+- **Overtriggering**: Narrow `description`, clarify scope, or add explicit negative guidance such as "Do not use for ..."
+- **Instructions not followed**: Shorten the body, move detail to `references/`, and hoist critical instructions higher. When a fragile check must be deterministic, prefer a script over prose.
+- **Context bloat**: Reduce inline examples, split references by variant or domain, and keep SKILL.md lean enough that multiple skills can coexist.
+
+### Step 7: Iterate
 
 After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
 
