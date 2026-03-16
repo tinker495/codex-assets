@@ -90,12 +90,6 @@ Include:
 ## Output Contract (chat)
 
 - Put merge outcome first.
-- Include one ASCII process map:
-
-```text
-[Onboard] -> [Preflight] -> [Merge] -> [Resolve] -> [Validate] -> [Docs]
-```
-
 - Separate `Confirmed` and `Open Risks`.
 - Ask exactly one question only when blocked.
 

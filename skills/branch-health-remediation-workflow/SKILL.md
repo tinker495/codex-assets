@@ -78,7 +78,6 @@ Include a structural impact check per proposal:
 
 ## Output Contract (chat)
 - Answer first with the remediation plan summary.
-- Provide an ASCII flow diagram.
 - Provide evidence list with file paths and key symbols.
 - Provide risks and unknowns.
 - Include a compact structural impact table (proposal -> boundaries -> risk).

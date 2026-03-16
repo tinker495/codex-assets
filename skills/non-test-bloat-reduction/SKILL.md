@@ -185,7 +185,6 @@ When fallback is used, record one-line evidence in the cycle report.
 - After the table, report gate verdict (`met` or `not met`) and current non-test net delta.
 - Report executable-code delta separately from comment/docstring delta.
 - Report `radon` delta (or no-regression confirmation) and `xenon` pass/fail separately from LOC metrics.
-- Include an ASCII loop snapshot.
 - Include an intent cluster summary (`before clusters -> after clusters`).
 - Separate `applied reductions` from `next identifiable reductions`.
 - Keep test-code metrics in a separate line and exclude them from target calculations.

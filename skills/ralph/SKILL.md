@@ -41,6 +41,15 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent
 </Execution_Policy>
 
+## Operational Noise Controls
+
+- Before git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
+- If `write_stdin` fails with `stdin is closed`, rerun via a fresh `exec_command` session with `tty=true`; retry once only.
+- If a tool rejects `--json`, rerun once without `--json` and parse text output.
+- If `timeout` is unavailable, rerun without it or use `gtimeout`.
+- If optional grepai or Ollama-backed exploration fails, switch to `rg`-only discovery and continue with explicit limitation notes.
+- Avoid here-doc syntax; use `python -c` or single-line commands instead.
+
 <Steps>
 0. **Pre-context intake (required before planning/execution loop starts)**:
    - Assemble or load a context snapshot at `.omx/context/{task-slug}-{timestamp}.md` (UTC `YYYYMMDDTHHMMSSZ`).

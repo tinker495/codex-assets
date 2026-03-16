@@ -36,6 +36,8 @@ For existing automations, review the current prompt before proposing changes.
 - Check whether guardrails or fallback rules are stale, contradictory, or drifting from actual file paths/resources.
 - Prefer shorter prompts after the audit; remove restated lists when a script or file already owns them.
 - Preserve `rrule` and `cwds` unless the user asked to change them or the evidence shows cadence/workspace is part of the problem.
+- When the automation audits machine-wide Codex state under `~/.codex` (for example `sessions`, `automations`, or `skills`), default `cwds` to `~/.codex` rather than a backup/admin repo such as `~/project/codex-skills`.
+- If the automation reviews many repos from session history, keep `cwds` at `~/.codex` and recover per-repo context from session metadata instead of anchoring the run to one repo.
 
 ### 4) Construct Fields
 
@@ -46,6 +48,7 @@ For existing automations, review the current prompt before proposing changes.
   - Hourly interval: `FREQ=HOURLY;INTERVAL=<hours>[;BYDAY=MO,TU,...]`
   - Weekly schedule: `FREQ=WEEKLY;BYDAY=MO,TU,...;BYHOUR=<0-23>;BYMINUTE=<0-59>`
 - `cwds`: Comma-separated list or JSON array string of workspace paths.
+- `cwds` rule: Choose the narrowest real execution root for the task. Repo-local automation uses the target repo. Machine-wide Codex automation uses `~/.codex`.
 - `status`: Default to `ACTIVE` unless user requests paused.
 - `validation`: After editing an automation TOML, parse it once with `tomllib`. If default `python` lacks `tomllib`, use `python3.11` fallback.
 - `path checks`: Before reading or writing automation files, verify with `test -d` and `test -w` on the parent directory.
@@ -54,6 +57,7 @@ For existing automations, review the current prompt before proposing changes.
 - `shell guardrail`: Avoid here-doc syntax and prefer `python -c` or single-line commands.
 - `date guardrail`: If `date -I` fails, use `python -c "import datetime; print(datetime.date.today().isoformat())"`.
 - `flag fallback`: If a tool rejects `--json`, rerun without it and parse plain-text output.
+- `repo fallback`: If repo context is needed but the automation runs from `~/.codex`, recover `repo_root` from session `workdir` or absolute file paths, verify with `git -C <repo_root> rev-parse --is-inside-work-tree`, then run `git -C <repo_root> ...`. Do not assume the automation `cwd` is the repo.
 
 ### 5) Emit Directive
 

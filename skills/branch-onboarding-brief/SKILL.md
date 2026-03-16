@@ -13,11 +13,23 @@ Create a reliable, repeatable onboarding phase that summarizes the current branc
 
 ### 1) Collect branch context
 
+Before running repo-scoped branch commands, verify context once:
+
+```bash
+git rev-parse --is-inside-work-tree
+```
+
 Prefer the bundled script for deterministic data:
 
 ```bash
-test -f scripts/collect_branch_info.py || rg --files -g 'collect_branch_info.py'
-python scripts/collect_branch_info.py --base main --format json
+test -f scripts/collect_branch_info.py && python scripts/collect_branch_info.py --base main --format json
+```
+
+If the repo-local script path is missing, search exact candidates and run the first returned path:
+
+```bash
+rg --files -g 'collect_branch_info.py'
+python /absolute/path/from-search/collect_branch_info.py --base main --format json
 ```
 
 If the script is unavailable (or script path check fails), fall back to:
@@ -67,18 +79,12 @@ When categorizing changes, make your criteria explicit (for example: tests by `t
 - Use search-as-discovery: run `scripts/collect_branch_info.py` first; do not start with broad repo-wide scans.
 - Apply path filtering: prioritize changed-file lists from branch diff output before expanding to repository-wide search.
 - Use trace-plus-rg evidence gating: run targeted `rg` on identified files/modules first; only then expand with `rg --files`.
+- Before any repo-scoped script or git command, verify repo context with `git rev-parse --is-inside-work-tree`; if it fails, stop branch-only analysis and report.
 - Path-sensitive guardrail: verify script existence with `test -f` (or `rg --files`) before execution; if missing, skip script and continue with git-based branch context commands.
+- If `rg --files -g 'collect_branch_info.py'` finds a path, run that exact path instead of retrying `scripts/collect_branch_info.py`.
 - Avoid fallback loops: if git/base-detection fails twice, resolve base once (`origin/HEAD`) and proceed with the minimal diff set.
 
 ## Output format (chat)
-
-Always include a small ASCII flow diagram so the user can scan the process quickly.
-
-Example:
-
-```
-[Collect] -> [Onboard] -> [Brief] -> [Handoff]
-```
 
 ## Resources
 

@@ -14,6 +14,7 @@ Treat `grepai search` as discovery only, and ground final claims with dual-view 
 - Before repository git fallback commands, verify context: `git rev-parse --is-inside-work-tree`.
 - If `grepai` is unavailable (`command not found: grepai`), switch immediately to `rg`-only discovery and continue with explicit limitation notes.
 - If embeddings fail against local Ollama (`failed to send request to Ollama` / `localhost:11434`), skip embeddings-based steps and continue with `rg`/trace evidence.
+- If a `grepai` subcommand rejects `--json`, rerun once without `--json` and parse text output; do not keep retrying the flagged form.
 - Retry identical failing commands at most once, then move to the documented fallback (no retry loops).
 
 ```mermaid
@@ -153,7 +154,6 @@ flowchart LR
 
 ## Output Contract
 - Provide a short behavior summary first.
-- Provide an ASCII diagram of the flow in chat output.
 - Provide an evidence list with file paths and key symbols.
 - Label each evidence item as `trace`, `rg`, or `test/spec`.
 - Provide risks and unknowns as separate lists.

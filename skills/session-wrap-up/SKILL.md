@@ -96,32 +96,11 @@ Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets
 
 Always return, in order:
 1. Session result summary (answer-first, 3-5 lines).
-2. ASCII flow snapshot.
-3. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
-4. Delegation plan (`orchestrator -> specialist`) for each action.
-5. Topology delta summary (if no change, say "no topology change").
-6. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
+2. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
+3. Delegation plan (`orchestrator -> specialist`) for each action.
+4. Topology delta summary (if no change, say "no topology change").
+5. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
 If every action is `none`, still emit all sections and explicitly say `no-op wrap-up`.
-
-ASCII flow format:
-
-```text
-[Session Evidence]
-      |
-      v
-[Reusable Insight Extraction]
-      |
-      v
-[Action Decision]
-  |       |        |        |
- none   update   create   retire
-          \        |        /
-           v       v       v
-        [skill-creator]
-              |
-              v
-       [Topology Check]
-```
 
 ## Delegation Boundaries
 

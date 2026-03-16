@@ -115,12 +115,6 @@ Report:
 
 ## Output Contract (chat)
 - Put the documentation refresh result first.
-- Include an ASCII process map:
-
-```text
-[Onboard] -> [Map Docs] -> [Deep Analyze] -> [Rewrite] -> [Validate]
-```
-
 - Include evidence list with file paths and symbols.
 - Separate confirmed updates and unresolved items.
 - Ask exactly one question only when blocked.

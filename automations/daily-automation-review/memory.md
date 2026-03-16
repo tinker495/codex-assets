@@ -60,3 +60,12 @@
 
 - Summary: Executed approved fix. Updated scanner SIGNALS in automatically-create-new-skills to include write_stdin stdin-closed signal, synced automation prompt Signals/Guardrails with explicit exec_command tty=true recovery, and refreshed updated_at. Validated with tomllib parse and scan_noise runs (single-file + 24h) confirming signal detection and HIGH classification in 24h view.
 - Run time: 2026-02-17T11:04:54.883138
+
+- Summary: Reviewed 2026-03-15 sessions plus both existing automation TOMLs/memory files. Repeated operational failures were path-discovery misses (`collect_branch_info.py` 7, `fetch_comments.py` 7, `agent-tiers.md` 5) and team shutdown gating (4), while repo test/setup failures were separate (6). Updated `automatically-create-new-skills` prompt to keep scanner JSON primary but require a secondary pass for repeated non-zero discovery/path failures and to demote generic `ERROR collecting` / `ModuleNotFoundError` into repo-specific context unless corroborated by non-test sessions. Updated `daily-automation-review` prompt to use `scan_noise.py` as the baseline when present and to join `function_call_output` with `function_call` metadata so read-only observer output is ignored. Validated both automation TOMLs with `python3 tomllib`; no schedule changes.
+- Run time: 2026-03-16T17:31:14.169895+09:00
+
+- Summary: Verified both current automations were still anchored to `/Users/mrx-ksjung/project/codex-skills`, which is the backup/admin repo rather than the global Codex runtime root. Updated both `cwds` to `/Users/mrx-ksjung/.codex` so they execute from the machine-wide Codex state, and tightened both prompts so any repo fallback must recover a repo root from session workdir or absolute paths and then use `git -C <repo_root> ...` instead of assuming the automation cwd is a repo. Validated both automation TOMLs with `python3 tomllib`.
+- Run time: 2026-03-16T17:35:25.745905+09:00
+
+- Summary: Executed the wrap-up follow-through. Updated `/Users/mrx-ksjung/.codex/skills/automation-creator/SKILL.md` so machine-wide Codex automations default `cwds` to `~/.codex`, keep multi-repo review anchored there, and recover repo context with `git -C <repo_root>` instead of assuming the automation cwd is a repo. Validated with `uv run --with pyyaml python /Users/mrx-ksjung/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/mrx-ksjung/.codex/skills/automation-creator`.
+- Run time: 2026-03-16T17:39:43.420800+09:00
