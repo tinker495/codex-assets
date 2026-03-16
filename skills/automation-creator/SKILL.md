@@ -7,7 +7,7 @@ description: Create, update, and inspect Codex automations (recurring tasks). Us
 
 ## Overview
 
-Translate user intent into Codex automation directives for creating, updating, or viewing recurring tasks.
+Translate user intent into Codex automation directives for creating, updating, or viewing recurring tasks. When reviewing or updating an existing automation, audit prompt quality in addition to model, schedule, and workspace settings.
 
 ## Workflow
 
@@ -17,6 +17,7 @@ Translate user intent into Codex automation directives for creating, updating, o
 - Identify the task objective and expected output.
 - Identify schedule requirements (frequency, days, time) and confirm the user's local time zone.
 - Identify which workspaces (`cwds`) the automation should use.
+- If reviewing or updating an existing automation, read the current `automation.toml` first and read `memory.md` when present to understand prior run outcomes.
 - If a required detail is missing, ask one targeted question.
 
 ### 2) Decide Mode
@@ -25,7 +26,18 @@ Translate user intent into Codex automation directives for creating, updating, o
 - If the user wants to change an existing automation, read the current automation TOML, then emit a suggested update directive.
 - If the user wants a new automation, emit a suggested create directive.
 
-### 3) Construct Fields
+### 3) Audit Existing Automation Quality
+
+For existing automations, review the current prompt before proposing changes.
+
+- Check whether the prompt duplicates data already owned by a script or structured output; prefer one canonical source of truth.
+- Check whether the prompt has a clear output contract, for example exact decision buckets, ranked recommendations, required evidence, or explicit no-change behavior.
+- Check whether execution order and prioritization are explicit enough for repeated runs.
+- Check whether guardrails or fallback rules are stale, contradictory, or drifting from actual file paths/resources.
+- Prefer shorter prompts after the audit; remove restated lists when a script or file already owns them.
+- Preserve `rrule` and `cwds` unless the user asked to change them or the evidence shows cadence/workspace is part of the problem.
+
+### 4) Construct Fields
 
 - `name`: Short, human-friendly label. Propose one if the user does not provide it.
 - `prompt`: Task only. Do not include schedule or workspace details.
@@ -43,7 +55,7 @@ Translate user intent into Codex automation directives for creating, updating, o
 - `date guardrail`: If `date -I` fails, use `python -c "import datetime; print(datetime.date.today().isoformat())"`.
 - `flag fallback`: If a tool rejects `--json`, rerun without it and parse plain-text output.
 
-### 4) Emit Directive
+### 5) Emit Directive
 
 - Output a single `::automation-update{...}` directive.
 - If helpful, add a short explanation of assumptions and any defaults.

@@ -78,6 +78,8 @@ When change impact still spans multiple modules or naming drift remains ambiguou
 
 ### 6) Draft PR Description
 
+- When `scripts/generate_pr_brief.py` is available, prefer it to turn `run_pr_workflow.py` JSON into a Markdown draft before manual polishing.
+
 Use this format (**한국어로 자세히 작성**):
 
 ```markdown
@@ -192,6 +194,7 @@ By Category:
 - Reuse prior verified results when they satisfy the same checklist item; avoid rerunning `make test` after a successful coverage-enabled `code-health` run.
 - If `code-health` emits structured JSON metadata, decide the standard test item from `standard_test_status` first and use `failure` only as supporting evidence.
 - When `scripts/evaluate_pr_checklist.py` is available, use it to produce the checklist verdict JSON and report directly from that output.
+- When `scripts/run_pr_workflow.py` is available, prefer it as the automation entrypoint for `code-health`, lint/format, optional full-dataset, checklist verdict, and PR-body input JSON.
 - If `code-health` fails without structured metadata, capture the failing substep and decide the standard test item from that evidence instead of blanket-failing it.
 - Do not run `make test-full` by default. Run full-dataset checks only when the user or an existing checklist explicitly requires them.
 - Mark items as passed/failed/blocked in your report.
@@ -202,6 +205,7 @@ By Category:
 - Show the full PR briefing to the user.
 - Ask whether to proceed with push + PR creation.
 - Stop if approval is not given.
+- When `scripts/create_pr_from_workflow.py` is available, prefer it to push the branch (optional) and call `gh pr create --body-file` from the generated artifacts after approval.
 
 ### 9) Push Branch (if needed)
 
@@ -226,6 +230,9 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 ## Bundled resources
 
 - `scripts/evaluate_pr_checklist.py`: consume `code-health` JSON plus explicit checklist inputs and emit machine-readable checklist verdicts.
+- `scripts/run_pr_workflow.py`: run `code-health`, lint/format, optional full-dataset, then emit a consolidated JSON payload for checklist verdicts and PR-body inputs.
+- `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
+- `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, and create the PR through `gh pr create`.
 
 ## Operational Noise Controls
 
