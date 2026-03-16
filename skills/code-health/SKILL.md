@@ -17,9 +17,11 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
    - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20 --base origin/main`
    - Use `--mode full` for deeper scans (keep origin/main baseline).
    - Use `--top-files 20` to expand the main-branch churn list.
+   - The built-in coverage lane runs standard `pytest --cov=stowage --cov=tui -q`; treat that as evidence for the normal test lane only, never as `make test-full` or any full-dataset substitute.
    - Use `--skip-coverage` only if tests are too heavy; ask before skipping coverage when accuracy matters.
    - Before using `--out-dir`, verify writability: `test -w /tmp` or `test -d "$CODEX_HOME/shared/code-health"`.
    - If neither is writable, fallback to a repo-root temp dir (for example, `<repo_root>/.codex_tmp/code-health`) and report the fallback.
+   - If the pipeline fails, capture the failing substep/command plus the relevant stdout/stderr. Distinguish `pytest` failure from later reporting failure so downstream consumers can decide whether the standard test item passed even when `code-health` overall failed.
 4. If the request is complexity-fix oriented (`xenon FAIL`, `radon C+`), run:
    - `uv run radon cc src -s -n C`
    - `uv run xenon --max-absolute B --max-modules A --max-average A src` (or repo-provided thresholds)
@@ -53,6 +55,8 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Complexity: top cyclomatic entries (radon).
 - Maintainability: lowest MI entries (radon).
 - Coverage hotspots: lowest covered files and missing-line hotspots.
+- Failure evidence (when applicable): failing substep, command, exit context, and the minimal stdout/stderr excerpt needed to classify whether the standard `pytest --cov ...` lane completed.
+- Structured JSON metadata (when applicable): top-level `status`, `standard_test_status`, and `failure` object for downstream automation.
 - Navigation efficiency (optional): steps/cost/efficiency when localization workflows are in scope.
 - Actions: 3-5 concrete follow-ups, prioritize deletions and simplifications.
 
@@ -61,6 +65,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Treat xenon FAIL as blocking for refactors.
 - If cyclomatic complexity is C or worse, or MI is low, suggest refactors or tests.
 - If non-test diff shows net growth without tests, call it out explicitly.
+- Never imply that `code-health` coverage satisfies `make test-full`; full-dataset verification requires an explicit separate run.
 
 ## Bundled resources
 - `scripts/run_code_health.py`: orchestrate tool execution and write global reports (not in repo).

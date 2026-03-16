@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,25 +20,48 @@ IGNORE = (
 )
 
 
-def run(cmd: list[str], check: bool = True) -> str:
+_OUTPUT_EXCERPT_LIMIT = 2000
+
+
+@dataclass(frozen=True)
+class StepFailure(Exception):
+    step: str
+    command: tuple[str, ...]
+    returncode: int
+    stdout: str
+    stderr: str
+
+
+def _excerpt(text: str) -> str:
+    normalized = text.strip()
+    if len(normalized) <= _OUTPUT_EXCERPT_LIMIT:
+        return normalized
+    return f"{normalized[:_OUTPUT_EXCERPT_LIMIT]}...(truncated)"
+
+
+def run(step: str, cmd: list[str], check: bool = True) -> str:
     result = subprocess.run(cmd, capture_output=True, text=True)
     if check and result.returncode != 0:
-        raise subprocess.CalledProcessError(
-            returncode=result.returncode, cmd=cmd, output=result.stdout, stderr=result.stderr
+        raise StepFailure(
+            step=step,
+            command=tuple(cmd),
+            returncode=result.returncode,
+            stdout=result.stdout,
+            stderr=result.stderr,
         )
     return (result.stdout + result.stderr).strip()
 
 
-def run_module(module: str, args: list[str], check: bool = True) -> str:
+def run_module(step: str, module: str, args: list[str], check: bool = True) -> str:
     if shutil.which("uv"):
         cmd = ["uv", "run", module, *args]
     else:
         cmd = [sys.executable, "-m", module, *args]
-    return run(cmd, check=check)
+    return run(step, cmd, check=check)
 
 
-def run_python_script(script: Path, args: list[str], check: bool = True) -> str:
-    return run([sys.executable, str(script), *args], check=check)
+def run_python_script(step: str, script: Path, args: list[str], check: bool = True) -> str:
+    return run(step, [sys.executable, str(script), *args], check=check)
 
 
 def jscpd_command() -> list[str] | None:
@@ -133,6 +157,31 @@ def parse_xenon_status(text: str) -> str:
     return match.group(1) if match else "UNKNOWN"
 
 
+def build_failure_metadata(
+    failure: StepFailure,
+    *,
+    coverage_skipped: bool,
+    coverage_pytest_completed: bool,
+) -> dict[str, Any]:
+    if coverage_skipped:
+        standard_test_status = "not_run"
+    elif coverage_pytest_completed:
+        standard_test_status = "passed"
+    else:
+        standard_test_status = "failed"
+
+    return {
+        "step": failure.step,
+        "command": list(failure.command),
+        "returncode": failure.returncode,
+        "stdout_excerpt": _excerpt(failure.stdout),
+        "stderr_excerpt": _excerpt(failure.stderr),
+        "combined_excerpt": _excerpt(f"{failure.stdout}\n{failure.stderr}".strip()),
+        "coverage_pytest_completed": coverage_pytest_completed,
+        "standard_test_status": standard_test_status,
+    }
+
+
 def write_report(
     output_path: Path,
     mode: str,
@@ -144,6 +193,9 @@ def write_report(
     coverage_out: str,
     jscpd_data: dict[str, Any],
     coverage_skipped: bool,
+    status: str,
+    standard_test_status: str,
+    failure: dict[str, Any] | None,
 ) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     xenon_status = parse_xenon_status(code_out)
@@ -155,6 +207,8 @@ def write_report(
     lines.append(f"Top: {top}")
     lines.append("")
     lines.append("## Summary")
+    lines.append(f"- Status: {status}")
+    lines.append(f"- Standard test status: {standard_test_status}")
     lines.append(
         f"- Duplication: {jscpd_data['clones']} clones, {jscpd_data['dup_lines']} duplicated lines "
         f"({jscpd_data['pct']}%) across {jscpd_data['files']} files"
@@ -188,6 +242,21 @@ def write_report(
         lines.append("## Coverage Hotspots")
         lines.append("```text")
         lines.append(coverage_out or "(no coverage output)")
+        lines.append("```")
+    if failure is not None:
+        lines.append("")
+        lines.append("## Failure Evidence")
+        lines.append("```text")
+        lines.append(f"step: {failure['step']}")
+        lines.append(f"command: {' '.join(failure['command'])}")
+        lines.append(f"returncode: {failure['returncode']}")
+        lines.append(f"standard_test_status: {failure['standard_test_status']}")
+        lines.append("")
+        lines.append("stdout:")
+        lines.append(failure["stdout_excerpt"] or "(empty)")
+        lines.append("")
+        lines.append("stderr:")
+        lines.append(failure["stderr_excerpt"] or "(empty)")
         lines.append("```")
     lines.append("")
 
@@ -226,63 +295,89 @@ def main() -> None:
     out_dir = args.out_dir if args.out_dir else default_output_dir()
     output_path, json_path = build_report_paths(out_dir, project, branch)
     main_ref = args.base if args.base else resolve_main_ref()
-    diff_out = run_python_script(
-        skill_dir / "diff_summary_compact.py",
-        ["--base", main_ref],
-    )
-    main_diff_out = run_python_script(
-        skill_dir / "diff_summary_compact.py",
-        [
-            "--base",
-            main_ref,
-            "--deep",
-            "--all-files",
-            "--top-files",
-            str(args.top_files),
-        ],
-    )
+    diff_out = ""
+    main_diff_out = ""
+    code_out = ""
+    coverage_out = ""
+    coverage_pytest_completed = False
+    status = "passed"
+    standard_test_status = "not_run" if args.skip_coverage else "failed"
+    failure_data: dict[str, Any] | None = None
 
     jscpd_dir = out_dir / "jscpd"
     jscpd_dir.mkdir(parents=True, exist_ok=True)
     jscpd_json = jscpd_dir / "jscpd-report.json"
-    jscpd_cmd = jscpd_command()
-    if jscpd_cmd:
-        run(
+    jscpd_data = parse_jscpd_json(jscpd_json)
+
+    try:
+        diff_out = run_python_script(
+            "diff_summary",
+            skill_dir / "diff_summary_compact.py",
+            ["--base", main_ref],
+        )
+        main_diff_out = run_python_script(
+            "diff_summary_deep",
+            skill_dir / "diff_summary_compact.py",
             [
-                *jscpd_cmd,
-                ".",
-                "--reporters",
-                "json",
-                "--output",
-                str(jscpd_dir),
-                "--min-lines",
-                "5",
-                "--min-tokens",
-                "70",
-                "--mode",
-                "weak",
-                "--gitignore",
-                "--silent",
-                "--ignore",
-                IGNORE,
+                "--base",
+                main_ref,
+                "--deep",
+                "--all-files",
+                "--top-files",
+                str(args.top_files),
             ],
-            check=False,
         )
 
-    code_out = run_python_script(
-        skill_dir / "code_health_compact.py",
-        ["--mode", args.mode, "--top", str(args.top), "--jscpd-json", str(jscpd_json)],
-    )
+        jscpd_cmd = jscpd_command()
+        if jscpd_cmd:
+            run(
+                "duplication_jscpd",
+                [
+                    *jscpd_cmd,
+                    ".",
+                    "--reporters",
+                    "json",
+                    "--output",
+                    str(jscpd_dir),
+                    "--min-lines",
+                    "5",
+                    "--min-tokens",
+                    "70",
+                    "--mode",
+                    "weak",
+                    "--gitignore",
+                    "--silent",
+                    "--ignore",
+                    IGNORE,
+                ],
+                check=False,
+            )
 
-    coverage_out = ""
-    if not args.skip_coverage:
-        coverage_json = out_dir / "coverage.json"
-        run_module("pytest", ["--cov=stowage", "--cov=tui", "-q"])
-        run_module("coverage", ["json", "-o", str(coverage_json)])
-        coverage_out = run_python_script(
-            skill_dir / "coverage_hotspots.py",
-            ["--coverage-json", str(coverage_json)],
+        code_out = run_python_script(
+            "code_health_compact",
+            skill_dir / "code_health_compact.py",
+            ["--mode", args.mode, "--top", str(args.top), "--jscpd-json", str(jscpd_json)],
         )
+
+        if not args.skip_coverage:
+            coverage_json = out_dir / "coverage.json"
+            run_module("coverage_pytest", "pytest", ["--cov=stowage", "--cov=tui", "-q"])
+            coverage_pytest_completed = True
+            run_module("coverage_json", "coverage", ["json", "-o", str(coverage_json)])
+            coverage_out = run_python_script(
+                "coverage_hotspots",
+                skill_dir / "coverage_hotspots.py",
+                ["--coverage-json", str(coverage_json)],
+            )
+            standard_test_status = "passed"
+    except StepFailure as failure:
+        status = "failed"
+        failure_data = build_failure_metadata(
+            failure,
+            coverage_skipped=args.skip_coverage,
+            coverage_pytest_completed=coverage_pytest_completed,
+        )
+        standard_test_status = failure_data["standard_test_status"]
 
     jscpd_data = parse_jscpd_json(jscpd_json)
 
@@ -296,6 +391,9 @@ def main() -> None:
         "duplication": jscpd_data,
         "xenon_status": parse_xenon_status(code_out),
         "coverage_skipped": args.skip_coverage,
+        "status": status,
+        "standard_test_status": standard_test_status,
+        "failure": failure_data,
         "output_markdown": str(output_path),
         "output_json": str(json_path),
     }
@@ -311,8 +409,14 @@ def main() -> None:
         coverage_out=coverage_out,
         jscpd_data=jscpd_data,
         coverage_skipped=args.skip_coverage,
+        status=status,
+        standard_test_status=standard_test_status,
+        failure=failure_data,
     )
     write_json(json_path, report_data)
+
+    if failure_data is not None:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,10 @@ Your job is to help users prepare and create comprehensive, well-structured PRs:
 
 - Use the `code-health` skill workflow to run the repo code-health pipeline.
 - Extract key metrics (duplication %, xenon status, dead code, complexity, maintainability, coverage hotspots, diff summary).
+- If the `code-health` run includes coverage successfully, treat that coverage-backed pytest run as satisfying the standard `make test` checklist item; do not rerun `make test` unless coverage was skipped or pytest did not complete.
+- Prefer the structured `code-health` JSON output when available: read top-level `status`, `standard_test_status`, and `failure` before falling back to raw logs.
+- For automatic checklist classification, prefer `scripts/evaluate_pr_checklist.py` with the `code-health` JSON output instead of ad-hoc reasoning.
+- If `code-health` fails, capture the failing command/substep and the relevant stdout/stderr. Use that failure detail to classify the standard test item: if the coverage-backed pytest command failed or never completed, `make test` is not satisfied; if pytest completed and a later health/report step failed, the `make test` item may still pass while `code-health` remains failed/blocked.
 - If the pipeline fails or tools are missing, report the issue, note it in the briefing, and ask whether to proceed.
 
 ### 3) Categorize Changes
@@ -177,15 +181,19 @@ By Category:
 ---
 
 ### Checklist
-- [ ] 모든 테스트 통과 (`make test`)
+- [ ] 모든 테스트 통과 (`make test` 또는 coverage 포함 `code-health` 결과에서 pytest 성공 확인)
 - [ ] Lint/Format 검사 통과 (`make lint`, `make format`)
-- [ ] Full dataset 테스트 통과 (`make test-full`)
 - [ ] Breaking changes 문서화 완료
 ```
 
 ### 7) Run Checklist Items (if present)
 
 - If the PR description contains a checklist, attempt each item in order.
+- Reuse prior verified results when they satisfy the same checklist item; avoid rerunning `make test` after a successful coverage-enabled `code-health` run.
+- If `code-health` emits structured JSON metadata, decide the standard test item from `standard_test_status` first and use `failure` only as supporting evidence.
+- When `scripts/evaluate_pr_checklist.py` is available, use it to produce the checklist verdict JSON and report directly from that output.
+- If `code-health` fails without structured metadata, capture the failing substep and decide the standard test item from that evidence instead of blanket-failing it.
+- Do not run `make test-full` by default. Run full-dataset checks only when the user or an existing checklist explicitly requires them.
 - Mark items as passed/failed/blocked in your report.
 - **If any item fails or is blocked, stop and ask the user whether to proceed with PR creation.**
 
@@ -214,6 +222,10 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - `grepai-deep-analysis`: owns deep evidence protocol and first-pass impact localization for breaking-change analysis.
 - `rpg-loop-reasoning`: owns dual-view augmentation when `grepai-deep-analysis` indicates unresolved cross-module ambiguity.
 - This skill owns change categorization, PR narrative, approval gating, and PR creation.
+
+## Bundled resources
+
+- `scripts/evaluate_pr_checklist.py`: consume `code-health` JSON plus explicit checklist inputs and emit machine-readable checklist verdicts.
 
 ## Operational Noise Controls
 
