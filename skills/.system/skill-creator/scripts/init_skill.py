@@ -25,10 +25,31 @@ ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+description: "[TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]"
+# Optional:
+# compatibility: [TODO: Add only if the skill depends on a specific surface, packages, network access, or runtime constraints.]
+# allowed-tools: [TODO: Add only if the skill requires explicit tool restrictions or scoped access.]
+# metadata:
+#   version: 0.1.0
 ---
 
 # {skill_title}
+
+## Use Cases
+
+[TODO: List 2-3 concrete user requests this skill should handle. Prefer realistic phrasing users would actually say.]
+
+- [Example request 1]
+- [Example request 2]
+- [Example request 3]
+
+## Success Criteria
+
+[TODO: Define how you will know the skill is working.]
+
+- Triggering: [Should trigger on ... / should not trigger on ...]
+- Functionality: [Should complete ... successfully]
+- Baseline improvement: [Optional - should reduce retries, questions, or token cost]
 
 ## Overview
 
@@ -36,7 +57,21 @@ description: [TODO: Complete and informative explanation of what the skill does 
 
 ## Structuring This Skill
 
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
+[TODO: Choose the framing and structure that best fit this skill's purpose.
+
+First choose the primary framing:
+
+**A. Problem-First**
+- Best when users describe the outcome they want
+- The skill chooses tools and sequencing
+- Example: "Set up a project workspace"
+
+**B. Tool-First**
+- Best when users already have a tool or MCP and need expert workflow guidance
+- The skill teaches best practices for using that tool effectively
+- Example: "Use Linear to plan this sprint"
+
+Then choose one or more workflow patterns:
 
 **1. Workflow-Based** (best for sequential processes)
 - Works well when there are clear step-by-step procedures
@@ -58,6 +93,18 @@ description: [TODO: Complete and informative explanation of what the skill does 
 - Example: Product Management with "Core Capabilities" -> numbered capability list
 - Structure: ## Overview -> ## Core Capabilities -> ### 1. Feature -> ### 2. Feature...
 
+**5. Iterative Refinement** (best when quality improves through review loops)
+- Works well when drafting, checking, and revising are core to the workflow
+- Example: Report generation with validation passes
+
+**6. Context-Aware Selection** (best when one goal maps to different tools based on context)
+- Works well when file type, size, source, or runtime conditions change the right path
+- Example: Storage or export workflows
+
+**7. Domain-Intelligence** (best when the skill adds expert rules beyond tool access)
+- Works well for compliance, review, policy, or governance-heavy tasks
+- Example: Financial, legal, or security workflows
+
 Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
 
 Delete this entire "Structuring This Skill" section when done - it's just guidance.]
@@ -69,6 +116,16 @@ Delete this entire "Structuring This Skill" section when done - it's just guidan
 - Decision trees for complex workflows
 - Concrete examples with realistic user requests
 - References to scripts/templates/references as needed]
+
+## Testing Notes
+
+[TODO: Before finalizing the skill, test it with:]
+
+- Obvious trigger requests
+- Paraphrased trigger requests
+- Unrelated requests that should not trigger
+- At least one representative end-to-end workflow
+- Representative scripts or tool calls, if any
 
 ## Resources (optional)
 
@@ -108,6 +165,7 @@ Files not intended to be loaded into context, but rather used within the output 
 ---
 
 **Not every skill requires all three types of resources.**
+**Do not add README.md inside the skill folder. If you publish the skill, keep human-facing README content at the repository root instead.**
 """
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
@@ -326,6 +384,8 @@ def init_skill(skill_name, path, resources, include_examples, interface_override
         print("2. Create resource directories only if needed (scripts/, references/, assets/)")
     print("3. Update agents/openai.yaml if the UI metadata should differ")
     print("4. Run the validator when ready to check the skill structure")
+    print("5. Test triggering on obvious, paraphrased, and unrelated prompts")
+    print("6. Run one representative end-to-end workflow before shipping")
 
     return skill_dir
 
