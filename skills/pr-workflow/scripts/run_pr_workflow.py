@@ -109,6 +109,14 @@ def command_status(result: CommandResult) -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def commit_subjects(commit_log: list[str]) -> list[str]:
+    subjects: list[str] = []
+    for line in commit_log:
+        parts = line.split("\t", 1)
+        subjects.append(parts[1] if len(parts) == 2 else parts[0])
+    return subjects
+
+
 def parse_numstat(text: str) -> list[NumstatRow]:
     rows: list[NumstatRow] = []
     for line in text.splitlines():
@@ -124,16 +132,86 @@ def parse_numstat(text: str) -> list[NumstatRow]:
 def runtime_category_from_commits(commit_log: list[str]) -> str:
     if not commit_log:
         return "Feature"
-    subjects: list[str] = []
-    for line in commit_log:
-        parts = line.split("\t", 1)
-        subject = parts[1] if len(parts) == 2 else parts[0]
-        subjects.append(subject.lower())
+    subjects = [subject.lower() for subject in commit_subjects(commit_log)]
     if subjects and all(subject.startswith("refactor") for subject in subjects):
         return "Refactor"
     if subjects and all(subject.startswith(("fix", "bugfix")) for subject in subjects):
         return "Bugfix"
     return "Feature"
+
+
+def _matches(text: str, keywords: tuple[str, ...]) -> int:
+    return sum(1 for keyword in keywords if keyword in text)
+
+
+def infer_narrative_hints(
+    *,
+    branch: str,
+    commit_log: list[str],
+    file_list: list[str],
+    runtime_bucket: str,
+) -> dict[str, Any]:
+    subjects = commit_subjects(commit_log)
+    corpus_parts = [branch.lower(), *(subject.lower() for subject in subjects), *(path.lower() for path in file_list)]
+    corpus = " ".join(corpus_parts)
+    branch_sources = [branch, *subjects[:3], *file_list[:5]]
+
+    evidence_score = _matches(
+        corpus,
+        ("evidence", "diagnostic", "diagnostics", "debug", "trace", "log", "export", "visibility", "observability"),
+    )
+    ui_score = _matches(corpus, ("tui", "widget", "render", "visual", "legend", "color", "overlay", "display"))
+    constraint_score = _matches(
+        corpus,
+        ("constraint", "validation", "anomaly", "blocked", "support", "reject", "fallback", "budget", "solver"),
+    )
+    timeout_score = _matches(corpus, ("timeout", "stale", "async", "race", "concurrency"))
+
+    if evidence_score >= 2:
+        problem = "이 브랜치는 기존에 SPP 진단 근거와 가시성이 부족해 원인 추적과 리뷰가 어려웠던 문제를 보완하려는 것으로 보입니다."
+        if ui_score >= 1:
+            solution = "이를 위해 진단 근거 export를 강화하고, TUI/시각화 경로에서 해당 정보를 바로 확인할 수 있게 기능을 추가한 것으로 추론됩니다."
+        else:
+            solution = "이를 위해 진단 근거 수집과 export 흐름을 보강하는 기능을 추가한 것으로 추론됩니다."
+        confidence = "high"
+    elif constraint_score >= 2:
+        problem = "이 브랜치는 기존 제약/검증 정보가 부족하거나 실패 원인이 충분히 드러나지 않던 문제를 보완하려는 것으로 보입니다."
+        solution = "이를 위해 제약/검증 관련 근거와 처리 로직을 강화하는 기능을 추가한 것으로 추론됩니다."
+        confidence = "medium"
+    elif timeout_score >= 1:
+        problem = "이 브랜치는 기존 비동기/타이밍 경로에서 불안정하거나 재현이 어려운 문제가 있었던 것으로 보입니다."
+        solution = "이를 위해 타이밍 관련 처리와 검증 경로를 보강한 것으로 추론됩니다."
+        confidence = "medium"
+    elif runtime_bucket == "Bugfix":
+        problem = "이 브랜치는 기존 동작의 오류 또는 불일치를 수정하려는 맥락으로 보입니다."
+        solution = "이를 위해 관련 로직 수정과 검증 보강이 추가된 것으로 추론됩니다."
+        confidence = "low"
+    elif runtime_bucket == "Refactor":
+        problem = "이 브랜치는 기존 구조의 복잡도 또는 유지보수 부담을 줄이려는 맥락으로 보입니다."
+        solution = "이를 위해 구조 정리와 책임 분리가 진행된 것으로 추론됩니다."
+        confidence = "low"
+    else:
+        return {
+            "problem_statement": None,
+            "solution_statement": None,
+            "confidence": "low",
+            "source_hints": branch_sources,
+            "needs_manual_completion": True,
+            "manual_prompt": "TODO: 이 브랜치 이전에 어떤 문제/운영 불편/결함이 있었는지 1~2문장으로 보강해 주세요.",
+        }
+
+    return {
+        "problem_statement": problem,
+        "solution_statement": solution,
+        "confidence": confidence,
+        "source_hints": branch_sources,
+        "needs_manual_completion": confidence == "low",
+        "manual_prompt": (
+            "TODO: 자동 추론 문장이 약하면, 이 브랜치가 해결하려는 기존 문제를 실제 배경에 맞게 보강해 주세요."
+            if confidence == "low"
+            else ""
+        ),
+    }
 
 
 def classify_path(path: str, *, runtime_bucket: str) -> str:
@@ -193,6 +271,12 @@ def collect_branch_context(repo_root: Path, base: str) -> dict[str, Any]:
             for row in numstats
         ],
         "runtime_bucket": runtime_bucket,
+        "narrative_hints": infer_narrative_hints(
+            branch=branch,
+            commit_log=commit_log,
+            file_list=[line for line in files.splitlines() if line.strip()],
+            runtime_bucket=runtime_bucket,
+        ),
         "category_metrics": category_metrics,
         "diff_stat": diff_stat,
     }
@@ -422,6 +506,7 @@ def main() -> None:
                 "files_changed": branch_context["files_changed"],
                 "diff_stat": branch_context["diff_stat"],
             },
+            "narrative_hints": branch_context["narrative_hints"],
             "category_metrics": branch_context["category_metrics"],
             "runtime_bucket": branch_context["runtime_bucket"],
             "code_health_summary": {

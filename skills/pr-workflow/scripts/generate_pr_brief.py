@@ -122,6 +122,7 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
     checklist = as_dict(payload.get("checklist"), name="checklist")
     checklist_items = as_dict(checklist.get("items"), name="checklist.items")
     pr_body_inputs = as_dict(payload.get("pr_body_inputs"), name="pr_body_inputs")
+    narrative_hints = as_dict(pr_body_inputs.get("narrative_hints", {}), name="pr_body_inputs.narrative_hints")
     category_metrics = as_dict(pr_body_inputs.get("category_metrics"), name="pr_body_inputs.category_metrics")
     runtime_bucket = str(pr_body_inputs.get("runtime_bucket", "Feature"))
     breaking_changes = as_dict(payload.get("breaking_changes"), name="breaking_changes")
@@ -142,6 +143,14 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
         f"자동 체크리스트 상태는 `{checklist.get('overall_status', 'unknown')}`이며, "
         f"표준 테스트 판정은 `code-health.standard_test_status={code_health.get('standard_test_status', 'unknown')}`를 우선 사용했습니다."
     )
+    problem_statement = narrative_hints.get("problem_statement")
+    solution_statement = narrative_hints.get("solution_statement")
+    if isinstance(problem_statement, str) and problem_statement.strip():
+        lines.append(f"- 배경(자동 추론): {problem_statement.strip()}")
+    if isinstance(solution_statement, str) and solution_statement.strip():
+        lines.append(f"- 변경 방향(자동 추론): {solution_statement.strip()}")
+    if narrative_hints.get("needs_manual_completion"):
+        lines.append(str(narrative_hints.get("manual_prompt") or "TODO: 브랜치 배경 문제를 한두 문장으로 보강해 주세요."))
     lines.append("부정확할 수 있는 카테고리/리뷰 포인트는 TODO 표식을 남겼으니 PR 생성 전 최종 보정이 필요합니다.")
     lines.append("")
     lines.append("### 주요 변경사항 (Key Changes)")

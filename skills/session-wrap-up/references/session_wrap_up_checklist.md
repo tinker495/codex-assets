@@ -6,6 +6,17 @@
 2. Confirm at least one reusable insight exists.
 3. Confirm ownership can be assigned without overlap.
 4. If any action retires/removes skill assets, require `mirror` sync mode.
+5. If no reusable insight survives review, mark the wrap-up as `no-op` and stop after reporting.
+
+## Evidence Priority
+
+Use evidence in this order:
+1. Current task summary and delivered result.
+2. Changed files, command traces, validations, and failure/retry notes.
+3. User corrections or repeated steering.
+4. Local session artifacts such as `.omx/notepad.md` or saved reports.
+
+Do not reference a non-installed recall skill to fill evidence gaps.
 
 ## Insight Extraction Grid
 
@@ -16,16 +27,24 @@
 | New repeated workflow | appears in multiple tasks | high | create-new-skill |
 | One-off failure | isolated environment issue | low | none |
 
+Default bias:
+- prefer `update-existing-skill`
+- use `create-new-skill` only when no installed owner is a clean fit
+
 ## Handoff Packet to skill-creator
 
 Provide:
 - `name`: English hyphen-case.
+- `target_path`: `$CODEX_HOME/skills/<skill-name>`.
+- `action`: `update-existing-skill`, `create-new-skill`, `retire-skill`, or `none`.
 - `description`: what + when-to-use trigger.
+- `description_delta`: new trigger, removed trigger, or ownership correction.
 - `role`: specialist/orchestrator/utility/meta.
 - `ownership`: what this skill owns.
 - `delegation`: one-hop edges only.
 - `resources`: scripts/references/assets needs.
-- `validation`: quick_validate + topology consistency.
+- `interface`: whether `agents/openai.yaml` needs refresh.
+- `validation`: quick_validate + topology consistency when role/edges changed.
 
 If sub-agent execution is part of the proposed workflow, include:
 - `sub-agent invocation`: `--prompt-file` + `--timeout-sec` standard.
@@ -40,6 +59,7 @@ Update topology only when one of these changed:
 - ownership transfer between skills
 
 If none changed, record: `no topology change`.
+Never keep delegation notes that point to non-installed skills.
 
 ## Retirement and Sync Mode Gate
 

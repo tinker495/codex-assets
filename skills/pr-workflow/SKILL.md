@@ -24,12 +24,37 @@ Your job is to help users prepare and create comprehensive, well-structured PRs:
 - "Create PR", "Prepare PR", "Draft PR description"
 - Any request to analyze branch changes and create a pull request
 
+## Quick Start
+
+- 단일 엔트리포인트가 있으면 `scripts/launch_pr_workflow.py`를 기본 진입점으로 사용한다.
+- 기본 분석 + 초안 생성:
+
+```bash
+python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.py \
+  --repo-root . \
+  --base origin/main \
+  --pr-title "기능: 한국어 PR 제목"
+```
+
+- 브랜치 push + 실제 PR 생성까지:
+
+```bash
+python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.py \
+  --repo-root . \
+  --base origin/main \
+  --pr-title "기능: 한국어 PR 제목" \
+  --push-branch \
+  --execute
+```
+
 ## Workflow Steps
 
 ### 1) Gather Branch Information (Delegated)
 
 - Run `branch-onboarding-brief` first and reuse its branch/base, commit summary, file counts, and net LOC metrics.
 - Run additional `git diff` commands only when the onboarding output misses a metric required for the PR briefing.
+- If branch name / commit subjects / changed paths are strong enough, infer a short “previous problem → added capability” narrative from that onboarding context and seed the PR Overview with it.
+- If the onboarding evidence is too weak for a reliable narrative, insert a short TODO prompt asking the human to complete the branch background manually.
 
 ### 2) Run Code-Health (Required)
 
@@ -79,6 +104,7 @@ When change impact still spans multiple modules or naming drift remains ambiguou
 ### 6) Draft PR Description
 
 - When `scripts/generate_pr_brief.py` is available, prefer it to turn `run_pr_workflow.py` JSON into a Markdown draft before manual polishing.
+- The draft should include a short background sentence of the form “이전에는 … 문제가 있어서 … 기능을 추가했다” when onboarding evidence supports it; otherwise it should leave a concise TODO prompt for human completion.
 
 Use this format (**한국어로 자세히 작성**):
 
@@ -195,6 +221,7 @@ By Category:
 - If `code-health` emits structured JSON metadata, decide the standard test item from `standard_test_status` first and use `failure` only as supporting evidence.
 - When `scripts/evaluate_pr_checklist.py` is available, use it to produce the checklist verdict JSON and report directly from that output.
 - When `scripts/run_pr_workflow.py` is available, prefer it as the automation entrypoint for `code-health`, lint/format, optional full-dataset, checklist verdict, and PR-body input JSON.
+- When `scripts/launch_pr_workflow.py` is available, prefer it as the single entrypoint that chains workflow JSON generation, Markdown draft generation, and optional PR creation.
 - If `code-health` fails without structured metadata, capture the failing substep and decide the standard test item from that evidence instead of blanket-failing it.
 - Do not run `make test-full` by default. Run full-dataset checks only when the user or an existing checklist explicitly requires them.
 - Mark items as passed/failed/blocked in your report.
@@ -233,6 +260,7 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - `scripts/run_pr_workflow.py`: run `code-health`, lint/format, optional full-dataset, then emit a consolidated JSON payload for checklist verdicts and PR-body inputs.
 - `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
 - `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, and create the PR through `gh pr create`.
+- `scripts/launch_pr_workflow.py`: single entrypoint that orchestrates the full chain from workflow analysis to optional PR creation.
 
 ## Operational Noise Controls
 
