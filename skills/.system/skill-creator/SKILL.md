@@ -128,6 +128,8 @@ A skill should only contain essential files that directly support its functional
 
 The skill should only contain the information needed for an AI agent to do the job at hand. It should not contain auxiliary context about the process that went into creating it, setup and testing procedures, user-facing documentation, etc. Creating additional documentation files just adds clutter and confusion.
 
+If you publish the skill in a GitHub repository, keep human-facing README content at the repository root, not inside the skill folder itself.
+
 ### Progressive Disclosure Design Principle
 
 Skills use a three-level loading system to manage context efficiently:
@@ -247,6 +249,13 @@ Skip this step only when the skill's usage patterns are already clearly understo
 
 To create an effective skill, clearly understand concrete examples of how the skill will be used. This understanding can come from either direct user examples or generated examples that are validated with user feedback.
 
+Aim to pin down 2-3 concrete use cases before writing structure. For each use case, identify:
+
+- What outcome the user wants
+- What tools or integrations are needed
+- What domain knowledge or best practices should be embedded
+- What the user is likely to actually say
+
 For example, when building an image-editor skill, relevant questions include:
 
 - "What functionality should the image-editor skill support? Editing, rotating, anything else?"
@@ -304,6 +313,19 @@ Example: When building a `big-query` skill to handle queries like "How many user
 To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
 
 Before inventing a novel structure, inspect one or two similar high-quality skills and reuse the parts that already fit. Prefer adapting a proven pattern over creating a custom layout from scratch.
+
+Choose a dominant framing early:
+
+- **Problem-first**: The user describes an outcome and the skill chooses the right tools and sequence.
+- **Tool-first**: The user already has a tool or MCP connected and the skill teaches the best workflow for using it well.
+
+Choose a dominant workflow pattern as well:
+
+- **Sequential orchestration** for strict ordered workflows
+- **Multi-tool coordination** when work spans multiple services
+- **Iterative refinement** when quality improves through review loops
+- **Context-aware selection** when the same outcome uses different tools depending on context
+- **Domain intelligence** when the skill adds expert rules beyond simple tool usage
 
 ### Step 4: Initializing the Skill
 
@@ -363,7 +385,7 @@ If you used `--examples`, delete any placeholder files that are not needed for t
 
 ##### Frontmatter
 
-Write the YAML frontmatter with required `name` and `description`. In this local toolchain, `license`, `allowed-tools`, and `metadata` are the supported optional fields.
+Write the YAML frontmatter with required `name` and `description`. In this local toolchain, `license`, `allowed-tools`, `compatibility`, and `metadata` are the supported optional fields.
 
 - `name`: The skill name
 - `description`: This is the primary triggering mechanism for your skill, and helps Codex understand when to use the skill.
@@ -375,9 +397,16 @@ Write the YAML frontmatter with required `name` and `description`. In this local
   - Bad description example: "Helps with projects."
 - `license`: Optional. Use when the skill is intended for open-source distribution.
 - `allowed-tools`: Optional. Use only when the skill genuinely depends on restricted or explicitly scoped tools, and keep the list aligned with real commands or integrations.
+- `compatibility`: Optional. Use to record environment requirements such as intended surface, required system packages, network access expectations, or other runtime constraints.
 - `metadata`: Optional. Use for maintenance-oriented fields like version, author, category, or related MCP server name.
 
-Do not add unsupported frontmatter keys unless you also update the surrounding tooling. `scripts/quick_validate.py` currently validates `name`, `description`, `license`, `allowed-tools`, and `metadata`.
+Keep frontmatter safe:
+
+- Do not use angle brackets (`<` or `>`) in frontmatter values.
+- Keep `description` under 1024 characters.
+- Keep `compatibility` brief and concrete.
+
+Do not add unsupported frontmatter keys unless you also update the surrounding tooling. `scripts/quick_validate.py` currently validates `name`, `description`, `license`, `allowed-tools`, `compatibility`, and `metadata`.
 
 ##### Body
 
@@ -426,6 +455,7 @@ Use these fixes before adding more bulk to SKILL.md:
 - **Overtriggering**: Narrow `description`, clarify scope, or add explicit negative guidance such as "Do not use for ..."
 - **Instructions not followed**: Shorten the body, move detail to `references/`, and hoist critical instructions higher. When a fragile check must be deterministic, prefer a script over prose.
 - **Context bloat**: Reduce inline examples, split references by variant or domain, and keep SKILL.md lean enough that multiple skills can coexist.
+- **Unsure why a skill does or does not trigger**: Ask the model when it would use the skill and inspect which parts of `description` it quotes back. Revise the trigger language rather than blindly adding more body text.
 
 ### Step 7: Iterate
 
