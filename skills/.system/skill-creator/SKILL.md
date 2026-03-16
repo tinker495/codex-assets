@@ -72,17 +72,20 @@ skill-name/
 
 Every SKILL.md consists of:
 
-- **Frontmatter** (YAML): `name` and `description` are required and control triggering. In this toolchain, `license`, `allowed-tools`, and `metadata` are also supported when they add real value, but keep frontmatter minimal.
+- **Frontmatter** (YAML): `name` and `description` are required and control triggering. In this toolchain, `license`, `allowed-tools`, `compatibility`, and `metadata` are also supported when they add real value, but keep frontmatter minimal.
 - **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
 
 #### Agents metadata (recommended)
 
 - UI-facing metadata for skill lists and chips
 - Read references/openai_yaml.md before generating values and follow its descriptions and constraints
-- Create: human-facing `display_name`, `short_description`, and `default_prompt` by reading the skill
+- `agents/openai.yaml` is separate from `SKILL.md` frontmatter and does not affect Anthropic-style triggering
+- `scripts/generate_openai_yaml.py` currently scaffolds the `interface:` block only; add `dependencies:` or `policy:` manually if you need them
+- Create: human-facing `display_name`, `short_description`, and optional `default_prompt` by reading the skill
 - Generate deterministically by passing the values as `--interface key=value` to `scripts/generate_openai_yaml.py` or `scripts/init_skill.py`
 - On updates: validate `agents/openai.yaml` still matches SKILL.md; regenerate if stale
-- Only include other optional interface fields (icons, brand color) if explicitly provided
+- Only include other optional interface fields (icons, brand color, default prompt) if they are real and intentional
+- `default_prompt` should usually be short and task-shaped; include `$skill-name` when you want to demonstrate explicit invocation, but treat that as preferred guidance rather than a hard requirement
 - See references/openai_yaml.md for field definitions and examples
 
 #### Bundled Resources (optional)
@@ -353,19 +356,19 @@ The script:
 
 - Creates the skill directory at the specified path
 - Generates a SKILL.md template with proper frontmatter and TODO placeholders
-- Creates `agents/openai.yaml` using agent-generated `display_name`, `short_description`, and `default_prompt` passed via `--interface key=value`
+- Creates `agents/openai.yaml` with the `interface:` block using agent-generated `display_name`, `short_description`, and any optional `--interface key=value` overrides you provide
 - Optionally creates resource directories based on `--resources`
 - Optionally adds example files when `--examples` is set
 
 After initialization, customize the SKILL.md and add resources as needed. If you used `--examples`, replace or delete placeholder files.
 
-Generate `display_name`, `short_description`, and `default_prompt` by reading the skill, then pass them as `--interface key=value` to `init_skill.py` or regenerate with:
+Generate `display_name` and `short_description` by reading the skill, then add optional UI fields such as `default_prompt`, icons, or `brand_color` only when they are intentional. Pass them as `--interface key=value` to `init_skill.py` or regenerate with:
 
 ```bash
 scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 ```
 
-Only include other optional interface fields when the user explicitly provides them. For full field descriptions and examples, see references/openai_yaml.md.
+If you need `dependencies:` or `policy:`, add them manually after generation. For full field descriptions, generator-enforced constraints, and examples, see references/openai_yaml.md.
 
 ### Step 5: Edit the Skill
 
