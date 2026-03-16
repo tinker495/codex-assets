@@ -46,15 +46,19 @@ Prereq:
 - Fast path: if the user already provides final reply text plus a target review comment/thread, skip the drafting loop and move directly to posting.
 
 ## 3) If user chooses comments
-- Apply fixes for the selected comments
+- Apply fixes for the selected comments.
+- If the planned reply says or implies that a code fix has already been applied, do not post yet. First verify the change exists locally, then commit it, then push it to the PR branch.
+- If the commit or push is still pending, stop before posting and tell the user that the push is still pending.
 
 ## 4) Fast path: drafted reply -> post to existing review thread
 Use this when the user already has final comment text and wants it uploaded to a specific PR review comment thread.
 
 1. Find the target PR with Step 0 and keep the resolved `owner/repo` + PR number.
 2. Identify the target review `comment_id` from `scripts/fetch_comments.py` output or `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`.
-3. If the user only gives the drafted reply text, do not redraft it; preserve the final Korean text exactly as provided, including line breaks.
-4. Post the reply non-interactively with the required gh env:
+3. Decide which posting path applies:
+   - **Non-code-claim fast path:** if the user supplied final reply text and it does not claim that a fix/change has already been applied, do not redraft it; preserve the final Korean text exactly as provided, including line breaks.
+   - **Applied-fix path:** if the reply says or implies that a fix/change has already been applied, verify the code change is present locally, committed, and pushed to the PR branch before posting. If commit or push has not happened yet, stop and tell the user that push is still pending.
+4. Post the reply non-interactively with the required gh env only after the applicable checks above pass:
    ```bash
    GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat \
    gh api \
