@@ -10,6 +10,7 @@ description: Create and edit presentation slide decks (`.pptx`) with PptxGenJS, 
 Use PptxGenJS for slide authoring. Do not use `python-pptx` for deck generation unless the task is inspection-only; keep editable output in JavaScript and deliver both the `.pptx` and the source `.js`.
 
 Keep work in a task-local directory. Only copy final artifacts to the requested destination after rendering and validation pass.
+When invoking bundled helpers without copying them into the task workspace, use absolute paths under `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` so the commands do not depend on the current repo layout.
 
 ## Bundled Resources
 
@@ -27,7 +28,7 @@ Keep work in a task-local directory. Only copy final artifacts to the requested 
 2. Set the slide size up front. Default to 16:9 (`LAYOUT_WIDE`) unless the source material clearly uses another aspect ratio.
 3. Copy `assets/pptxgenjs_helpers/` into the working directory and import the helpers from there.
 4. Build the deck in JavaScript with an explicit theme font, stable spacing, and editable PowerPoint-native elements when practical.
-5. Run the bundled scripts from this skill directory or copy the needed ones into the task workspace. Render the result with `render_slides.py`, review the PNGs, and fix layout issues before delivery.
+5. Run the bundled scripts from `"$CODEX_HOME/skills/slides/scripts/"` or copy the needed ones into the task workspace. Render the result with `render_slides.py`, review the PNGs, and fix layout issues before delivery.
 6. Run `slides_test.py` for overflow checks when slide edges are tight or the deck is dense.
 7. Deliver the `.pptx`, the authoring `.js`, and any generated assets that are required to rebuild the deck.
 
@@ -52,20 +53,20 @@ Keep work in a task-local directory. Only copy final artifacts to the requested 
 
 ## Validation Commands
 
-Examples below assume you copied the needed scripts into the working directory. If not, invoke the same script paths relative to this skill folder.
+Examples below assume you copied the needed scripts into the working directory. If not, set `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` and `SKILL_DIR="$CODEX_HOME/skills/slides"` first, then use the absolute script paths from `"$SKILL_DIR/scripts/"`.
 
 ```bash
 # Render slides to PNGs for review
-python3 scripts/render_slides.py deck.pptx --output_dir rendered
+python3 "$SKILL_DIR/scripts/render_slides.py" deck.pptx --output_dir rendered
 
 # Build a montage for quick scanning
-python3 scripts/create_montage.py --input_dir rendered --output_file montage.png
+python3 "$SKILL_DIR/scripts/create_montage.py" --input_dir rendered --output_file montage.png
 
 # Check for overflow beyond the original slide canvas
-python3 scripts/slides_test.py deck.pptx
+python3 "$SKILL_DIR/scripts/slides_test.py" deck.pptx
 
 # Detect missing or substituted fonts
-python3 scripts/detect_font.py deck.pptx --json
+python3 "$SKILL_DIR/scripts/detect_font.py" deck.pptx --json
 ```
 
 Load `references/pptxgenjs-helpers.md` if you need the helper API summary or dependency details.

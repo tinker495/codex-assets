@@ -22,13 +22,15 @@ git rev-parse --is-inside-work-tree
 Prefer the bundled script for deterministic data:
 
 ```bash
-test -f scripts/collect_branch_info.py && python scripts/collect_branch_info.py --base main --format json
+CODEX_HOME=${CODEX_HOME:-$HOME/.codex}
+SKILL_DIR="$CODEX_HOME/skills/branch-onboarding-brief"
+test -f "$SKILL_DIR/scripts/collect_branch_info.py" && python "$SKILL_DIR/scripts/collect_branch_info.py" --base main --format json
 ```
 
-If the repo-local script path is missing, search exact candidates and run the first returned path:
+If the bundled skill path is missing, search exact candidates under `"$CODEX_HOME/skills"` first and run the first returned absolute path:
 
 ```bash
-rg --files -g 'collect_branch_info.py'
+rg --files "$CODEX_HOME/skills" -g 'collect_branch_info.py'
 python /absolute/path/from-search/collect_branch_info.py --base main --format json
 ```
 
@@ -64,7 +66,7 @@ Include:
 
 ### 3) Branch briefing (well-formatted)
 
-Use the template in `assets/branch_brief_template.md`. Keep the formatting tight and use the **PR Workflow** style as a reference (sections like Overview, Key Changes, Metrics, Risks, Tests, Review Focus).
+Use the template in `"$CODEX_HOME/skills/branch-onboarding-brief/assets/branch_brief_template.md"`. Keep the formatting tight and use the **PR Workflow** style as a reference (sections like Overview, Key Changes, Metrics, Risks, Tests, Review Focus).
 
 When categorizing changes, make your criteria explicit (for example: tests by `tests/`, TUI by `src/tui/`, domain logic by `src/stowage/`). If categorization is heuristic, say so.
 
@@ -76,12 +78,12 @@ When categorizing changes, make your criteria explicit (for example: tests by `t
 - Do not ask “Proceed with next task?” unless a true blocker exists.
 
 ## Operational Noise Controls
-- Use search-as-discovery: run `scripts/collect_branch_info.py` first; do not start with broad repo-wide scans.
+- Use search-as-discovery: run the bundled `"$CODEX_HOME/skills/branch-onboarding-brief/scripts/collect_branch_info.py"` first; do not start with broad repo-wide scans.
 - Apply path filtering: prioritize changed-file lists from branch diff output before expanding to repository-wide search.
 - Use trace-plus-rg evidence gating: run targeted `rg` on identified files/modules first; only then expand with `rg --files`.
 - Before any repo-scoped script or git command, verify repo context with `git rev-parse --is-inside-work-tree`; if it fails, stop branch-only analysis and report.
-- Path-sensitive guardrail: verify script existence with `test -f` (or `rg --files`) before execution; if missing, skip script and continue with git-based branch context commands.
-- If `rg --files -g 'collect_branch_info.py'` finds a path, run that exact path instead of retrying `scripts/collect_branch_info.py`.
+- Path-sensitive guardrail: never assume the current repo contains `scripts/collect_branch_info.py`; verify the bundled skill path with `test -f` first, then use `rg --files "$CODEX_HOME/skills" -g 'collect_branch_info.py'` before any repo-wide search.
+- If `rg --files "$CODEX_HOME/skills" -g 'collect_branch_info.py'` finds a path, run that exact absolute path instead of retrying a repo-local `scripts/collect_branch_info.py`.
 - Avoid fallback loops: if git/base-detection fails twice, resolve base once (`origin/HEAD`) and proceed with the minimal diff set.
 
 ## Output format (chat)

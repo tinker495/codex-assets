@@ -33,7 +33,7 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - Fire independent agent calls simultaneously -- never wait sequentially for independent work
 - Use `run_in_background: true` for long operations (installs, builds, test suites)
 - Always pass the `model` parameter explicitly when delegating to agents
-- Read `docs/shared/agent-tiers.md` before first delegation to select correct agent tiers
+- Resolve delegation guidance from `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` first: verify `test -d "$CODEX_HOME/prompts"` before reading prompt files, use `"$CODEX_HOME/docs/shared/agent-tiers.md"` only if it exists, and otherwise rely on Ralph's inline LOW/STANDARD/THOROUGH mapping below
 - Deliver the full implementation: no scope reduction, no partial completion, no deleting tests to make them pass
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints
@@ -43,6 +43,8 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 
 ## Operational Noise Controls
 
+- Export `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` before any skill-local path lookup; do not assume repo-local `.codex/prompts` exists.
+- If `test -f "$CODEX_HOME/docs/shared/agent-tiers.md"` fails, skip that read and use Ralph's inline LOW/STANDARD/THOROUGH delegation map instead of searching arbitrary repos for a replacement.
 - Before git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
 - If `write_stdin` fails with `stdin is closed`, rerun via a fresh `exec_command` session with `tty=true`; retry once only.
 - If a tool rejects `--json`, rerun once without `--json` and parse text output.
