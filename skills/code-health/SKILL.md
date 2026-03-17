@@ -17,6 +17,8 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
    - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20 --base origin/main`
    - Use `--mode full` for deeper scans (keep origin/main baseline).
    - Use `--top-files 20` to expand the main-branch churn list.
+   - The script now emits stage progress to `stderr` and can write a live status file with `--status-json /path/to/code_health.status.json`.
+   - When `--status-json` is omitted, the script writes a sibling `*.status.json` next to the normal report JSON/output directory when it has enough path context.
    - The built-in coverage lane runs standard `pytest --cov=stowage --cov=tui -q`; treat that as evidence for the normal test lane only, never as `make test-full` or any full-dataset substitute.
    - Use `--skip-coverage` only if tests are too heavy; ask before skipping coverage when accuracy matters.
    - Before using `--out-dir`, verify writability: `test -w /tmp` or `test -d "$CODEX_HOME/shared/code-health"`.
@@ -57,6 +59,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Coverage hotspots: lowest covered files and missing-line hotspots.
 - Failure evidence (when applicable): failing substep, command, exit context, and the minimal stdout/stderr excerpt needed to classify whether the standard `pytest --cov ...` lane completed.
 - Structured JSON metadata (when applicable): top-level `status`, `standard_test_status`, and `failure` object for downstream automation.
+- Live status metadata (when applicable): sibling `status_json` file with `phase`, `current_step`, heartbeat updates, and artifact paths for long-running checks.
 - Navigation efficiency (optional): steps/cost/efficiency when localization workflows are in scope.
 - Actions: 3-5 concrete follow-ups, prioritize deletions and simplifications.
 

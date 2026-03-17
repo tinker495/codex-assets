@@ -12,6 +12,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+COMMON_DIR = Path(__file__).resolve().parents[2] / "_common"
+if str(COMMON_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_DIR))
+
+from progress_runtime import StatusTracker, default_status_path, run_command_capture
+
 IGNORE = (
     "**/node_modules/**,**/.git/**,**/.venv/**,**/venv/**,**/dist/**,**/build/**,"
     "**/__pycache__/**,**/.mypy_cache/**,**/.pytest_cache/**,**/.tox/**,"
@@ -39,8 +45,22 @@ def _excerpt(text: str) -> str:
     return f"{normalized[:_OUTPUT_EXCERPT_LIMIT]}...(truncated)"
 
 
-def run(step: str, cmd: list[str], check: bool = True) -> str:
-    result = subprocess.run(cmd, capture_output=True, text=True)
+def run(
+    step: str,
+    cmd: list[str],
+    *,
+    check: bool = True,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = True,
+) -> str:
+    result = run_command_capture(
+        command=cmd,
+        cwd=get_repo_root(),
+        step_name=step,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+        relay_stderr=True,
+    )
     if check and result.returncode != 0:
         raise StepFailure(
             step=step,
@@ -52,16 +72,44 @@ def run(step: str, cmd: list[str], check: bool = True) -> str:
     return (result.stdout + result.stderr).strip()
 
 
-def run_module(step: str, module: str, args: list[str], check: bool = True) -> str:
+def run_module(
+    step: str,
+    module: str,
+    args: list[str],
+    *,
+    check: bool = True,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = True,
+) -> str:
     if shutil.which("uv"):
         cmd = ["uv", "run", module, *args]
     else:
         cmd = [sys.executable, "-m", module, *args]
-    return run(step, cmd, check=check)
+    return run(
+        step,
+        cmd,
+        check=check,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+    )
 
 
-def run_python_script(step: str, script: Path, args: list[str], check: bool = True) -> str:
-    return run(step, [sys.executable, str(script), *args], check=check)
+def run_python_script(
+    step: str,
+    script: Path,
+    args: list[str],
+    *,
+    check: bool = True,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = True,
+) -> str:
+    return run(
+        step,
+        [sys.executable, str(script), *args],
+        check=check,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+    )
 
 
 def jscpd_command() -> list[str] | None:
@@ -286,6 +334,7 @@ def main() -> None:
     parser.add_argument("--top-files", type=int, default=10)
     parser.add_argument("--skip-coverage", action="store_true")
     parser.add_argument("--out-dir", type=Path, default=None)
+    parser.add_argument("--status-json", type=Path, default=None)
     args = parser.parse_args()
 
     skill_dir = Path(__file__).resolve().parent
@@ -294,7 +343,33 @@ def main() -> None:
     branch = slugify(get_branch_name())
     out_dir = args.out_dir if args.out_dir else default_output_dir()
     output_path, json_path = build_report_paths(out_dir, project, branch)
+    status_path = (
+        args.status_json.resolve()
+        if args.status_json is not None
+        else default_status_path(json_path, fallback_dir=out_dir, stem=f"{project}__{branch}__code_health")
+    )
     main_ref = args.base if args.base else resolve_main_ref()
+    tracker = StatusTracker(
+        status_path=status_path,
+        script_name="code-health",
+        initial_state={
+            "repo_root": str(repo_root),
+            "project": project,
+            "branch": branch,
+            "base_ref": main_ref,
+            "mode": args.mode,
+            "top": args.top,
+            "top_files": args.top_files,
+        },
+    )
+    tracker.set_artifact("output_markdown", str(output_path))
+    tracker.set_artifact("output_json", str(json_path))
+    tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
+    tracker.set_phase(
+        "initializing",
+        message=f"code-health start: base={main_ref}, mode={args.mode}, skip_coverage={args.skip_coverage}",
+        output_dir=str(out_dir),
+    )
     diff_out = ""
     main_diff_out = ""
     code_out = ""
@@ -310,10 +385,12 @@ def main() -> None:
     jscpd_data = parse_jscpd_json(jscpd_json)
 
     try:
+        tracker.set_phase("diff", message=f"collecting diff summaries against {main_ref}")
         diff_out = run_python_script(
             "diff_summary",
             skill_dir / "diff_summary_compact.py",
             ["--base", main_ref],
+            tracker=tracker,
         )
         main_diff_out = run_python_script(
             "diff_summary_deep",
@@ -326,8 +403,10 @@ def main() -> None:
                 "--top-files",
                 str(args.top_files),
             ],
+            tracker=tracker,
         )
 
+        tracker.set_phase("duplication", message="running duplication scan")
         jscpd_cmd = jscpd_command()
         if jscpd_cmd:
             run(
@@ -351,23 +430,30 @@ def main() -> None:
                     IGNORE,
                 ],
                 check=False,
+                tracker=tracker,
             )
 
+        tracker.set_phase("static-analysis", message="running compact code-health analysis")
         code_out = run_python_script(
             "code_health_compact",
             skill_dir / "code_health_compact.py",
             ["--mode", args.mode, "--top", str(args.top), "--jscpd-json", str(jscpd_json)],
+            tracker=tracker,
         )
 
         if not args.skip_coverage:
+            tracker.set_phase("coverage", message="running coverage-backed pytest")
             coverage_json = out_dir / "coverage.json"
-            run_module("coverage_pytest", "pytest", ["--cov=stowage", "--cov=tui", "-q"])
+            tracker.set_artifact("coverage_json", str(coverage_json))
+            run_module("coverage_pytest", "pytest", ["--cov=stowage", "--cov=tui", "-q"], tracker=tracker)
             coverage_pytest_completed = True
-            run_module("coverage_json", "coverage", ["json", "-o", str(coverage_json)])
+            run_module("coverage_json", "coverage", ["json", "-o", str(coverage_json)], tracker=tracker)
+            tracker.set_phase("coverage-report", message="building coverage hotspot report")
             coverage_out = run_python_script(
                 "coverage_hotspots",
                 skill_dir / "coverage_hotspots.py",
                 ["--coverage-json", str(coverage_json)],
+                tracker=tracker,
             )
             standard_test_status = "passed"
     except StepFailure as failure:
@@ -378,6 +464,12 @@ def main() -> None:
             coverage_pytest_completed=coverage_pytest_completed,
         )
         standard_test_status = failure_data["standard_test_status"]
+        tracker.finish(
+            "failed",
+            message=f"code-health failed at step={failure.step}",
+            failure=failure_data,
+            standard_test_status=standard_test_status,
+        )
 
     jscpd_data = parse_jscpd_json(jscpd_json)
 
@@ -396,8 +488,10 @@ def main() -> None:
         "failure": failure_data,
         "output_markdown": str(output_path),
         "output_json": str(json_path),
+        "status_json": str(status_path) if status_path is not None else None,
     }
 
+    tracker.set_phase("writing", message="writing code-health artifacts")
     write_report(
         output_path=output_path,
         mode=args.mode,
@@ -414,6 +508,13 @@ def main() -> None:
         failure=failure_data,
     )
     write_json(json_path, report_data)
+    if failure_data is None:
+        tracker.finish(
+            "passed",
+            message="code-health completed",
+            standard_test_status=standard_test_status,
+            xenon_status=report_data["xenon_status"],
+        )
 
     if failure_data is not None:
         raise SystemExit(1)

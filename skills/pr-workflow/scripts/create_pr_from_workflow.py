@@ -10,6 +10,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+COMMON_DIR = Path(__file__).resolve().parents[2] / "_common"
+if str(COMMON_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_DIR))
+
+from progress_runtime import StatusTracker, default_status_path, run_command_capture
+
 
 @dataclass(frozen=True)
 class CommandResult:
@@ -59,13 +65,23 @@ def resolve_repo_root(path: Path) -> Path:
     return Path(git_output(path, "rev-parse", "--show-toplevel"))
 
 
-def run_command(*, name: str, command: list[str], cwd: Path, env: dict[str, str] | None = None) -> CommandResult:
-    process = subprocess.run(
-        command,
+def run_command(
+    *,
+    name: str,
+    command: list[str],
+    cwd: Path,
+    env: dict[str, str] | None = None,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = False,
+) -> CommandResult:
+    process = run_command_capture(
+        command=command,
         cwd=cwd,
-        text=True,
-        capture_output=True,
         env=env,
+        step_name=name,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+        relay_stderr=True,
     )
     return CommandResult(
         name=name,
@@ -172,6 +188,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--allow-nonpassing", action="store_true")
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--output-json", type=Path, default=None)
+    parser.add_argument("--status-json", type=Path, default=None)
     return parser
 
 
@@ -181,6 +198,21 @@ def main() -> None:
     workflow_payload = load_json(args.workflow_json.resolve())
     markdown = load_markdown(args.body_markdown.resolve())
     checklist_status = ensure_checklist_passed(workflow_payload, allow_nonpassing=args.allow_nonpassing)
+    status_path = (
+        args.status_json.resolve()
+        if args.status_json is not None
+        else default_status_path(args.output_json.resolve() if args.output_json is not None else None, fallback_dir=repo_root / ".codex_tmp" / "pr-workflow", stem="create-pr")
+    )
+    tracker = StatusTracker(
+        status_path=status_path,
+        script_name="pr-workflow.create",
+        initial_state={
+            "repo_root": str(repo_root),
+            "workflow_json": str(args.workflow_json.resolve()),
+            "body_markdown": str(args.body_markdown.resolve()),
+        },
+    )
+    tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
 
     branch_context = workflow_payload.get("branch_context")
     if not isinstance(branch_context, dict):
@@ -230,6 +262,7 @@ def main() -> None:
         "push_result": None,
         "create_result": None,
         "pr_url": None,
+        "status_json": str(status_path) if status_path is not None else None,
     }
 
     if not args.execute:
@@ -238,9 +271,12 @@ def main() -> None:
             args.output_json.parent.mkdir(parents=True, exist_ok=True)
             args.output_json.write_text(rendered)
         print(rendered)
+        tracker.finish("passed", message="create_pr_from_workflow dry-run completed")
         raise SystemExit(0)
 
+    tracker.set_phase("auth", message="checking gh authentication")
     ensure_gh_auth(repo_root)
+    tracker.set_phase("existing-pr", message=f"checking existing open PR for {head_branch}")
     existing_pr = find_existing_open_pr(repo_root=repo_root, head_branch=head_branch)
     if existing_pr is not None:
         output["existing_open_pr"] = existing_pr
@@ -250,13 +286,16 @@ def main() -> None:
             args.output_json.parent.mkdir(parents=True, exist_ok=True)
             args.output_json.write_text(rendered)
         print(rendered)
+        tracker.finish("passed", message="existing PR already open", pr_url=output["pr_url"])
         raise SystemExit(0)
 
     if args.push_branch:
+        tracker.set_phase("push", message=f"pushing branch {head_branch}")
         push_result = run_command(
             name="git_push",
             command=["git", "push", "-u", "origin", head_branch],
             cwd=repo_root,
+            tracker=tracker,
         )
         output["push_result"] = serialize_command(push_result)
         if push_result.returncode != 0:
@@ -265,8 +304,10 @@ def main() -> None:
                 args.output_json.parent.mkdir(parents=True, exist_ok=True)
                 args.output_json.write_text(rendered)
             print(rendered)
+            tracker.finish("failed", message="git push failed")
             raise SystemExit(1)
 
+    tracker.set_phase("create-pr", message=f"creating PR from {head_branch} to {base_branch}")
     create_result = run_command(
         name="gh_pr_create",
         command=[
@@ -284,6 +325,7 @@ def main() -> None:
         ],
         cwd=repo_root,
         env=gh_env(),
+        tracker=tracker,
     )
     output["create_result"] = serialize_command(create_result)
     if create_result.returncode == 0:
@@ -297,7 +339,9 @@ def main() -> None:
     print(rendered)
 
     if create_result.returncode == 0:
+        tracker.finish("passed", message="PR created successfully", pr_url=output["pr_url"])
         raise SystemExit(0)
+    tracker.finish("failed", message="gh pr create failed")
     raise SystemExit(1)
 
 

@@ -37,10 +37,12 @@ def main() -> None:
     args = parser.parse_args()
 
     branch = run(["git", "branch", "--show-current"])
-    commits = run(["git", "log", f"{args.base}..HEAD", "--oneline"])
-    name_only = run(["git", "diff", f"{args.base}..HEAD", "--name-only"])
-    numstat_raw = run(["git", "diff", f"{args.base}..HEAD", "--numstat"])
-    stat_raw = run(["git", "diff", "--stat", f"{args.base}..HEAD"])
+    commit_range = f"{args.base}..HEAD"
+    pr_range = f"{args.base}...HEAD"
+    commits = run(["git", "log", commit_range, "--oneline"])
+    name_only = run(["git", "diff", pr_range, "--name-only"])
+    numstat_raw = run(["git", "diff", pr_range, "--numstat"])
+    stat_raw = run(["git", "diff", "--stat", pr_range])
 
     numstats = parse_numstat(numstat_raw)
     total_added = sum(n.added for n in numstats)
@@ -52,6 +54,12 @@ def main() -> None:
     payload = {
         "branch": branch,
         "base": args.base,
+        "compare_mode": {
+            "commit_log": commit_range,
+            "files": pr_range,
+            "numstat": pr_range,
+            "diff_stat": pr_range,
+        },
         "commit_log": commits.splitlines() if commits else [],
         "files": name_only.splitlines() if name_only else [],
         "numstat": [n.__dict__ for n in numstats],
@@ -68,6 +76,8 @@ def main() -> None:
     # Markdown output
     lines = []
     lines.append(f"# Branch Brief: {branch} vs {args.base}")
+    lines.append("")
+    lines.append(f"Compare modes: commits={commit_range}, files/loc={pr_range}")
     lines.append("")
     lines.append(f"Total: +{total_added} / -{total_deleted} (net {total_added - total_deleted:+d})")
     lines.append("")

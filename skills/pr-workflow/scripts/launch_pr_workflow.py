@@ -10,6 +10,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+COMMON_DIR = Path(__file__).resolve().parents[2] / "_common"
+if str(COMMON_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_DIR))
+
+from progress_runtime import StatusTracker, default_status_path, run_command_capture
+
 
 @dataclass(frozen=True)
 class CommandResult:
@@ -27,12 +33,21 @@ def _excerpt(text: str, limit: int = 2000) -> str:
     return f"{normalized[:limit]}...(truncated)"
 
 
-def run_command(*, name: str, command: list[str], cwd: Path) -> CommandResult:
-    process = subprocess.run(
-        command,
+def run_command(
+    *,
+    name: str,
+    command: list[str],
+    cwd: Path,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = False,
+) -> CommandResult:
+    process = run_command_capture(
+        command=command,
         cwd=cwd,
-        text=True,
-        capture_output=True,
+        step_name=name,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+        relay_stderr=True,
     )
     return CommandResult(
         name=name,
@@ -116,6 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--push-branch", action="store_true")
     parser.add_argument("--allow-nonpassing", action="store_true")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--status-json", type=Path, default=None)
     return parser
 
 
@@ -124,10 +140,32 @@ def main() -> None:
     repo_root = resolve_repo_root(args.repo_root.resolve())
     artifacts_dir = args.artifacts_dir.resolve() if args.artifacts_dir is not None else build_default_artifacts_dir(repo_root)
     artifacts_dir.mkdir(parents=True, exist_ok=True)
+    status_path = (
+        args.status_json.resolve()
+        if args.status_json is not None
+        else default_status_path(args.output_json.resolve() if args.output_json is not None else None, fallback_dir=artifacts_dir, stem="launch")
+    )
+    run_status_path = artifacts_dir / "run_pr_workflow.status.json"
+    create_status_path = artifacts_dir / "create_pr.status.json"
+    tracker = StatusTracker(
+        status_path=status_path,
+        script_name="pr-workflow.launch",
+        initial_state={
+            "repo_root": str(repo_root),
+            "artifacts_dir": str(artifacts_dir),
+            "base": args.base,
+        },
+    )
+    tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
+    tracker.set_artifact("run_stage_status_json", str(run_status_path))
+    tracker.set_artifact("create_stage_status_json", str(create_status_path))
 
     workflow_json_path = artifacts_dir / "workflow.json"
     pr_brief_path = artifacts_dir / "pr_brief.md"
     create_json_path = artifacts_dir / "create_pr.json"
+    tracker.set_artifact("workflow_json", str(workflow_json_path))
+    tracker.set_artifact("pr_brief_markdown", str(pr_brief_path))
+    tracker.set_artifact("create_pr_json", str(create_json_path))
 
     run_script = Path("/Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/run_pr_workflow.py")
     create_script = Path("/Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/create_pr_from_workflow.py")
@@ -143,6 +181,8 @@ def main() -> None:
         str(workflow_json_path),
         "--pr-brief-output",
         str(pr_brief_path),
+        "--status-json",
+        str(run_status_path),
     ]
     if args.pr_title.strip():
         run_command_args.extend(["--pr-title", args.pr_title.strip()])
@@ -173,7 +213,8 @@ def main() -> None:
         run_command_args.append("--require-full-dataset")
         run_command_args.extend(["--full-dataset-cmd", args.full_dataset_cmd])
 
-    run_result = run_command(name="run_pr_workflow", command=run_command_args, cwd=repo_root)
+    tracker.set_phase("run-stage", message="launching run_pr_workflow stage")
+    run_result = run_command(name="run_pr_workflow", command=run_command_args, cwd=repo_root, tracker=tracker)
     workflow_payload = load_json_from_stdout(run_result, expected_name="run_pr_workflow")
 
     create_result_payload: dict[str, Any] | None = None
@@ -193,6 +234,8 @@ def main() -> None:
             str(pr_brief_path),
             "--output-json",
             str(create_json_path),
+            "--status-json",
+            str(create_status_path),
         ]
         if args.pr_title.strip():
             create_command_args.extend(["--title", args.pr_title.strip()])
@@ -202,7 +245,13 @@ def main() -> None:
             create_command_args.append("--allow-nonpassing")
         if args.execute:
             create_command_args.append("--execute")
-        create_result_command = run_command(name="create_pr_from_workflow", command=create_command_args, cwd=repo_root)
+        tracker.set_phase("create-stage", message="launching create_pr_from_workflow stage")
+        create_result_command = run_command(
+            name="create_pr_from_workflow",
+            command=create_command_args,
+            cwd=repo_root,
+            tracker=tracker,
+        )
         create_result_payload = load_json_from_stdout(create_result_command, expected_name="create_pr_from_workflow")
 
     output = {
@@ -212,6 +261,9 @@ def main() -> None:
             "workflow_json": str(workflow_json_path),
             "pr_brief_markdown": str(pr_brief_path),
             "create_pr_json": str(create_json_path) if create_result_payload is not None else None,
+            "status_json": str(status_path) if status_path is not None else None,
+            "run_stage_status_json": str(run_status_path),
+            "create_stage_status_json": str(create_status_path) if create_result_payload is not None else None,
         },
         "execute": args.execute,
         "push_branch": args.push_branch,
@@ -242,6 +294,14 @@ def main() -> None:
         args.output_json.parent.mkdir(parents=True, exist_ok=True)
         args.output_json.write_text(rendered)
     print(rendered)
+    final_status = "passed"
+    if run_result.returncode != 0:
+        final_status = "failed"
+    elif create_result_command is not None and create_result_command.returncode != 0:
+        final_status = "failed"
+    elif not should_attempt_create:
+        final_status = "blocked"
+    tracker.finish(final_status, message=f"launch_pr_workflow completed with status={final_status}")
 
     if run_result.returncode != 0:
         raise SystemExit(run_result.returncode)

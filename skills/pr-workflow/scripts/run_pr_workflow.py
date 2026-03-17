@@ -11,6 +11,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+COMMON_DIR = Path(__file__).resolve().parents[2] / "_common"
+if str(COMMON_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_DIR))
+
+from progress_runtime import StatusTracker, default_status_path, run_command_capture
+
 
 @dataclass(frozen=True)
 class CommandResult:
@@ -36,12 +42,21 @@ def _excerpt(text: str, limit: int = 2000) -> str:
     return f"{normalized[:limit]}...(truncated)"
 
 
-def run_command(*, name: str, command: list[str], cwd: Path) -> CommandResult:
-    process = subprocess.run(
-        command,
+def run_command(
+    *,
+    name: str,
+    command: list[str],
+    cwd: Path,
+    tracker: StatusTracker | None = None,
+    relay_stdout_to_stderr: bool = False,
+) -> CommandResult:
+    process = run_command_capture(
+        command=command,
         cwd=cwd,
-        text=True,
-        capture_output=True,
+        step_name=name,
+        tracker=tracker,
+        relay_stdout_to_stderr=relay_stdout_to_stderr,
+        relay_stderr=True,
     )
     return CommandResult(
         name=name,
@@ -316,10 +331,19 @@ def run_code_health(
     top: int,
     top_files: int,
     skip_coverage: bool,
+    tracker: StatusTracker | None,
 ) -> tuple[CommandResult, Path, dict[str, Any]]:
     script = Path("/Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py")
     branch = git_output(repo_root, "branch", "--show-current")
     expected_json = expected_code_health_json(repo_root, branch, out_dir)
+    expected_status_json = default_status_path(
+        expected_json,
+        fallback_dir=out_dir,
+        stem=f"{slugify(repo_root.name)}__{slugify(branch)}__code_health",
+    )
+    if tracker is not None:
+        tracker.set_artifact("code_health_json", str(expected_json))
+        tracker.set_artifact("code_health_status_json", str(expected_status_json) if expected_status_json else None)
     command = [
         "python3",
         str(script),
@@ -334,9 +358,11 @@ def run_code_health(
         "--out-dir",
         str(out_dir),
     ]
+    if expected_status_json is not None:
+        command.extend(["--status-json", str(expected_status_json)])
     if skip_coverage:
         command.append("--skip-coverage")
-    result = run_command(name="code_health", command=command, cwd=repo_root)
+    result = run_command(name="code_health", command=command, cwd=repo_root, tracker=tracker)
     payload = load_json(expected_json)
     return result, expected_json, payload
 
@@ -414,6 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--require-full-dataset", action="store_true")
     parser.add_argument("--full-dataset-cmd", default="make test-full")
     parser.add_argument("--output-json", type=Path, default=None)
+    parser.add_argument("--status-json", type=Path, default=None)
     parser.add_argument("--pr-title", default="")
     parser.add_argument("--pr-brief-output", type=Path, default=None)
     return parser
@@ -422,10 +449,37 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = build_parser().parse_args()
     repo_root = resolve_repo_root(args.repo_root.resolve())
+    branch_name = git_output(repo_root, "branch", "--show-current")
+    fallback_status_dir = repo_root / ".codex_tmp" / "pr-workflow" / slugify(branch_name)
+    status_path = (
+        args.status_json.resolve()
+        if args.status_json is not None
+        else default_status_path(
+            args.output_json.resolve() if args.output_json is not None else None,
+            fallback_dir=fallback_status_dir,
+            stem="workflow",
+        )
+    )
+    tracker = StatusTracker(
+        status_path=status_path,
+        script_name="pr-workflow.run",
+        initial_state={
+            "repo_root": str(repo_root),
+            "base": args.base,
+            "branch": branch_name,
+        },
+    )
+    tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
+    if args.output_json is not None:
+        tracker.set_artifact("workflow_output_json", str(args.output_json.resolve()))
+    if args.pr_brief_output is not None:
+        tracker.set_artifact("pr_brief_markdown", str(args.pr_brief_output.resolve()))
+    tracker.set_phase("branch-context", message=f"collecting PR workflow context for {branch_name} vs {args.base}")
     branch_context = collect_branch_context(repo_root, args.base)
     out_dir = args.code_health_out_dir if args.code_health_out_dir is not None else default_code_health_out_dir()
 
     if args.code_health_json is None:
+        tracker.set_phase("code-health", message="running code-health prerequisite")
         code_health_result, code_health_json_path, code_health_payload = run_code_health(
             repo_root=repo_root,
             base=args.base,
@@ -434,20 +488,40 @@ def main() -> None:
             top=args.code_health_top,
             top_files=args.code_health_top_files,
             skip_coverage=args.skip_coverage,
+            tracker=tracker,
         )
     else:
+        tracker.set_phase("code-health", message="reusing existing code-health JSON")
         code_health_result, code_health_json_path, code_health_payload = reuse_code_health_json(
             args.code_health_json.resolve()
         )
+        tracker.set_artifact("code_health_json", str(args.code_health_json.resolve()))
+        tracker.set_artifact("code_health_status_json", code_health_payload.get("status_json"))
 
-    lint_result = run_command(name="lint", command=parse_command(args.lint_cmd), cwd=repo_root)
-    format_result = run_command(name="format", command=parse_command(args.format_cmd), cwd=repo_root)
+    tracker.set_phase("lint-format", message="running lint and format checks")
+    lint_result = run_command(
+        name="lint",
+        command=parse_command(args.lint_cmd),
+        cwd=repo_root,
+        tracker=tracker,
+        relay_stdout_to_stderr=True,
+    )
+    format_result = run_command(
+        name="format",
+        command=parse_command(args.format_cmd),
+        cwd=repo_root,
+        tracker=tracker,
+        relay_stdout_to_stderr=True,
+    )
 
     if args.require_full_dataset:
+        tracker.set_phase("full-dataset", message="running full dataset verification")
         full_dataset_result = run_command(
             name="full_dataset",
             command=parse_command(args.full_dataset_cmd),
             cwd=repo_root,
+            tracker=tracker,
+            relay_stdout_to_stderr=True,
         )
         full_dataset_status = command_status(full_dataset_result)
     else:
@@ -461,7 +535,9 @@ def main() -> None:
         )
         full_dataset_status = "not_run"
 
+    tracker.set_phase("breaking-changes", message="collecting breaking-change hints")
     breaking_changes = collect_breaking_change_hints(repo_root, args.base)
+    tracker.set_phase("checklist", message="evaluating checklist from collected results")
     checklist_payload = run_checklist_evaluator(
         code_health_json=code_health_json_path,
         repo_root=repo_root,
@@ -478,6 +554,8 @@ def main() -> None:
         "artifacts": {
             "code_health_json": str(code_health_json_path),
             "code_health_markdown": code_health_payload.get("output_markdown"),
+            "status_json": str(status_path) if status_path is not None else None,
+            "code_health_status_json": code_health_payload.get("status_json"),
         },
         "code_health": {
             "status": code_health_payload.get("status"),
@@ -524,6 +602,7 @@ def main() -> None:
     if args.output_json is not None:
         args.output_json.parent.mkdir(parents=True, exist_ok=True)
         args.output_json.write_text(rendered)
+    tracker.set_phase("writing", message="writing PR workflow output artifacts")
     if args.pr_brief_output is not None:
         if args.output_json is None:
             raise ValueError("--pr-brief-output requires --output-json so the generator has a concrete input artifact")
@@ -538,8 +617,14 @@ def main() -> None:
         ]
         if args.pr_title.strip():
             generator_command.extend(["--title", args.pr_title.strip()])
-        generator_result = run_command(name="generate_pr_brief", command=generator_command, cwd=repo_root)
+        generator_result = run_command(
+            name="generate_pr_brief",
+            command=generator_command,
+            cwd=repo_root,
+            tracker=tracker,
+        )
         if generator_result.returncode != 0:
+            tracker.finish("failed", message="generate_pr_brief failed")
             raise ValueError(
                 generator_result.stderr.strip() or generator_result.stdout.strip() or "PR brief generation failed"
             )
@@ -547,6 +632,12 @@ def main() -> None:
         rendered = json.dumps(output, indent=2)
         args.output_json.write_text(rendered)
     print(rendered)
+    final_status = (
+        "passed"
+        if checklist_payload["overall_status"] == "passed"
+        else "blocked" if checklist_payload["overall_status"] == "blocked" else "failed"
+    )
+    tracker.finish(final_status, message=f"pr-workflow completed with checklist={checklist_payload['overall_status']}")
 
     if checklist_payload["overall_status"] == "passed":
         raise SystemExit(0)

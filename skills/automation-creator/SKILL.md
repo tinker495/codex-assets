@@ -43,6 +43,7 @@ For existing automations, review the current prompt before proposing changes.
 
 - `name`: Short, human-friendly label. Propose one if the user does not provide it.
 - `prompt`: Task only. Do not include schedule or workspace details.
+- `prompt` language: In this workspace, default automation user-facing output to Korean unless the user explicitly requests another language. Add an explicit rule in the prompt that progress updates, summaries, tables, inbox titles, inbox summaries, and final briefings must be in Korean, while commands, paths, ids, code, and literal error text remain unchanged when quoting evidence.
 - `prompt` safety: If prompt text includes double quotes (for example `python -c "..."`), escape inner quotes as `\"` so the TOML string stays valid.
 - `rrule`: Use supported formats only:
   - Hourly interval: `FREQ=HOURLY;INTERVAL=<hours>[;BYDAY=MO,TU,...]`

@@ -27,6 +27,11 @@ SKILL_DIR="$CODEX_HOME/skills/branch-onboarding-brief"
 test -f "$SKILL_DIR/scripts/collect_branch_info.py" && python "$SKILL_DIR/scripts/collect_branch_info.py" --base main --format json
 ```
 
+Bundled collector semantics:
+- commit subjects use `base..HEAD`
+- file list / numstat / diff stat use `base...HEAD` to match GitHub PR delta semantics
+- the JSON payload now exposes `compare_mode` so parent workflows can see which range each metric used
+
 If the bundled skill path is missing, search exact candidates under `"$CODEX_HOME/skills"` first and run the first returned absolute path:
 
 ```bash
@@ -41,9 +46,9 @@ git log --since=1.week --name-only
 git diff --stat
 git branch --show-current
 git log main..HEAD --oneline
-git diff main..HEAD --name-only
-git diff main..HEAD --numstat
-git diff --stat main..HEAD
+git diff main...HEAD --name-only
+git diff main...HEAD --numstat
+git diff --stat main...HEAD
 ```
 
 If the repo does not use `main`, detect the default base:

@@ -47,6 +47,11 @@ python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.p
   --execute
 ```
 
+- 진행 상태 관찰:
+  - `launch_pr_workflow.py`, `run_pr_workflow.py`, `create_pr_from_workflow.py`는 이제 stage 진행 로그를 `stderr`로 즉시 출력한다.
+  - 세 스크립트 모두 `--status-json /path/to/status.json`을 지원한다.
+  - `launch_pr_workflow.py`는 기본 artifacts dir 아래에 `launch.status.json`, `run_pr_workflow.status.json`, `create_pr.status.json`을 남겨 장시간 단계(`code-health`, coverage pytest, gh PR create`)를 외부 스킬이 폴링하기 쉽게 한다.
+
 ## Workflow Steps
 
 ### 1) Gather Branch Information (Delegated)
@@ -222,6 +227,7 @@ By Category:
 - When `scripts/evaluate_pr_checklist.py` is available, use it to produce the checklist verdict JSON and report directly from that output.
 - When `scripts/run_pr_workflow.py` is available, prefer it as the automation entrypoint for `code-health`, lint/format, optional full-dataset, checklist verdict, and PR-body input JSON.
 - When `scripts/launch_pr_workflow.py` is available, prefer it as the single entrypoint that chains workflow JSON generation, Markdown draft generation, and optional PR creation.
+- When monitoring long-running stages, prefer polling the emitted `status_json` files over waiting on silent stdout. The launcher and child scripts keep `phase`, `current_step`, heartbeat timestamps, and artifact paths up to date while they run.
 - If `code-health` fails without structured metadata, capture the failing substep and decide the standard test item from that evidence instead of blanket-failing it.
 - Do not run `make test-full` by default. Run full-dataset checks only when the user or an existing checklist explicitly requires them.
 - Mark items as passed/failed/blocked in your report.
@@ -261,6 +267,7 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
 - `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, and create the PR through `gh pr create`.
 - `scripts/launch_pr_workflow.py`: single entrypoint that orchestrates the full chain from workflow analysis to optional PR creation.
+- All workflow scripts: emit progress to `stderr` and support `--status-json` for live status inspection.
 
 ## Operational Noise Controls
 
