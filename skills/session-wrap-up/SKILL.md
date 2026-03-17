@@ -100,6 +100,10 @@ Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets
 
 ## Output Contract (chat)
 
+Default output language: Korean.
+Use Korean for section titles, summaries, TODO notes, insight descriptions, delegation notes, and handoff text unless the user explicitly requests another language.
+Keep literal workflow/action tokens such as `none`, `update-existing-skill`, `create-new-skill`, `retire-skill`, `merge`, `mirror`, and `no-op wrap-up` in backticks unless the user explicitly asks to localize them.
+
 Always return, in order:
 1. Session result summary (answer-first, 3-5 lines).
 2. TODO status summary:

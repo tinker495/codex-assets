@@ -9,8 +9,6 @@ metadata:
 
 Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
 
-This skill is standalone and delegation optional. If installation changes the local skill inventory enough to require topology cleanup, a later handoff to `skill-topology-adjuster` is optional rather than part of the install flow itself.
-
 Use the helper scripts based on the task:
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
 - Install from the curated list when the user provides a skill name.

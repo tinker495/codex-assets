@@ -46,15 +46,6 @@ ALLOWED_INTERFACE_KEYS = {
     "default_prompt",
 }
 
-INTERFACE_FIELD_ORDER = [
-    "display_name",
-    "short_description",
-    "icon_small",
-    "icon_large",
-    "brand_color",
-    "default_prompt",
-]
-
 
 def yaml_quote(value):
     escaped = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
@@ -141,6 +132,7 @@ def read_frontmatter_name(skill_dir):
 
 def parse_interface_overrides(raw_overrides):
     overrides = {}
+    optional_order = []
     for item in raw_overrides:
         if "=" not in item:
             print(f"[ERROR] Invalid interface override '{item}'. Use key=value.")
@@ -156,51 +148,9 @@ def parse_interface_overrides(raw_overrides):
             print(f"[ERROR] Unknown interface field '{key}'. Allowed: {allowed}")
             return None, None
         overrides[key] = value
-    optional_order = [
-        key
-        for key in INTERFACE_FIELD_ORDER
-        if key not in ("display_name", "short_description") and key in overrides
-    ]
+        if key not in ("display_name", "short_description") and key not in optional_order:
+            optional_order.append(key)
     return overrides, optional_order
-
-
-def validate_interface_values(skill_name, display_name, short_description, overrides):
-    if not display_name.strip():
-        print("[ERROR] display_name must not be empty.")
-        return False
-
-    if not (25 <= len(short_description) <= 64):
-        print(
-            "[ERROR] short_description must be 25-64 characters "
-            f"(got {len(short_description)})."
-        )
-        return False
-
-    brand_color = overrides.get("brand_color")
-    if brand_color is not None and not re.match(r"^#[0-9A-Fa-f]{6}$", brand_color):
-        print("[ERROR] brand_color must be a 6-digit hex color like #3B82F6.")
-        return False
-
-    for key in ("icon_small", "icon_large"):
-        value = overrides.get(key)
-        if value is not None and value and not value.startswith("./"):
-            print(f"[ERROR] {key} must be a relative path starting with './'.")
-            return False
-
-    default_prompt = overrides.get("default_prompt")
-    if default_prompt is not None:
-        if not default_prompt.strip():
-            print("[ERROR] default_prompt must not be empty.")
-            return False
-        preferred_token = f"${skill_name}"
-        if preferred_token not in default_prompt:
-            print(
-                "[WARN] default_prompt does not mention the skill token "
-                f"'{preferred_token}'. Prefer including it when the prompt is meant "
-                "to demonstrate explicit invocation."
-            )
-
-    return True
 
 
 def write_openai_yaml(skill_dir, skill_name, raw_overrides):
@@ -211,7 +161,11 @@ def write_openai_yaml(skill_dir, skill_name, raw_overrides):
     display_name = overrides.get("display_name") or format_display_name(skill_name)
     short_description = overrides.get("short_description") or generate_short_description(display_name)
 
-    if not validate_interface_values(skill_name, display_name, short_description, overrides):
+    if not (25 <= len(short_description) <= 64):
+        print(
+            "[ERROR] short_description must be 25-64 characters "
+            f"(got {len(short_description)})."
+        )
         return None
 
     interface_lines = [
