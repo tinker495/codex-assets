@@ -28,18 +28,13 @@ Sequential task execution wastes time when tasks are independent. Ultrawork enab
 <Execution_Policy>
 - Fire all independent agent calls simultaneously -- never serialize independent work
 - Always pass the `model` parameter explicitly when delegating
-- Resolve delegation guidance from `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` first: verify `test -d "$CODEX_HOME/prompts"` before reading prompt files, use `"$CODEX_HOME/docs/shared/agent-tiers.md"` only if it exists, and otherwise rely on Ultrawork's inline LOW/STANDARD/THOROUGH mapping below
+- Read `docs/shared/agent-tiers.md` before first delegation for agent selection guidance
 - Use `run_in_background: true` for operations over ~30 seconds (installs, builds, tests)
 - Run quick commands (git status, file reads, simple checks) in the foreground
 </Execution_Policy>
 
-## Operational Noise Controls
-
-- Export `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` before any skill-local path lookup; do not assume repo-local `.codex/prompts` exists.
-- If `test -f "$CODEX_HOME/docs/shared/agent-tiers.md"` fails, skip that read and use the built-in tier map in Step 3 instead of searching arbitrary repos for a replacement.
-
 <Steps>
-1. **Resolve agent reference**: Read `"$CODEX_HOME/docs/shared/agent-tiers.md"` only when it exists; otherwise use the Step 3 tier map and prompt roster under `"$CODEX_HOME/prompts"`
+1. **Read agent reference**: Load `docs/shared/agent-tiers.md` for tier selection
 2. **Classify tasks by independence**: Identify which tasks can run in parallel vs which have dependencies
 3. **Route to correct tiers**:
    - Simple lookups/definitions: LOW tier
