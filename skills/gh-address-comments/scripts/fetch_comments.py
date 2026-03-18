@@ -40,6 +40,7 @@ query(
         pageInfo { hasNextPage endCursor }
         nodes {
           id
+          databaseId
           body
           createdAt
           updatedAt
@@ -51,6 +52,7 @@ query(
         pageInfo { hasNextPage endCursor }
         nodes {
           id
+          databaseId
           state
           body
           submittedAt
@@ -75,6 +77,7 @@ query(
           comments(first: 100) {
             nodes {
               id
+              databaseId
               body
               createdAt
               updatedAt
@@ -435,12 +438,38 @@ def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
             break
 
     assert pr_meta is not None
+    _add_rest_ids(conversation_comments)
+    _add_rest_ids(reviews)
+    _add_rest_ids(review_threads)
     return {
         "pull_request": pr_meta,
         "conversation_comments": conversation_comments,
         "reviews": reviews,
         "review_threads": review_threads,
     }
+
+
+def _add_rest_ids(records: list[dict[str, Any]]) -> None:
+    for record in records:
+        _add_rest_id(record)
+
+
+def _add_rest_id(record: dict[str, Any]) -> None:
+    database_id = record.get("databaseId")
+    if isinstance(database_id, int):
+        record["rest_id"] = database_id
+
+    comments = record.get("comments")
+    if not isinstance(comments, dict):
+        return
+
+    nodes = comments.get("nodes")
+    if not isinstance(nodes, list):
+        return
+
+    for node in nodes:
+        if isinstance(node, dict):
+            _add_rest_id(node)
 
 
 def main() -> None:

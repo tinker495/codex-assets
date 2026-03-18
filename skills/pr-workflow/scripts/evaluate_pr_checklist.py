@@ -129,6 +129,26 @@ def evaluate_standard_test(result: CodeHealthResult) -> dict[str, Any]:
     )
 
 
+def evaluate_standard_test_override(
+    *,
+    result: CodeHealthResult,
+    override_status: ChecklistStatus,
+    override_detail: str | None,
+) -> dict[str, Any]:
+    normalized_status = ChecklistStatus.BLOCKED if override_status is ChecklistStatus.NOT_RUN else override_status
+    detail = override_detail or (
+        "manual standard-test override applied "
+        f"over code-health standard_test_status={result.standard_test_status.value}"
+    )
+    return _make_item(
+        name="standard_test",
+        status=normalized_status,
+        required=True,
+        source=f"manual_override:standard_test over code_health_json:{result.source_path}",
+        detail=detail,
+    )
+
+
 def evaluate_lint_format(lint_status: ChecklistStatus, format_status: ChecklistStatus) -> dict[str, Any]:
     states = {lint_status, format_status}
     if ChecklistStatus.FAILED in states:
@@ -195,6 +215,8 @@ def evaluate_overall(items: list[dict[str, Any]]) -> tuple[str, list[str], list[
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Evaluate PR checklist items from code-health metadata")
     parser.add_argument("--code-health-json", type=Path, required=True)
+    parser.add_argument("--standard-test-override", default=None, choices=sorted(_MANUAL_ITEM_STATUSES))
+    parser.add_argument("--standard-test-override-detail", default="")
     parser.add_argument("--lint", default=ChecklistStatus.NOT_RUN.value, choices=sorted(_MANUAL_ITEM_STATUSES))
     parser.add_argument("--format", default=ChecklistStatus.NOT_RUN.value, choices=sorted(_MANUAL_ITEM_STATUSES))
     parser.add_argument("--breaking-changes", default=ChecklistStatus.NOT_RUN.value, choices=sorted(_MANUAL_ITEM_STATUSES))
@@ -207,13 +229,24 @@ def main() -> None:
     args = build_parser().parse_args()
 
     code_health = load_code_health_result(args.code_health_json)
+    standard_test_override = (
+        _parse_manual_status(args.standard_test_override) if args.standard_test_override is not None else None
+    )
     lint_status = _parse_manual_status(args.lint)
     format_status = _parse_manual_status(args.format)
     breaking_changes_status = _parse_manual_status(args.breaking_changes)
     full_dataset_status = _parse_manual_status(args.full_dataset)
 
     items = [
-        evaluate_standard_test(code_health),
+        (
+            evaluate_standard_test_override(
+                result=code_health,
+                override_status=standard_test_override,
+                override_detail=args.standard_test_override_detail.strip() or None,
+            )
+            if standard_test_override is not None
+            else evaluate_standard_test(code_health)
+        ),
         evaluate_lint_format(lint_status, format_status),
         evaluate_breaking_changes(breaking_changes_status),
         evaluate_full_dataset(required=args.require_full_dataset, status=full_dataset_status),
@@ -227,6 +260,8 @@ def main() -> None:
         "items": {item["name"]: item for item in items},
         "inputs": {
             "code_health_json": str(args.code_health_json),
+            "standard_test_override": standard_test_override.value if standard_test_override is not None else None,
+            "standard_test_override_detail": args.standard_test_override_detail,
             "require_full_dataset": args.require_full_dataset,
             "lint": lint_status.value,
             "format": format_status.value,

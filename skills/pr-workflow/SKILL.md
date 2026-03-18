@@ -69,6 +69,7 @@ python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.p
 - Prefer the structured `code-health` JSON output when available: read top-level `status`, `standard_test_status`, and `failure` before falling back to raw logs.
 - For automatic checklist classification, prefer `scripts/evaluate_pr_checklist.py` with the `code-health` JSON output instead of ad-hoc reasoning.
 - If `code-health` fails, capture the failing command/substep and the relevant stdout/stderr. Use that failure detail to classify the standard test item: if the coverage-backed pytest command failed or never completed, `make test` is not satisfied; if pytest completed and a later health/report step failed, the `make test` item may still pass while `code-health` remains failed/blocked.
+- If `standard_test` fails at `coverage_pytest` but the failure looks flaky or unrelated to the branch, rerun the exact reported standard-test command once before asking the user to override. If the rerun passes, record that rerun explicitly and use `scripts/evaluate_pr_checklist.py --standard-test-override passed --standard-test-override-detail "manual rerun passed: <exact command>"` to produce an updated checklist verdict.
 - If the pipeline fails or tools are missing, report the issue, note it in the briefing, and ask whether to proceed.
 
 ### 3) Categorize Changes
@@ -225,10 +226,12 @@ By Category:
 - Reuse prior verified results when they satisfy the same checklist item; avoid rerunning `make test` after a successful coverage-enabled `code-health` run.
 - If `code-health` emits structured JSON metadata, decide the standard test item from `standard_test_status` first and use `failure` only as supporting evidence.
 - When `scripts/evaluate_pr_checklist.py` is available, use it to produce the checklist verdict JSON and report directly from that output.
+- When a flaky standard-test failure is revalidated manually, prefer `scripts/evaluate_pr_checklist.py --standard-test-override ...` over ad-hoc prose-only checklist changes so the updated verdict remains machine-readable.
 - When `scripts/run_pr_workflow.py` is available, prefer it as the automation entrypoint for `code-health`, lint/format, optional full-dataset, checklist verdict, and PR-body input JSON.
 - When `scripts/launch_pr_workflow.py` is available, prefer it as the single entrypoint that chains workflow JSON generation, Markdown draft generation, and optional PR creation.
 - When monitoring long-running stages, prefer polling the emitted `status_json` files over waiting on silent stdout. The launcher and child scripts keep `phase`, `current_step`, heartbeat timestamps, and artifact paths up to date while they run.
 - If `code-health` fails without structured metadata, capture the failing substep and decide the standard test item from that evidence instead of blanket-failing it.
+- If the reported failing step is `coverage_pytest`, rerun that exact command at most once when flakiness is plausible. If the rerun passes, preserve the original failure evidence in the narrative but re-evaluate the checklist with `scripts/evaluate_pr_checklist.py --standard-test-override passed`.
 - Do not run `make test-full` by default. Run full-dataset checks only when the user or an existing checklist explicitly requires them.
 - Mark items as passed/failed/blocked in your report.
 - **If any item fails or is blocked, stop and ask the user whether to proceed with PR creation.**
@@ -263,6 +266,7 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 ## Bundled resources
 
 - `scripts/evaluate_pr_checklist.py`: consume `code-health` JSON plus explicit checklist inputs and emit machine-readable checklist verdicts.
+  - Supports `--standard-test-override` and `--standard-test-override-detail` so a verified manual rerun can refresh the standard-test verdict without mutating the original code-health JSON.
 - `scripts/run_pr_workflow.py`: run `code-health`, lint/format, optional full-dataset, then emit a consolidated JSON payload for checklist verdicts and PR-body inputs.
 - `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
 - `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, and create the PR through `gh pr create`.

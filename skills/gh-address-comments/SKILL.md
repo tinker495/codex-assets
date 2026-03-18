@@ -37,8 +37,10 @@ Prereq:
   - reviews
   - inline review threads
   - `resolution` metadata (`repo`, `pr`, `source`, `url`)
+- `scripts/fetch_comments.py` now returns both the GraphQL node id (`id`) and, when available, the numeric REST review-comment id as `rest_id` on inline review comments. Use `rest_id` for reply-posting APIs.
 - When the user already has final reply text and wants it posted to an existing review thread, identify the target review `comment_id` first:
-  - Preferred: use the inline review thread/comment ids returned by `scripts/fetch_comments.py`.
+  - Preferred: use the inline review comment `rest_id` returned by `scripts/fetch_comments.py`.
+  - If only node ids are present, fetch `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate` and match `node_id` -> numeric `id`.
   - If needed, confirm with gh directly: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`
 
 ## 2) Ask the user for clarification
@@ -55,6 +57,8 @@ Use this when the user already has final comment text and wants it uploaded to a
 
 1. Find the target PR with Step 0 and keep the resolved `owner/repo` + PR number.
 2. Identify the target review `comment_id` from `scripts/fetch_comments.py` output or `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`.
+   - Prefer the numeric `rest_id` field from `scripts/fetch_comments.py` for inline review comments.
+   - Treat the GraphQL-style `id`/`node_id` (for example `PRRC_...`) as lookup helpers only; the reply API wants the numeric review comment id.
 3. Decide which posting path applies:
    - **Non-code-claim fast path:** if the user supplied final reply text and it does not claim that a fix/change has already been applied, do not redraft it; preserve the final Korean text exactly as provided, including line breaks.
    - **Applied-fix path:** if the reply says or implies that a fix/change has already been applied, verify the code change is present locally, committed, and pushed to the PR branch before posting. If commit or push has not happened yet, stop and tell the user that push is still pending.
@@ -66,6 +70,7 @@ Use this when the user already has final comment text and wants it uploaded to a
      --method POST \
      --raw-field body="$(cat /absolute/path/to/reply.txt)"
    ```
+   - `comment_id` here means the numeric REST review comment id, not the GraphQL node id.
    - This `gh api repos/{owner}/{repo}/pulls/{pr}/comments/{comment_id}/replies` pattern is the preferred reliable method for replying to an existing PR review comment thread.
    - For short single-line replies, `--raw-field body='final reply text'` is acceptable.
    - Keep the env prefix on every gh retry to avoid interactive TTY failures.
@@ -76,6 +81,7 @@ Use this when the user already has final comment text and wants it uploaded to a
 - If any `--json` flag is rejected by the local tool version, rerun without `--json` and parse plain-text output.
 - If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument.
 - If `jq` parsing fails (`jq: parse error`), rerun without `--jq`/`--json` and continue in text-parsing mode.
+- If the reply API returns `Parent comment not found`, assume a node-id/REST-id mismatch first. Re-fetch `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`, match `node_id`, and retry once with the numeric `id`.
 - If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR choice.
 - Before writing temp/output files, verify destination parent directory with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`.
 - Keep path filtering tight: run `rg --files -g 'fetch_comments.py'` before broad searches.
