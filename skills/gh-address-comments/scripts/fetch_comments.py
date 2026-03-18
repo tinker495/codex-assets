@@ -236,18 +236,31 @@ def resolve_explicit_pr(pr_value: str, gh_repo: str | None, repo_root: Path) -> 
 
 
 def resolve_current_repo_pr(repo_root: Path, gh_repo: str | None) -> TargetPR | None:
+    branch = current_branch(repo_root)
+    if not branch:
+        return None
+
     try:
-        pr = _run_json(
-            gh_cmd(["pr", "view", "--json", "number,url"], gh_repo=gh_repo),
+        pr_list = _run_json(
+            gh_cmd(
+                ["pr", "list", "--state", "open", "--head", branch, "--json", "number,url,updatedAt"],
+                gh_repo=gh_repo,
+            ),
             cwd=repo_root,
         )
     except RuntimeError:
         return None
 
-    number = pr.get("number")
-    if not number:
+    if not isinstance(pr_list, list) or not pr_list:
         return None
 
+    candidates = [item for item in pr_list if isinstance(item, dict) and item.get("number")]
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda item: str(item.get("updatedAt") or ""), reverse=True)
+    pr = candidates[0]
+    number = pr.get("number")
     url = str(pr.get("url") or "")
     repo_slug = gh_repo
     if not repo_slug and url:

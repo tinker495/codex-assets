@@ -17,6 +17,7 @@ Prereq:
 
 ## 0) Resolve target PR (fork-aware)
 - Preferred: run `scripts/fetch_comments.py` directly (auto-resolves current repo PR, then fork upstream parent PR by head branch when needed).
+- Auto-resolution should prefer the current git branch name plus `gh pr list --head <branch>` over bare `gh pr view`, because `gh pr view` may infer the wrong branch in repos with stale local metadata.
 - Path guardrail (required, search-as-discovery):
   - First verify local script path: `test -f scripts/fetch_comments.py`.
   - If missing, search candidate paths before fallback: `rg --files -g 'fetch_comments.py'`.
