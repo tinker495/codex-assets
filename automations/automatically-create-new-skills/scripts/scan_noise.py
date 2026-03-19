@@ -15,7 +15,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Set
+from typing import Dict, Iterable, List, Optional, Set
 
 
 SIGNALS: List[str] = [
@@ -51,12 +51,46 @@ SIGNALS: List[str] = [
 
 BACKTICK_SKILL_PATTERN = re.compile(r"`([a-z0-9-]+)`")
 DOLLAR_SKILL_PATTERN = re.compile(r"\$([a-z0-9-]+)")
+SKILL_PATH_PATTERN = re.compile(r"(/[^\s\"']*SKILL\.md)")
+SHELL_FAILURE_LINE_PATTERN = re.compile(
+    r"(?m)^(?:ls|sed|cat|rg|git|find|python|python3|bash|zsh|jq|gh|timeout|pdfinfo|grepai): .+$"
+)
+READ_ONLY_SEGMENT_PREFIXES = (
+    "cat ",
+    "sed ",
+    "find ",
+    "rg ",
+    "ls ",
+    "tmux capture-pane",
+    "git rev-parse",
+    "git status",
+    "git diff",
+    "git log",
+    "git show",
+    "test -f ",
+    "test -d ",
+    "[ -f ",
+    "[ -d ",
+    "pwd",
+    "printf ",
+    "echo ",
+    "head ",
+    "tail ",
+    "wc ",
+    "stat ",
+)
 
 
 @dataclass
 class SignalStats:
     count: int
     sessions: Set[str]
+
+
+@dataclass
+class CallMeta:
+    tool_name: str
+    cmd: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,8 +104,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--file",
         type=str,
-        default="",
-        help="Optional single JSONL file to scan (overrides time window).",
+        action="append",
+        default=[],
+        help="Optional JSONL file to scan. Repeatable; overrides time window.",
     )
     return parser.parse_args()
 
@@ -105,12 +140,15 @@ def modified_skills_7d(codex_home: Path, now_ts: float) -> Set[str]:
     return modified
 
 
-def list_session_files(codex_home: Path, since_seconds: int, single_file: str) -> List[Path]:
-    if single_file:
-        path = Path(single_file).expanduser()
-        if path.is_file():
-            return [path]
-        raise FileNotFoundError(f"Session file not found: {path}")
+def list_session_files(codex_home: Path, since_seconds: int, explicit_files: List[str]) -> List[Path]:
+    if explicit_files:
+        files: List[Path] = []
+        for raw_path in explicit_files:
+            path = Path(raw_path).expanduser()
+            if not path.is_file():
+                raise FileNotFoundError(f"Session file not found: {path}")
+            files.append(path)
+        return sorted(set(files))
 
     now_ts = time.time()
     cutoff = now_ts - since_seconds
@@ -151,13 +189,33 @@ def extract_message_text(payload: Dict) -> str:
     return " ".join(chunks)
 
 
-def should_count_no_such_file(output: str) -> bool:
+def extract_exit_code(output: str) -> Optional[int]:
     code_match = re.search(r"Process exited with code (\d+)", output)
     if code_match:
-        return int(code_match.group(1)) != 0
-    if re.search(r"\bexit code\s*([12])\b", output, flags=re.IGNORECASE):
+        return int(code_match.group(1))
+    exit_match = re.search(r"\bexit code\s*([0-9]+)\b", output, flags=re.IGNORECASE)
+    if exit_match:
+        return int(exit_match.group(1))
+    return None
+
+
+def has_shell_failure_text(output: str) -> bool:
+    if SHELL_FAILURE_LINE_PATTERN.search(output):
+        return True
+    if re.search(r"(?m)^fatal: .+$", output):
+        return True
+    if re.search(r"(?m)^command not found: .+$", output):
+        return True
+    if re.search(r"(?m)^write_stdin failed: .+$", output):
         return True
     return False
+
+
+def should_count_no_such_file(output: str) -> bool:
+    code = extract_exit_code(output)
+    if code is not None:
+        return code != 0 or has_shell_failure_text(output)
+    return has_shell_failure_text(output)
 
 
 def extract_skills_from_text(text: str, known_skills: Set[str]) -> Set[str]:
@@ -169,6 +227,37 @@ def extract_skills_from_text(text: str, known_skills: Set[str]) -> Set[str]:
         if token in known_skills:
             found.add(token)
     return found
+
+
+def extract_skills_from_command(cmd: str, known_skills: Set[str]) -> Set[str]:
+    found: Set[str] = set()
+    for raw_path in SKILL_PATH_PATTERN.findall(cmd):
+        skill_name = Path(raw_path).parent.name
+        if skill_name in known_skills:
+            found.add(skill_name)
+    return found
+
+
+def is_read_only_segment(segment: str) -> bool:
+    cleaned = segment.strip()
+    if not cleaned:
+        return True
+    return cleaned.startswith(READ_ONLY_SEGMENT_PREFIXES)
+
+
+def is_successful_read_only_observer(call_meta: CallMeta, output: str) -> bool:
+    if call_meta.tool_name != "exec_command":
+        return False
+    if has_shell_failure_text(output):
+        return False
+    code = extract_exit_code(output)
+    if code not in {None, 0}:
+        return False
+    cmd = call_meta.cmd.strip()
+    if not cmd:
+        return False
+    segments = re.split(r"\s*(?:&&|\|\||;|\|)\s*", cmd)
+    return bool(segments) and all(is_read_only_segment(segment) for segment in segments)
 
 
 def ensure_signal_record(stats: Dict[str, SignalStats], signal: str) -> SignalStats:
@@ -193,6 +282,7 @@ def main() -> int:
     for session_file in session_files:
         session_id = session_file.name
         active_skills: Set[str] = set()
+        call_map: Dict[str, CallMeta] = {}
         try:
             with session_file.open("r", encoding="utf-8") as handle:
                 for line in handle:
@@ -229,11 +319,46 @@ def main() -> int:
                                 used_skills_24h.update(found)
                         continue
 
+                    if payload_type == "function_call":
+                        call_id = payload.get("call_id")
+                        args_raw = payload.get("arguments")
+                        cmd = ""
+                        if isinstance(args_raw, str):
+                            try:
+                                parsed_args = json.loads(args_raw)
+                            except json.JSONDecodeError:
+                                parsed_args = {}
+                        elif isinstance(args_raw, dict):
+                            parsed_args = args_raw
+                        else:
+                            parsed_args = {}
+                        if isinstance(parsed_args, dict):
+                            cmd_value = parsed_args.get("cmd")
+                            if isinstance(cmd_value, str):
+                                cmd = cmd_value
+                        if isinstance(call_id, str):
+                            call_map[call_id] = CallMeta(
+                                tool_name=str(payload.get("name") or ""),
+                                cmd=cmd,
+                            )
+                        found = extract_skills_from_command(cmd, known_skills)
+                        if found:
+                            active_skills = set(found)
+                            used_skills_24h.update(found)
+                        continue
+
                     if payload_type != "function_call_output":
                         continue
 
                     output = payload.get("output")
                     if not isinstance(output, str):
+                        continue
+                    call_id = payload.get("call_id")
+                    if isinstance(call_id, str):
+                        call_meta = call_map.get(call_id, CallMeta(tool_name="", cmd=""))
+                    else:
+                        call_meta = CallMeta(tool_name="", cmd="")
+                    if is_successful_read_only_observer(call_meta, output):
                         continue
 
                     for signal in SIGNALS:
