@@ -51,7 +51,7 @@ For existing automations, review the current prompt before proposing changes.
 - `cwds`: Comma-separated list or JSON array string of workspace paths.
 - `cwds` rule: Choose the narrowest real execution root for the task. Repo-local automation uses the target repo. Machine-wide Codex automation uses `~/.codex`.
 - `status`: Default to `ACTIVE` unless user requests paused.
-- `validation`: After editing an automation TOML, parse it once with `tomllib`. If default `python` lacks `tomllib`, use `python3.11` fallback.
+- `validation`: After editing an automation TOML, parse it once with `tomllib`. If default `python` lacks `tomllib`, use `python3.11` fallback. If `python3.11` is unavailable, fall back to `python3 -c 'from pip._vendor import tomli as tomllib'`.
 - `path checks`: Before reading or writing automation files, verify with `test -d` and `test -w` on the parent directory.
   If the parent is not writable, fallback outputs to repo root or `$CODEX_HOME`; if neither is writable, stop and report.
 - `path convention`: Never use `/automations/...` absolute paths. Always use `$CODEX_HOME/automations/<id>`.
