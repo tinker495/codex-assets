@@ -28,12 +28,6 @@ Use this skill when:
 - When the caller provides a changed-files list (for example, Ralph session-owned edits), keep the cleanup strictly bounded to those files.
 - In the **Ralph workflow**, the mandatory deslop pass should run this skill on Ralph's changed files only, in standard mode unless the caller explicitly requests otherwise.
 
-## Operational Noise Guardrails
-
-- When a cleanup pass needs an ad hoc Python import/probe inside a repo, prefer the repo runtime first (for example `uv run python -c "..."` when `pyproject.toml`/`uv.lock` is present) instead of bare `python`.
-- If a bare interpreter import fails with `ModuleNotFoundError` for the repo package, rerun once with the repo runtime and continue; treat the first failure as environment mismatch unless the repo runtime fails too.
-- Avoid here-doc Python snippets for probes (`python - <<'PY'`); prefer `python -c` for short checks and a checked temp script only when the snippet is too large for `-c`.
-
 ## Procedure
 
 1. **Lock behavior with regression tests first**
