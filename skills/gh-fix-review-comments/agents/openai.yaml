@@ -1,0 +1,4 @@
+interface:
+  display_name: "GH Review Fixes"
+  short_description: "Fix review comments, push, and resolve"
+  default_prompt: "Use $gh-fix-review-comments to apply PR review feedback, push the fix, reply, and resolve the thread."

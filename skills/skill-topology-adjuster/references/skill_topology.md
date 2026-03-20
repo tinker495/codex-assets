@@ -56,6 +56,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
 | `gh-address-comments` | specialist | PR comment retrieval and response workflow |
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
+| `gh-fix-review-comments` | specialist-orchestrator | end-to-end PR review fix, commit, push, reply, and resolve workflow |
 | `interface-design` | specialist | intentional interface design workflow for app/product UI tasks |
 | `jupyter-notebook` | specialist | notebook scaffold/edit workflow |
 | `cp-sat-performance-and-advanced-features` | specialist | advanced CP-SAT performance tuning, log forensics, and scaling workflow |
@@ -106,7 +107,7 @@ Layer 1: Specialists (single-domain ownership)
   spec-diff, spreadsheet, visual-verdict, yeet
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
-  deep-interview, grepai-deep-analysis, refresh-branch-docs,
+  deep-interview, gh-fix-review-comments, grepai-deep-analysis, refresh-branch-docs,
   non-test-bloat-reduction, web-clone
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
@@ -158,6 +159,8 @@ flowchart LR
   PR --> CH
   PR --> GDA
 
+  GFRC["gh-fix-review-comments"] --> GHC["gh-address-comments"]
+
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> TI["todo-inventory"]
   SWU --> OWP["omx-workspace-prune"]
@@ -187,6 +190,7 @@ flowchart LR
   DCAA["docs-codebase-alignment-audit"]
   FS["find-skills"]
   GHF["gh-fix-ci"]
+  GFRC["gh-fix-review-comments"]
   GHC["gh-address-comments"]
   HELP["help"]
   HUD["hud"]
@@ -245,10 +249,12 @@ flowchart TD
   ORCH --> UW["ultrawork"]
 
   HYB --> DI["deep-interview"]
+  HYB --> GFRC["gh-fix-review-comments"]
   HYB --> GDA["grepai-deep-analysis"]
   HYB --> NTBR["non-test-bloat-reduction"]
   HYB --> RBD["refresh-branch-docs"]
   HYB --> WCL["web-clone"]
+  GFRC --> GHC["gh-address-comments"]
 
   SPEC --> AMB["agents-md-builder"]
   SPEC --> AISC["ai-slop-cleaner"]

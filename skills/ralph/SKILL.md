@@ -33,7 +33,8 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - Fire independent agent calls simultaneously -- never wait sequentially for independent work
 - Use `run_in_background: true` for long operations (installs, builds, test suites)
 - Always pass the `model` parameter explicitly when delegating to agents
-- Read `docs/shared/agent-tiers.md` before first delegation to select correct agent tiers
+- Before first delegation, set `CODEX_HOME=${CODEX_HOME:-$HOME/.codex}` and prefer `"$CODEX_HOME/docs/shared/agent-tiers.md"` to select agent tiers; if that file is absent, use Ralph's inline LOW/STANDARD/THOROUGH guidance instead of probing repo-local `docs/shared/agent-tiers.md`
+- When a delegated role needs a prompt file, prefer `"$CODEX_HOME/prompts/<role>.md"`; only fall back to `./.codex/prompts/<role>.md` after `test -f` confirms it exists in the current repo
 - Deliver the full implementation: no scope reduction, no partial completion, no deleting tests to make them pass
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints
