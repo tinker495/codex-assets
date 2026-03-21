@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Design"
+  short_description: "Branded landing pages with strong visual hierarchy"
+  default_prompt: "Use $frontend-design to design or build a branded landing page with a strong hero composition and intentional motion."

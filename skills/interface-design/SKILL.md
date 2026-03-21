@@ -11,7 +11,7 @@ Build interface design with craft and consistency.
 
 **Use for:** Dashboards, admin panels, SaaS apps, tools, settings pages, data interfaces.
 
-**Not for:** Landing pages, marketing sites, campaigns. Redirect those to `/frontend-design`.
+**Not for:** Landing pages, marketing sites, campaigns. Redirect those to `$frontend-design`.
 
 ---
 

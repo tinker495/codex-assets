@@ -54,6 +54,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `doc` | specialist | DOCX editing and conversion workflow |
 | `doc-separator` | specialist | mixed-document Tobe/As-Is separation |
 | `docs-codebase-alignment-audit` | specialist | deterministic docs/codebase alignment audit and minimal-diff fixes |
+| `frontend-design` | specialist | branded landing pages, marketing sites, and hero-first promotional frontend work |
 | `gh-address-comments` | specialist | PR comment retrieval and response workflow |
 | `gh-fix-ci` | specialist | GitHub Actions failure triage and fix gating |
 | `gh-fix-review-comments` | specialist-orchestrator | end-to-end PR review fix, commit, push, reply, and resolve workflow |
@@ -101,8 +102,8 @@ Layer 1: Specialists (single-domain ownership)
   code-review,
   cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
   desloppify, doc, doc-separator,
-  docs-codebase-alignment-audit, gh-address-comments, gh-fix-ci,
-  interface-design, jupyter-notebook, layer-boundary-test-scaffold,
+  docs-codebase-alignment-audit, frontend-design, gh-address-comments,
+  gh-fix-ci, interface-design, jupyter-notebook, layer-boundary-test-scaffold,
   no-deep-flag-review, pdf, reverse-doc, screenshot, security-review,
   spec-diff, spreadsheet, visual-verdict, yeet
 
@@ -188,6 +189,7 @@ flowchart LR
   DI["deep-interview"]
   DOCR["doctor"]
   DCAA["docs-codebase-alignment-audit"]
+  FED["frontend-design"]
   FS["find-skills"]
   GHF["gh-fix-ci"]
   GFRC["gh-fix-review-comments"]
@@ -267,6 +269,7 @@ flowchart TD
   SPEC --> DOC["doc"]
   SPEC --> DSEP["doc-separator"]
   SPEC --> DCAA["docs-codebase-alignment-audit"]
+  SPEC --> FED["frontend-design"]
   SPEC --> GHF["gh-fix-ci"]
   SPEC --> GHC["gh-address-comments"]
   SPEC --> IFD["interface-design"]
