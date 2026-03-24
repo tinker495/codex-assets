@@ -24,8 +24,7 @@ Automatically detects which mode is active and cancels it:
 - **Swarm**: Stops coordinated agent swarm, releases claimed tasks
 - **Ultrapilot**: Stops parallel autopilot workers
 - **Pipeline**: Stops sequential agent pipeline
-- **Team**: Sends shutdown inbox to all workers, waits for exit, kills tmux session, clears linked ralph if present
-- **Team+Ralph (linked)**: Cancels team first (tmux shutdown + state cleanup), then clears ralph state
+- **Team**: Sends shutdown inbox to all workers, waits for exit, kills tmux session, and clears team state
 
 ## Usage
 
@@ -52,7 +51,6 @@ For Ralph-targeted cancellation (standalone or linked), completion is defined by
    - `current_phase='cancelled'`
    - `completed_at` is set (ISO timestamp)
 2. If Ralph is linked to Ultrawork or Ecomode in the same scope, that linked mode is also terminalized/non-active.
-3. If Ralph is team-linked (`linked_team=true`), Team cancellation occurs first, then Ralph terminal state is propagated.
 4. Cancellation MUST remain scope-safe: no mutation of unrelated sessions.
 
 See: `docs/contracts/ralph-cancel-contract.md`.
@@ -75,7 +73,6 @@ When cancellation targets Ralph state in a scope, completion requires all of the
 
 1. Ralph state is terminal in that same scope: `active=false`, `current_phase='cancelled'` (or linked terminal phase), and `completed_at` is set.
 2. Linked Ultrawork/Ecomode in the same scope is also terminal/non-active.
-3. If `linked_team=true`, Team terminalization happens before Ralph terminalization, and Ralph records linked terminal metadata.
 4. Unrelated sessions are untouched.
 
 ## Force Clear All
@@ -190,10 +187,7 @@ After graceful pass:
   1. Strip AGENTS.md team worker overlay (<!-- OMX:TEAM:WORKER:START/END -->)
   2. Remove team state directory: rm -rf .omx/state/team/{name}/
   3. Clear team mode state: state_clear(mode="team")
-  4. Check for linked ralph: state_read(mode="ralph") — if linked_team is true:
-     a. Clear ralph state: state_clear(mode="ralph")
-     b. Clear linked ultrawork if present: state_clear(mode="ultrawork")
-  5. Emit structured cancel report
+  4. Emit structured cancel report
 ```
 
 **Structured Cancel Report:**

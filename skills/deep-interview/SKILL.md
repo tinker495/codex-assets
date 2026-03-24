@@ -261,7 +261,7 @@ Present execution options after artifact generation using explicit handoff contr
 - **Skipped / Already-Satisfied Stages:** Requirement clarification and early ambiguity reduction
 - **Expected Output:** Coordinated multi-agent execution against the shared spec, with evidence that can later feed a Ralph verification pass when appropriate
 - **Best When:** The task is large, multi-lane, or blocker-sensitive enough to justify coordinated parallel execution instead of a single persistent loop
-- **Next Recommended Step:** Follow the `team -> ralph` verification path when the coordinated execution phase finishes or needs a persistent verification/fix loop
+- **Next Recommended Step:** Follow the team verification path when the coordinated execution phase finishes; escalate to a separate Ralph loop only when a later persistent verification/fix owner is still needed
 
 ### 5. **Refine further**
 - **Input Artifact:** Existing transcript, context snapshot, and current spec draft

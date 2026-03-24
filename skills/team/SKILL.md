@@ -37,7 +37,7 @@ If `omx team` is unavailable, stop with a hard error.
 ## Invocation Contract
 
 ```bash
-omx team [ralph] [N:agent-type] "<task description>"
+omx team [N:agent-type] "<task description>"
 ```
 
 Examples:
@@ -45,26 +45,19 @@ Examples:
 ```bash
 omx team 3:executor "analyze feature X and report flaws"
 omx team "debug flaky integration tests"
-omx team ralph "ship end-to-end fix with verification"
+omx team "ship end-to-end fix with verification"
 ```
 
-### Why `team ralph` exists as a linked launch path
+### Team-first launch contract
 
-`omx team ralph ...` is not just shorthand for "run team now, decide on Ralph
-later." It creates a linked team+Ralph lifecycle from launch time while still
-using the normal `omx team` runtime startup path.
+`omx team ...` is now the canonical launch path for coordinated execution.
+Team mode should carry its own parallel delivery + verification lanes without
+requiring a separate linked Ralph launch up front.
 
-- **Linked lifecycle/state:** launch marks team state with `linked_ralph`,
-  creates/updates Ralph state with `linked_team`, and team terminal phases can
-  propagate into Ralph state.
-- **Cleanup/shutdown:** linked cancellation and shutdown happen in order: team
-  cleanup first, then Ralph terminalization/cleanup metadata.
-- **Operator choice:**
-  - use plain `omx team ...` when you only want coordinated workers
-  - use `omx team ralph ...` when persistent Ralph verification/cleanup is part
-    of the plan from the start
-  - use plain `team` and start Ralph later only when you want a deliberately
-    separate manual follow-up after reviewing output or changing scope
+- **Canonical launch:** use plain `omx team ...` / `$team ...` for coordinated workers.
+- **Verification ownership:** keep one lane focused on tests, regression coverage, and evidence before shutdown.
+- **Escalation:** start a separate `omx ralph ...` / `$ralph ...` only when a later manual follow-up still needs a persistent single-owner fix/verification loop.
+- **Deprecation:** `omx team ralph ...` has been removed. Use plain `omx team ...` for team execution or run `omx ralph ...` separately when you explicitly want a later Ralph loop.
 
 ### Claude teammates (v0.6.0+)
 
@@ -128,14 +121,14 @@ When `$team` is used as a follow-up mode from ralplan, carry forward the approve
 - state the recommended headcount and role counts
 - state the suggested reasoning level for each lane when available
 - explain why each lane exists (delivery, verification, specialist support)
-- include an explicit launch hint (`omx team ralph N "<task>"` / `$team ralph N "<task>"`) when the plan expects Ralph to verify after team delivery
+- include an explicit launch hint (`omx team N "<task>"` / `$team N "<task>"`) for the coordinated team run; mention a later separate Ralph follow-up only when genuinely needed
 - if the ideal role is unavailable, choose the closest role from the roster and say so
 
 ## Current Runtime Behavior (As Implemented)
 
 `omx team` currently performs:
 
-1. Parse args (`ralph`, `N`, `agent-type`, task)
+1. Parse args (`N`, `agent-type`, task)
 2. Sanitize team name from task text
 3. Initialize team state:
    - `.omx/state/team/<team>/config.json`
