@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume"
+  short_description: "Resume current work then do task"
+  default_prompt: "Use $resume to load the current working state first, then continue this task: <paste task here>."
