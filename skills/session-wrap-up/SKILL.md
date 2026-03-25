@@ -1,13 +1,13 @@
 ---
 name: session-wrap-up
-description: Close an active coding session by distilling reusable insights, summarizing deferred TODO and follow-up status, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, capture session-end TODO status, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
+description: Close an active coding session by distilling reusable insights, summarizing deferred TODO and follow-up status, reviewing even small usage mistakes or recoverable hiccups for reusable guardrail gaps, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, capture session-end TODO status, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
 ---
 
 # Session Wrap Up
 
 ## Overview
 
-Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator`, use `todo-inventory` when deferred-work evidence matters, and keep topology edits conditional.
+Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator`, use `todo-inventory` when deferred-work evidence matters, and keep topology edits conditional. Do not ignore small but repeatable usage mistakes, validation slips, aborted turns, or recoverable tool hiccups when they reveal a missing guardrail.
 
 ```mermaid
 flowchart LR
@@ -22,11 +22,12 @@ flowchart LR
 ## Workflow
 
 1. Collect session evidence.
-Capture goals, delivered outputs, repeated friction, failed attempts, and proven fixes from the current session.
+Capture goals, delivered outputs, repeated friction, failed attempts, small usage mistakes, recoverable hiccups, and proven fixes from the current session.
 Prefer concrete artifacts in this order:
 - current task/result summary
 - changed file paths, command traces, and validation output
 - user correction points or repeated prompt steering
+- aborted turns, command misuse, validation-format mistakes, or quick recoveries that still exposed a missing guardrail
 - local session artifacts (`.omx/notepad.md`, `.omx/state`, draft reports) when present
 Do not invent history and do not assume a missing recall skill exists.
 When deferred follow-up visibility matters, call `todo-inventory` to capture:
@@ -40,6 +41,7 @@ Classify each candidate into one of:
 - workflow gap
 - ownership/delegation boundary gap
 - reusable resource gap (script/reference/template)
+Treat small but repeatable operator mistakes or tool-usage slips as `workflow gap` candidates when a guardrail, clearer instruction, validator, or helper script would have prevented them.
 Drop one-off observations that are unlikely to recur.
 
 3. Decide action type per insight.
@@ -47,6 +49,7 @@ Choose `none` when value is non-reusable.
 Choose `update-existing-skill` when ownership already exists or when an installed skill is the obvious home.
 Choose `create-new-skill` only when repeated value + clear ownership boundary + no installed owner are all true.
 Choose retirement/removal guidance only when the asset is superseded or harmful; otherwise keep scope to additive updates.
+Do not dismiss a small failure just because recovery was easy; if it exposed a reusable missing guardrail, prefer `update-existing-skill`.
 If every candidate resolves to `none`, publish a no-op wrap-up and stop after reporting.
 
 4. Delegate implementation to `skill-creator`.
@@ -93,6 +96,7 @@ Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets
 ## Decision Rules
 
 - Bias toward `update-existing-skill` over `create-new-skill`.
+- Bias toward treating small repeatable usage mistakes as guardrail gaps, not as noise.
 - Keep delegation to installed skills only; if the owner is missing, either handle evidence locally or create a bounded proposal to add the owner.
 - Allow `none` as a valid final action when the session produced no reusable pattern.
 - Keep retirement guidance explicit and reversible; never recommend direct deletion from the mirror repo.
@@ -104,17 +108,35 @@ Default output language: Korean.
 Use Korean for section titles, summaries, TODO notes, insight descriptions, delegation notes, and handoff text unless the user explicitly requests another language.
 Keep literal workflow/action tokens such as `none`, `update-existing-skill`, `create-new-skill`, `retire-skill`, `merge`, `mirror`, and `no-op wrap-up` in backticks unless the user explicitly asks to localize them.
 
+Use the exact section order below.
+Do not merge sections.
+If a section has no content, still emit the heading and write `없음`.
+
 Always return, in order:
-1. Session result summary (answer-first, 3-5 lines).
-2. TODO status summary:
+1. `## 1. 세션 결과 요약`
+   - Session result summary (answer-first, 3-5 lines).
+   - Mention small-but-reusable usage mistakes or minor hiccups when they influenced the session outcome.
+2. `## 2. TODO 상태 요약`
+   - TODO status summary:
    - TODOs newly added in the current diff
    - remaining TODOs in scope
    - follow-up items reported without inline TODO markers, if any
-3. Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
-4. Delegation plan (`orchestrator -> specialist`) for each action.
-5. Topology delta summary (if no change, say "no topology change").
-6. Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
-If every action is `none`, still emit all sections, include TODO status, and explicitly say `no-op wrap-up`.
+3. `## 3. 사소한 장애/사용 미스 검토`
+   - List small usage mistakes, aborted turns, validator slips, command misuse, or recoverable hiccups that mattered.
+   - For each item, say:
+     - what happened
+     - why it matters
+     - whether it is `one-off` or a reusable `guardrail gap`
+   - If none, write `없음`.
+4. `## 4. 재사용 가능한 인사이트`
+   - Reusable insights list with action type (`none`, `update-existing-skill`, `create-new-skill`, `retire-skill`).
+5. `## 5. 위임 계획`
+   - Delegation plan (`orchestrator -> specialist`) for each action.
+6. `## 6. 토폴로지 변경 요약`
+   - Topology delta summary (if no change, say exactly `no topology change`).
+7. `## 7. 즉시 다음 작업`
+   - Immediate next command/task for handoff (include sync mode: `merge` or `mirror`).
+If every action is `none`, still emit all sections, include TODO status and the small-incident review section, and explicitly say `no-op wrap-up`.
 
 ## Delegation Boundaries
 

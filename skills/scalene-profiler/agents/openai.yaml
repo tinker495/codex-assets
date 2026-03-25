@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scalene Profiler"
+  short_description: "Repeatable Scalene profiling workflow"
+  default_prompt: "Use $scalene-profiler to capture a detailed Scalene CPU/memory profile and save reusable artifacts."

@@ -14,6 +14,7 @@
 Use evidence in this order:
 1. Current task summary and delivered result.
 2. Changed files, command traces, validations, and failure/retry notes.
+   - Include small-but-revealing failures such as aborted turns, YAML/frontmatter slips, command syntax mistakes, and easy recoveries that still exposed a missing guardrail.
 3. User corrections or repeated steering.
 4. Local session artifacts such as `.omx/notepad.md` or saved reports.
 5. TODO inventory evidence (`todo-inventory` output, inline `TODO:` markers, or explicit deferred follow-up notes).
@@ -26,11 +27,13 @@ Do not reference a non-installed recall skill to fill evidence gaps.
 | --- | --- | --- | --- |
 | Trigger mismatch | repeated prompt correction | high | update-existing-skill |
 | Missing sequence guardrail | repeated manual workaround | high | update-existing-skill |
+| Minor but repeatable usage mistake | aborted turn, YAML slip, command misuse, default misunderstanding | medium-high | update-existing-skill |
 | New repeated workflow | appears in multiple tasks | high | create-new-skill |
 | One-off failure | isolated environment issue | low | none |
 
 Default bias:
 - prefer `update-existing-skill`
+- if a small failure revealed a reusable guardrail gap, do not down-rank it to `none` just because recovery was quick
 - use `create-new-skill` only when no installed owner is a clean fit
 
 ## Handoff Packet to skill-creator
@@ -71,6 +74,24 @@ When wrap-up output mentions deferred follow-up work:
 2. Distinguish current TODO inventory from TODOs newly added in the current diff.
 3. If work was deferred without an inline TODO comment, label it explicitly as `reported-without-inline-TODO`.
 4. If diff status is unavailable, say so instead of implying zero new TODOs.
+
+## Output Format Gate
+
+The final wrap-up must always emit these exact headings, in this order:
+
+1. `## 1. 세션 결과 요약`
+2. `## 2. TODO 상태 요약`
+3. `## 3. 사소한 장애/사용 미스 검토`
+4. `## 4. 재사용 가능한 인사이트`
+5. `## 5. 위임 계획`
+6. `## 6. 토폴로지 변경 요약`
+7. `## 7. 즉시 다음 작업`
+
+Rules:
+1. Never merge or skip sections.
+2. If a section has no content, write `없음`.
+3. In section 3, explicitly classify each item as `one-off` or `guardrail gap`.
+4. If no reusable action survives review, still emit all seven sections and explicitly mark the wrap-up as `no-op wrap-up`.
 
 ## Retirement and Sync Mode Gate
 

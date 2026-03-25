@@ -66,6 +66,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `no-deep-flag-review` | specialist | review deep flag-passing violations and minimal fix direction |
 | `pdf` | specialist | PDF rendering and visual QA |
 | `reverse-doc` | specialist | code-to-As-Is documentation workflow |
+| `scalene-profiler` | specialist | repeatable Scalene runtime profiling and artifact generation |
 | `screenshot` | specialist | OS-level screenshot capture |
 | `security-review` | specialist | focused security audit for code and configuration |
 | `spec-diff` | specialist | Tobe/As-Is drift comparison workflow |
@@ -104,7 +105,7 @@ Layer 1: Specialists (single-domain ownership)
   desloppify, doc, doc-separator,
   docs-codebase-alignment-audit, frontend-design, gh-address-comments,
   gh-fix-ci, interface-design, jupyter-notebook, layer-boundary-test-scaffold,
-  no-deep-flag-review, pdf, reverse-doc, screenshot, security-review,
+  no-deep-flag-review, pdf, reverse-doc, scalene-profiler, screenshot, security-review,
   spec-diff, spreadsheet, visual-verdict, yeet
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
@@ -205,6 +206,7 @@ flowchart LR
   PLAN["plan"]
   RALPH["ralph"]
   RLP["ralplan"]
+  SPROF["scalene-profiler"]
   SECR["security-review"]
   SHOT["screenshot"]
   SKILL["skill"]
@@ -278,6 +280,7 @@ flowchart TD
   SPEC --> NDF["no-deep-flag-review"]
   SPEC --> PDF["pdf"]
   SPEC --> RD["reverse-doc"]
+  SPEC --> SPROF["scalene-profiler"]
   SPEC --> SECR["security-review"]
   SPEC --> SHOT["screenshot"]
   SPEC --> SPD["spec-diff"]
