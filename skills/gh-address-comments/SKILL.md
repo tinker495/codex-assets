@@ -13,7 +13,7 @@ Prereq:
 - Ensure `gh` exists first: `command -v gh`.
 - Before running git-scoped commands, verify repo context: `git rev-parse --is-inside-work-tree`.
 - Use non-interactive gh env for all gh calls: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
-- If any `gh` call still fails with `Error: could not open a new TTY`, rerun once with the same env and then report failure.
+- If any `gh` call still fails because the CLI attempts to allocate an interactive TTY, rerun once with the same env and then report failure.
 
 ## 0) Resolve target PR (fork-aware)
 - Preferred: run `scripts/fetch_comments.py` directly (auto-resolves current repo PR, then fork upstream parent PR by head branch when needed).
@@ -80,10 +80,10 @@ Use this when the user already has final comment text and wants it uploaded to a
 ## Operational Noise Controls
 
 - If any `--json` flag is rejected by the local tool version, rerun without `--json` and parse plain-text output.
-- If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument.
-- If `jq` parsing fails (`jq: parse error`), rerun without `--jq`/`--json` and continue in text-parsing mode.
+- If `gh` rejects the `--repo` flag, rerun without it and pass `OWNER/REPO` as the positional repository argument.
+- If `jq` cannot parse the payload, rerun without `--jq`/`--json` and continue in text-parsing mode.
 - If the reply API returns `Parent comment not found`, assume a node-id/REST-id mismatch first. Re-fetch `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`, match `node_id`, and retry once with the numeric `id`.
-- If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR choice.
+- If PR auto-resolution cannot determine the current branch PR, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR choice.
 - Before writing temp/output files, verify destination parent directory with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`.
 - Keep path filtering tight: run `rg --files -g 'fetch_comments.py'` before broad searches.
 
