@@ -61,7 +61,7 @@ python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.p
 - Run `branch-onboarding-brief` first and reuse its branch/base, commit summary, file counts, and net LOC metrics.
 - Run additional `git diff` commands only when the onboarding output misses a metric required for the PR briefing.
 - If branch name / commit subjects / changed paths are strong enough, infer a short “previous problem → added capability” narrative from that onboarding context and seed the PR Overview with it.
-- If the onboarding evidence is too weak for a reliable narrative, insert a short TODO prompt asking the human to complete the branch background manually.
+- If the onboarding evidence is too weak for a reliable narrative, insert a short neutral note asking the human to complete the branch background manually; avoid raw TODO markers by default.
 
 ### 2) Run Code-Health (Required)
 
@@ -278,7 +278,6 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - `scripts/evaluate_pr_checklist.py`: consume `code-health` JSON plus explicit checklist inputs and emit machine-readable checklist verdicts.
   - Supports `--standard-test-override` and `--standard-test-override-detail` so a verified manual rerun can refresh the standard-test verdict without mutating the original code-health JSON.
 - `scripts/run_pr_workflow.py`: run `code-health`, lint/format, optional full-dataset, then emit a consolidated JSON payload for checklist verdicts and PR-body inputs.
-- `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
 - `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a directly publishable Markdown PR body by default.
 - `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, create a new PR, or update the existing branch PR through `gh pr edit`.
 - `scripts/launch_pr_workflow.py`: single entrypoint that orchestrates the full chain from workflow analysis to optional PR creation.

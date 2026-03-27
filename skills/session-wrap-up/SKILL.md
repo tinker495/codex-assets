@@ -1,13 +1,13 @@
 ---
 name: session-wrap-up
-description: Close an active coding session by distilling reusable insights, summarizing deferred TODO and follow-up status, reviewing even small usage mistakes or recoverable hiccups for reusable guardrail gaps, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, capture session-end TODO status, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
+description: Close an active coding session by distilling reusable insights, summarizing deferred TODO and follow-up status, reviewing material usage mistakes or recoverable hiccups for reusable guardrail gaps, deciding whether to keep/update/create/retire skill assets, and delegating concrete skill maintenance work while preserving clean orchestration boundaries. Use when asked to do session wrap-up/retrospective, convert lessons learned into new or updated skills, capture session-end TODO status, decide whether a session implies no-op skill follow-up, or adjust delegation topology across skills.
 ---
 
 # Session Wrap Up
 
 ## Overview
 
-Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator`, use `todo-inventory` when deferred-work evidence matters, and keep topology edits conditional. Do not ignore small but repeatable usage mistakes, validation slips, aborted turns, or recoverable tool hiccups when they reveal a missing guardrail.
+Run a deterministic session-closing flow that turns session outcomes into reusable skill actions. Own synthesis and prioritization. Prefer strengthening installed skills over creating new ones. Delegate skill implementation mechanics to `skill-creator`, use `todo-inventory` when deferred-work evidence matters, and keep topology edits conditional. Review small mistakes or recoverable hiccups only when they materially affected the session, repeated, or clearly exposed a reusable missing guardrail.
 
 ```mermaid
 flowchart LR
@@ -22,12 +22,12 @@ flowchart LR
 ## Workflow
 
 1. Collect session evidence.
-Capture goals, delivered outputs, repeated friction, failed attempts, small usage mistakes, recoverable hiccups, and proven fixes from the current session.
+Capture goals, delivered outputs, repeated friction, failed attempts, material usage mistakes, recoverable hiccups, and proven fixes from the current session.
 Prefer concrete artifacts in this order:
 - current task/result summary
 - changed file paths, command traces, and validation output
 - user correction points or repeated prompt steering
-- aborted turns, command misuse, validation-format mistakes, or quick recoveries that still exposed a missing guardrail
+- aborted turns, command misuse, validation-format mistakes, or quick recoveries only when they changed the execution path, affected the result, repeated, or still exposed a reusable missing guardrail
 - local session artifacts (`.omx/notepad.md`, `.omx/state`, draft reports) when present
 Do not invent history and do not assume a missing recall skill exists.
 When deferred follow-up visibility matters, call `todo-inventory` to capture:
@@ -42,14 +42,14 @@ Classify each candidate into one of:
 - ownership/delegation boundary gap
 - reusable resource gap (script/reference/template)
 Treat small but repeatable operator mistakes or tool-usage slips as `workflow gap` candidates when a guardrail, clearer instruction, validator, or helper script would have prevented them.
-Drop one-off observations that are unlikely to recur.
+Drop one-off observations that are unlikely to recur, were cheap to recover from, and did not change the result or the session process.
 
 3. Decide action type per insight.
 Choose `none` when value is non-reusable.
 Choose `update-existing-skill` when ownership already exists or when an installed skill is the obvious home.
 Choose `create-new-skill` only when repeated value + clear ownership boundary + no installed owner are all true.
 Choose retirement/removal guidance only when the asset is superseded or harmful; otherwise keep scope to additive updates.
-Do not dismiss a small failure just because recovery was easy; if it exposed a reusable missing guardrail, prefer `update-existing-skill`.
+Do not dismiss a small failure just because recovery was easy if it exposed a reusable missing guardrail; otherwise allow `none` for trivial one-off recoveries.
 If every candidate resolves to `none`, publish a no-op wrap-up and stop after reporting.
 
 4. Delegate implementation to `skill-creator`.
@@ -96,7 +96,7 @@ Prefer workspace paths or `~/.codex/sub_agent_runs` for sub-agent output targets
 ## Decision Rules
 
 - Bias toward `update-existing-skill` over `create-new-skill`.
-- Bias toward treating small repeatable usage mistakes as guardrail gaps, not as noise.
+- Bias toward treating only repeated or outcome-affecting small usage mistakes as guardrail gaps; ignore trivial noise.
 - Keep delegation to installed skills only; if the owner is missing, either handle evidence locally or create a bounded proposal to add the owner.
 - Allow `none` as a valid final action when the session produced no reusable pattern.
 - Keep retirement guidance explicit and reversible; never recommend direct deletion from the mirror repo.
@@ -115,14 +115,14 @@ If a section has no content, still emit the heading and write `없음`.
 Always return, in order:
 1. `## 1. 세션 결과 요약`
    - Session result summary (answer-first, 3-5 lines).
-   - Mention small-but-reusable usage mistakes or minor hiccups when they influenced the session outcome.
+   - Mention small-but-reusable usage mistakes or minor hiccups only when they materially influenced the session outcome or produced a concrete skill update.
 2. `## 2. TODO 상태 요약`
    - TODO status summary:
    - TODOs newly added in the current diff
    - remaining TODOs in scope
    - follow-up items reported without inline TODO markers, if any
 3. `## 3. 사소한 장애/사용 미스 검토`
-   - List small usage mistakes, aborted turns, validator slips, command misuse, or recoverable hiccups that mattered.
+   - List only small usage mistakes, aborted turns, validator slips, command misuse, or recoverable hiccups that materially mattered.
    - For each item, say:
      - what happened
      - why it matters

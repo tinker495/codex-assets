@@ -14,7 +14,7 @@
 Use evidence in this order:
 1. Current task summary and delivered result.
 2. Changed files, command traces, validations, and failure/retry notes.
-   - Include small-but-revealing failures such as aborted turns, YAML/frontmatter slips, command syntax mistakes, and easy recoveries that still exposed a missing guardrail.
+   - Include small-but-revealing failures such as aborted turns, YAML/frontmatter slips, command syntax mistakes, and easy recoveries only when they changed the session path, affected output quality, repeated, or still exposed a missing guardrail.
 3. User corrections or repeated steering.
 4. Local session artifacts such as `.omx/notepad.md` or saved reports.
 5. TODO inventory evidence (`todo-inventory` output, inline `TODO:` markers, or explicit deferred follow-up notes).
@@ -34,6 +34,7 @@ Do not reference a non-installed recall skill to fill evidence gaps.
 Default bias:
 - prefer `update-existing-skill`
 - if a small failure revealed a reusable guardrail gap, do not down-rank it to `none` just because recovery was quick
+- if a small failure was trivial, one-off, and did not alter outcome or process, prefer omitting it from section 3
 - use `create-new-skill` only when no installed owner is a clean fit
 
 ## Handoff Packet to skill-creator
@@ -91,7 +92,8 @@ Rules:
 1. Never merge or skip sections.
 2. If a section has no content, write `없음`.
 3. In section 3, explicitly classify each item as `one-off` or `guardrail gap`.
-4. If no reusable action survives review, still emit all seven sections and explicitly mark the wrap-up as `no-op wrap-up`.
+4. Omit trivial one-off recoveries from section 3 unless they changed execution, result quality, or a skill-update decision.
+5. If no reusable action survives review, still emit all seven sections and explicitly mark the wrap-up as `no-op wrap-up`.
 
 ## Retirement and Sync Mode Gate
 

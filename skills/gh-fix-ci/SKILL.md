@@ -79,6 +79,8 @@ Prereq:
    - Request explicit approval before implementation.
 7. Implement after approval.
    - Apply the approved plan, summarize diffs/tests, and ask about opening a PR.
+   - If you encounter a concrete follow-up that is valid but outside the approved fix scope, leave a precise `TODO:` at the nearest editable boundary touched by the change and include it in the same repo commit when possible.
+   - If no safe editable boundary exists, report the deferred item explicitly in the handoff instead of forcing a stray TODO.
 8. Recheck status.
    - After changes, suggest re-running the relevant tests and `gh pr checks` to confirm.
 

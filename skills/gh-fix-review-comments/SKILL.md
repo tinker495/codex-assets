@@ -40,6 +40,8 @@ If auth is missing, stop and tell the user to run `gh auth login`.
    - Do not broaden scope unless the fix requires it.
    - Keep existing repo conventions and AGENTS.md rules.
    - If multiple selected comments need disjoint edits, batch them only when one commit still reads clearly.
+   - If you find a concrete related improvement that is valid but outside the requested review-fix scope, leave a precise `TODO:` at the nearest editable boundary you are already touching and keep the commit otherwise narrow.
+   - If repository rules or the current task make that boundary unsafe to edit, do not force a TODO; explain the deferred item in the final handoff or rationale reply.
 
 5. Verify before claiming the fix is done.
    - Run targeted tests first.
