@@ -14,6 +14,7 @@ Your job is to help users prepare and create comprehensive, well-structured PRs:
 - Generate a structured PR briefing following the standard format
 - **PR 브리핑은 한국어로 자세히 작성**
 - **PR 제목은 반드시 한국어로 작성**
+- **생성된 PR 바디는 그대로 게시 가능한 품질이어야 하며, `자동 초안`, `자동 추론`, `TODO` 같은 임시 문구를 기본 출력으로 남기지 않는다**
 - If a checklist exists, try to run each item. If any item cannot be verified or fails, report to the user and ask whether to proceed with PR creation.
 - Present the PR briefing to the user and wait for explicit approval before pushing or creating the PR.
 - Create the PR with `gh pr create` only after approval.
@@ -51,6 +52,7 @@ python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.p
   - `launch_pr_workflow.py`, `run_pr_workflow.py`, `create_pr_from_workflow.py`는 이제 stage 진행 로그를 `stderr`로 즉시 출력한다.
   - 세 스크립트 모두 `--status-json /path/to/status.json`을 지원한다.
   - `launch_pr_workflow.py`는 기본 artifacts dir 아래에 `launch.status.json`, `run_pr_workflow.status.json`, `create_pr.status.json`을 남겨 장시간 단계(`code-health`, coverage pytest, gh PR create`)를 외부 스킬이 폴링하기 쉽게 한다.
+  - `create_pr_from_workflow.py`는 같은 브랜치의 오픈 PR이 이미 있으면 새 PR을 만들지 않고, 최신 body/title로 해당 PR을 갱신한다.
 
 ## Workflow Steps
 
@@ -110,7 +112,9 @@ When change impact still spans multiple modules or naming drift remains ambiguou
 ### 6) Draft PR Description
 
 - When `scripts/generate_pr_brief.py` is available, prefer it to turn `run_pr_workflow.py` JSON into a Markdown draft before manual polishing.
-- The draft should include a short background sentence of the form “이전에는 … 문제가 있어서 … 기능을 추가했다” when onboarding evidence supports it; otherwise it should leave a concise TODO prompt for human completion.
+- The draft should include a short background sentence of the form “이전에는 … 문제가 있어서 … 기능을 추가했다” when onboarding evidence supports it.
+- Default output quality target: directly publishable Korean PR body. Avoid placeholder sections, meta commentary about automation, `TODO` markers, or “자동 초안/자동 추론” wording unless the user explicitly asks for a draft-like artifact.
+- If evidence is weak, prefer neutral phrasing (“브랜치 커밋/변경 파일 기준으로 정리했다”) over TODO placeholders.
 
 Use this format (**한국어로 자세히 작성**):
 
@@ -242,6 +246,7 @@ By Category:
 - Ask whether to proceed with push + PR creation.
 - Stop if approval is not given.
 - When `scripts/create_pr_from_workflow.py` is available, prefer it to push the branch (optional) and call `gh pr create --body-file` from the generated artifacts after approval.
+- If the branch already has an open PR, prefer updating the existing PR body/title with the regenerated markdown rather than leaving the old body stale.
 
 ### 9) Push Branch (if needed)
 
@@ -254,6 +259,11 @@ git push -u origin $(git branch --show-current)
 ```bash
 gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR description from step 5]"
 ```
+
+### 11) Post-Create Body Refresh
+
+- If the user asks to revise the PR body after creation, or if the workflow is re-run on a branch with an existing open PR, treat `gh pr edit --body-file` as the standard path.
+- Apply the refreshed markdown body from workflow artifacts instead of manually patching small fragments in chat whenever possible.
 
 ## Cross-Skill Usage
 
@@ -269,7 +279,8 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
   - Supports `--standard-test-override` and `--standard-test-override-detail` so a verified manual rerun can refresh the standard-test verdict without mutating the original code-health JSON.
 - `scripts/run_pr_workflow.py`: run `code-health`, lint/format, optional full-dataset, then emit a consolidated JSON payload for checklist verdicts and PR-body inputs.
 - `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a Markdown PR body draft with TODO markers for manual refinement.
-- `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, and create the PR through `gh pr create`.
+- `scripts/generate_pr_brief.py`: convert `run_pr_workflow.py` JSON into a directly publishable Markdown PR body by default.
+- `scripts/create_pr_from_workflow.py`: consume workflow JSON + Markdown body, optionally push the branch, create a new PR, or update the existing branch PR through `gh pr edit`.
 - `scripts/launch_pr_workflow.py`: single entrypoint that orchestrates the full chain from workflow analysis to optional PR creation.
 - All workflow scripts: emit progress to `stderr` and support `--status-json` for live status inspection.
 
@@ -283,6 +294,7 @@ gh pr create --title "[유형]: [간단한 한국어 설명]" --body "[PR descri
 - For gh commands, use non-interactive env: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
 - If `gh` reports `Error: could not open a new TTY`, rerun once with the same env and then report failure.
 - If PR resolution fails with `unable to resolve PR from current branch`, fallback to `gh pr list --author @me --state open` and continue with explicit PR selection.
+- If the workflow is re-run after a PR already exists, prefer refreshing the existing PR body/title from the current markdown artifact instead of silently exiting.
 - If `gh` reports `Error: unknown flag: --repo`, rerun without `--repo` and pass `OWNER/REPO` as positional repository argument.
 - If JSON/JQ parsing fails (`--json` rejected or `jq: parse error`), rerun without `--json`/`--jq` and parse text output.
 

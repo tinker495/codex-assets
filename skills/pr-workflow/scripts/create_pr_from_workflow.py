@@ -260,6 +260,7 @@ def main() -> None:
         "planned_commands": planned_commands,
         "existing_open_pr": None,
         "push_result": None,
+        "update_result": None,
         "create_result": None,
         "pr_url": None,
         "status_json": str(status_path) if status_path is not None else None,
@@ -276,18 +277,6 @@ def main() -> None:
 
     tracker.set_phase("auth", message="checking gh authentication")
     ensure_gh_auth(repo_root)
-    tracker.set_phase("existing-pr", message=f"checking existing open PR for {head_branch}")
-    existing_pr = find_existing_open_pr(repo_root=repo_root, head_branch=head_branch)
-    if existing_pr is not None:
-        output["existing_open_pr"] = existing_pr
-        output["pr_url"] = existing_pr.get("url")
-        rendered = json.dumps(output, indent=2)
-        if args.output_json is not None:
-            args.output_json.parent.mkdir(parents=True, exist_ok=True)
-            args.output_json.write_text(rendered)
-        print(rendered)
-        tracker.finish("passed", message="existing PR already open", pr_url=output["pr_url"])
-        raise SystemExit(0)
 
     if args.push_branch:
         tracker.set_phase("push", message=f"pushing branch {head_branch}")
@@ -306,6 +295,50 @@ def main() -> None:
             print(rendered)
             tracker.finish("failed", message="git push failed")
             raise SystemExit(1)
+
+    tracker.set_phase("existing-pr", message=f"checking existing open PR for {head_branch}")
+    existing_pr = find_existing_open_pr(repo_root=repo_root, head_branch=head_branch)
+    if existing_pr is not None:
+        output["existing_open_pr"] = existing_pr
+        output["pr_url"] = existing_pr.get("url")
+        pr_number = existing_pr.get("number")
+        if not isinstance(pr_number, int):
+            rendered = json.dumps(output, indent=2)
+            if args.output_json is not None:
+                args.output_json.parent.mkdir(parents=True, exist_ok=True)
+                args.output_json.write_text(rendered)
+            print(rendered)
+            tracker.finish("failed", message="existing PR payload missing numeric PR number")
+            raise SystemExit(1)
+
+        tracker.set_phase("update-pr", message=f"updating existing PR #{pr_number}")
+        update_result = run_command(
+            name="gh_pr_edit",
+            command=[
+                "gh",
+                "pr",
+                "edit",
+                str(pr_number),
+                "--title",
+                title,
+                "--body-file",
+                str(args.body_markdown.resolve()),
+            ],
+            cwd=repo_root,
+            env=gh_env(),
+            tracker=tracker,
+        )
+        output["update_result"] = serialize_command(update_result)
+        rendered = json.dumps(output, indent=2)
+        if args.output_json is not None:
+            args.output_json.parent.mkdir(parents=True, exist_ok=True)
+            args.output_json.write_text(rendered)
+        print(rendered)
+        if update_result.returncode == 0:
+            tracker.finish("passed", message="existing PR updated", pr_url=output["pr_url"])
+            raise SystemExit(0)
+        tracker.finish("failed", message="gh pr edit failed")
+        raise SystemExit(1)
 
     tracker.set_phase("create-pr", message=f"creating PR from {head_branch} to {base_branch}")
     create_result = run_command(

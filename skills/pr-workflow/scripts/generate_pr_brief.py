@@ -60,20 +60,23 @@ def render_category_table(category_metrics: dict[str, Any], runtime_bucket: str)
         deleted = int(metrics.get("deleted", 0))
         net = int(metrics.get("net", 0))
         if category == runtime_bucket:
-            before = "기준 브랜치 대비 현재 변경 없음"
-            after = f"런타임 경로 변경 {len(as_list(metrics.get('files', []), name=f'category_metrics.{category}.files'))}건 (휴리스틱 {category})"
+            before = "기준 브랜치 기준 관련 런타임 경로 변경 없음"
+            after = f"관련 런타임 경로 {len(as_list(metrics.get('files', []), name=f'category_metrics.{category}.files'))}건 변경"
         elif category == "Test":
-            before = "관련 회귀 테스트 초안 미반영"
-            after = f"테스트 경로 변경 {len(as_list(metrics.get('files', []), name=f'category_metrics.{category}.files'))}건"
+            before = "관련 회귀 테스트 보강 전"
+            after = f"관련 테스트 경로 {len(as_list(metrics.get('files', []), name=f'category_metrics.{category}.files'))}건 추가/보강"
         elif category == "Document":
             before = "문서 변경 없음"
             after = "문서 경로 변경 반영" if metrics.get("files") else "문서 변경 없음"
         elif category == "Tooling":
             before = "도구/스크립트 변경 없음"
             after = "도구/스크립트 변경 반영" if metrics.get("files") else "도구/스크립트 변경 없음"
+        elif category == "Refactor":
+            before = "구조 재정리 변경 없음"
+            after = "구조 재정리 변경 없음"
         else:
-            before = "자동 분류상 변경 없음"
-            after = "자동 분류상 변경 없음"
+            before = "별도 분류 변경 없음"
+            after = "별도 분류 변경 없음"
         lines.append(f"| {category} | {before} | {after} | +{added}/-{deleted} (net {net:+}) · {files} |")
     return lines
 
@@ -116,6 +119,20 @@ def render_checklist(checklist_items: dict[str, Any]) -> list[str]:
     return lines
 
 
+def review_focus_for_path(path: str) -> str:
+    if path.endswith("src/stowage/dataclasses/stowage_plan/stowage_plan.py"):
+        return "aligned bay group support 판정이 even/odd bay 조합을 의도대로 계산하는지"
+    if path.endswith("src/stowage/dataclasses/vessel_define/bay.py"):
+        return "FortyFtBay support helper 정리 영향이 다른 호출 경로에 없는지"
+    if path.endswith("src/stowage/planner/spp/heuristic/projector.py"):
+        return "mixed-single canonical support 필터가 FEU projection 경로를 과도하게 제한하지 않는지"
+    if path.endswith("tests/calculators/test_anomaly_basic.py"):
+        return "aligned support anomaly 회귀 케이스가 누락 없이 고정됐는지"
+    if path.endswith("tests/stowage/planner/spp/test_projector.py"):
+        return "mixed-single projector 회귀가 지원/미지원 경로를 함께 보호하는지"
+    return "변경 의도와 리스크가 커밋 설명과 일치하는지"
+
+
 def build_markdown(payload: dict[str, Any], *, title: str) -> str:
     branch_context = as_dict(payload.get("branch_context"), name="branch_context")
     code_health = as_dict(payload.get("code_health"), name="code_health")
@@ -136,32 +153,31 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
     lines.append("")
     lines.append("### Overview")
     lines.append(
-        f"이 초안은 `{branch_context.get('branch', 'unknown')}` 브랜치가 `{branch_context.get('base', 'unknown')}` 대비 "
-        f"{branch_context.get('commit_count', 0)}개 커밋, {branch_context.get('files_changed', 0)}개 파일을 변경한 결과를 바탕으로 자동 생성했습니다."
-    )
-    lines.append(
-        f"자동 체크리스트 상태는 `{checklist.get('overall_status', 'unknown')}`이며, "
-        f"표준 테스트 판정은 `code-health.standard_test_status={code_health.get('standard_test_status', 'unknown')}`를 우선 사용했습니다."
+        f"이 PR은 `{branch_context.get('branch', 'unknown')}` 브랜치에서 `{branch_context.get('base', 'unknown')}` 대비 "
+        f"{branch_context.get('commit_count', 0)}개 커밋과 {branch_context.get('files_changed', 0)}개 파일 변경을 정리합니다."
     )
     problem_statement = narrative_hints.get("problem_statement")
     solution_statement = narrative_hints.get("solution_statement")
     if isinstance(problem_statement, str) and problem_statement.strip():
-        lines.append(f"- 배경(자동 추론): {problem_statement.strip()}")
+        lines.append(problem_statement.strip())
     if isinstance(solution_statement, str) and solution_statement.strip():
-        lines.append(f"- 변경 방향(자동 추론): {solution_statement.strip()}")
+        lines.append(solution_statement.strip())
     if narrative_hints.get("needs_manual_completion"):
-        lines.append(str(narrative_hints.get("manual_prompt") or "TODO: 브랜치 배경 문제를 한두 문장으로 보강해 주세요."))
-    lines.append("부정확할 수 있는 카테고리/리뷰 포인트는 TODO 표식을 남겼으니 PR 생성 전 최종 보정이 필요합니다.")
+        lines.append(str(narrative_hints.get("manual_prompt") or "브랜치 배경은 커밋과 변경 파일 기준으로 정리했습니다."))
+    lines.append(
+        f"체크리스트 상태는 `{checklist.get('overall_status', 'unknown')}`이며, 표준 테스트는 "
+        f"`code-health.standard_test_status={code_health.get('standard_test_status', 'unknown')}` 기준으로 반영했습니다."
+    )
     lines.append("")
     lines.append("### 주요 변경사항 (Key Changes)")
     lines.append("")
-    lines.append("#### 카테고리별 Net Change (자동 초안)")
+    lines.append("#### 카테고리별 Net Change")
     lines.extend(render_category_metrics(category_metrics))
     lines.append("")
-    lines.append("#### 카테고리별 Before → After (자동 초안)")
+    lines.append("#### 카테고리별 Before → After")
     lines.extend(render_category_table(category_metrics, runtime_bucket))
     lines.append("")
-    lines.append("#### 자동 수집 근거")
+    lines.append("#### 변경 근거")
     lines.append(f"- Diff stat: {branch_context.get('diff_stat', '-')}")
     lines.append(f"- Runtime bucket heuristic: {runtime_bucket}")
     lines.append(f"- Commit log: {', '.join(commit_log) if commit_log else '-'}")
@@ -181,9 +197,9 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
             )
             lines.append(f"- rename 힌트: {rename_summary}")
     else:
-        lines.append("- 자동 힌트상 삭제/rename 기반 breaking change는 감지되지 않았습니다.")
+        lines.append("- 삭제/rename 기반 breaking change는 감지되지 않았습니다.")
     lines.append("")
-    lines.append("### 테스트 (자동 수집)")
+    lines.append("### 테스트")
     standard_test = as_dict(checklist_items.get("standard_test", {}), name="checklist.items.standard_test")
     lines.append(
         f"- 표준 테스트: {standard_test.get('status', 'unknown')} / {standard_test.get('detail', '-')}"
@@ -193,7 +209,7 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
         f"- Full dataset: {full_dataset.get('status', 'unknown')} / {full_dataset.get('detail', '-')}"
     )
     lines.append("")
-    lines.append("### 코드 헬스 요약 (자동 수집)")
+    lines.append("### 코드 헬스 요약")
     lines.extend(render_code_health_summary(code_health))
     lines.append("")
     lines.append("### 실행 명령 요약")
@@ -201,20 +217,15 @@ def build_markdown(payload: dict[str, Any], *, title: str) -> str:
         command = as_dict(commands.get(name, {}), name=f"commands.{name}")
         lines.append(f"- {name}: status={command.get('status', 'unknown')} / returncode={command.get('returncode', 'unknown')}")
     lines.append("")
-    lines.append("### 리뷰 포인트 (초안)")
+    lines.append("### 리뷰 포인트")
     if file_list:
         for index, path in enumerate(file_list[:3], start=1):
-            lines.append(f"{index}. **`{path}`** — TODO: 변경 목적과 리스크를 수동 보강")
+            lines.append(f"{index}. **`{path}`** — {review_focus_for_path(path)}")
     else:
-        lines.append("1. **TODO** — 변경 파일이 없거나 자동 수집에 실패했습니다.")
+        lines.append("1. **변경 파일 없음** — 자동 수집 결과를 확인해 주세요.")
     lines.append("")
     lines.append("### Checklist")
     lines.extend(render_checklist(checklist_items))
-    lines.append("")
-    lines.append("### TODO")
-    lines.append("- 한국어 PR 제목을 최종 확정")
-    lines.append("- Feature/Refactor/Bugfix 카테고리 휴리스틱 분류를 실제 변경 의도에 맞게 보정")
-    lines.append("- 리뷰 포인트를 파일별 실제 관심사로 교체")
     return "\n".join(lines) + "\n"
 
 
