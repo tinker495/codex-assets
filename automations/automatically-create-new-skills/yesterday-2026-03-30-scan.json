@@ -1,0 +1,588 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-03-31T01:41:38Z",
+  "files_scanned": 5,
+  "signals": {
+    "ERROR collecting": {
+      "count": 2,
+      "sessions": 1
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 4,
+      "sessions": 3
+    },
+    "No such file or directory": {
+      "count": 5,
+      "sessions": 2
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 3,
+      "sessions": 1
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "autopilot": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 13,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "cancel": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "code-review": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "doctor": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "help": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "note": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "plan": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "security-review": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "team": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "trace": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "visual-verdict": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "web-clone": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "worker": {
+      "count": 12,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ModuleNotFoundError: No module named",
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "grepai-deep-analysis",
+      "help",
+      "note",
+      "plan",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "grepai-deep-analysis",
+      "help",
+      "note",
+      "plan",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "grepai-deep-analysis",
+      "help",
+      "note",
+      "plan",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ],
+    "modified_7d": [
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "resume",
+      "scalene-profiler",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "help",
+      "imagegen",
+      "note",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "resume",
+      "scalene-profiler",
+      "security-review",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ]
+  }
+}
