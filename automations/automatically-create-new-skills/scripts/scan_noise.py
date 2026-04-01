@@ -79,6 +79,24 @@ READ_ONLY_SEGMENT_PREFIXES = (
     "wc ",
     "stat ",
 )
+READ_ONLY_CONTROL_SEGMENTS = {"then", "else", "fi", "do", "done"}
+ENV_ASSIGNMENT_PATTERN = re.compile(
+    r"^(?:[A-Za-z_][A-Za-z0-9_]*=(?:\"[^\"]*\"|'[^']*'|[^\s]+)\s+)+"
+)
+PYTHON_READ_ONLY_MARKERS = (
+    ".read_text(",
+    ".read_bytes(",
+    ".open(",
+    "Path(",
+)
+PYTHON_WRITE_MARKERS = (
+    ".write_text(",
+    ".write_bytes(",
+    "subprocess.",
+    "os.system(",
+    "Path.mkdir(",
+    "unlink(",
+)
 
 
 @dataclass
@@ -218,7 +236,19 @@ def should_count_no_such_file(output: str) -> bool:
     return has_shell_failure_text(output)
 
 
+def is_instruction_boilerplate(text: str) -> bool:
+    markers = (
+        "# AGENTS.md instructions",
+        "<INSTRUCTIONS>",
+        "### Available skills",
+        "Supported workflow triggers include:",
+    )
+    return any(marker in text for marker in markers)
+
+
 def extract_skills_from_text(text: str, known_skills: Set[str]) -> Set[str]:
+    if is_instruction_boilerplate(text):
+        return set()
     found: Set[str] = set()
     for token in BACKTICK_SKILL_PATTERN.findall(text):
         if token in known_skills:
@@ -238,11 +268,43 @@ def extract_skills_from_command(cmd: str, known_skills: Set[str]) -> Set[str]:
     return found
 
 
-def is_read_only_segment(segment: str) -> bool:
+def normalize_read_only_segment(segment: str) -> str:
     cleaned = segment.strip()
+    while cleaned.startswith(("if ", "then ", "else ", "do ")):
+        cleaned = cleaned.split(" ", 1)[1].strip()
+    if cleaned in READ_ONLY_CONTROL_SEGMENTS:
+        return ""
+    if cleaned.startswith("export "):
+        cleaned = cleaned[len("export ") :].strip()
+    cleaned = ENV_ASSIGNMENT_PATTERN.sub("", cleaned).strip()
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=(?:\"[^\"]*\"|'[^']*'|[^\s]+)", cleaned):
+        return ""
+    return cleaned
+
+
+def is_read_only_segment(segment: str) -> bool:
+    cleaned = normalize_read_only_segment(segment)
     if not cleaned:
         return True
     return cleaned.startswith(READ_ONLY_SEGMENT_PREFIXES)
+
+
+def is_successful_python_file_dump(call_meta: CallMeta, output: str) -> bool:
+    if call_meta.tool_name != "exec_command":
+        return False
+    if has_shell_failure_text(output):
+        return False
+    code = extract_exit_code(output)
+    if code not in {None, 0}:
+        return False
+    cmd = call_meta.cmd.strip()
+    if not cmd.startswith(("python ", "python3 ")):
+        return False
+    if not any(marker in cmd for marker in PYTHON_READ_ONLY_MARKERS):
+        return False
+    if any(marker in cmd for marker in PYTHON_WRITE_MARKERS):
+        return False
+    return "print(" in cmd
 
 
 def is_successful_read_only_observer(call_meta: CallMeta, output: str) -> bool:
@@ -257,7 +319,9 @@ def is_successful_read_only_observer(call_meta: CallMeta, output: str) -> bool:
     if not cmd:
         return False
     segments = re.split(r"\s*(?:&&|\|\||;|\|)\s*", cmd)
-    return bool(segments) and all(is_read_only_segment(segment) for segment in segments)
+    if bool(segments) and all(is_read_only_segment(segment) for segment in segments):
+        return True
+    return is_successful_python_file_dump(call_meta, output)
 
 
 def ensure_signal_record(stats: Dict[str, SignalStats], signal: str) -> SignalStats:

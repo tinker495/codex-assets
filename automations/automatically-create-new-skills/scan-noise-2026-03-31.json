@@ -1,0 +1,725 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-01T01:42:02Z",
+  "files_scanned": 12,
+  "signals": {
+    "ERROR collecting": {
+      "count": 30,
+      "sessions": 1
+    },
+    "ERROR:xenon:block": {
+      "count": 2,
+      "sessions": 1
+    },
+    "ERROR:xenon:module": {
+      "count": 2,
+      "sessions": 1
+    },
+    "Error: PRD file not found: prd.json": {
+      "count": 1,
+      "sessions": 1
+    },
+    "Error: could not open a new TTY": {
+      "count": 1,
+      "sessions": 1
+    },
+    "Error: unknown flag: --json": {
+      "count": 1,
+      "sessions": 1
+    },
+    "Error: unknown flag: --repo": {
+      "count": 1,
+      "sessions": 1
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 32,
+      "sessions": 3
+    },
+    "ModuleNotFoundError: No module named 'yaml'": {
+      "count": 2,
+      "sessions": 1
+    },
+    "No module named pytest": {
+      "count": 2,
+      "sessions": 1
+    },
+    "No such file or directory": {
+      "count": 13,
+      "sessions": 5
+    },
+    "PyYAML install/run mention": {
+      "count": 1,
+      "sessions": 1
+    },
+    "Sandbox(Denied, PermissionError: [Errno 1] Operation not permitted, blocked by policy]": {
+      "count": 1,
+      "sessions": 1
+    },
+    "can't create temp file for here document: operation not permitted": {
+      "count": 1,
+      "sessions": 1
+    },
+    "command not found: grepai": {
+      "count": 1,
+      "sessions": 1
+    },
+    "command not found: pdfinfo": {
+      "count": 1,
+      "sessions": 1
+    },
+    "command not found: timeout": {
+      "count": 1,
+      "sessions": 1
+    },
+    "date: invalid argument 's' for -I": {
+      "count": 2,
+      "sessions": 1
+    },
+    "failed to send request to Ollama": {
+      "count": 2,
+      "sessions": 1
+    },
+    "fatal: not a git repository": {
+      "count": 1,
+      "sessions": 1
+    },
+    "frontmatter/YAML error": {
+      "count": 1,
+      "sessions": 1
+    },
+    "jq: parse error": {
+      "count": 1,
+      "sessions": 1
+    },
+    "ls: /automations/automatically-create-new-skills": {
+      "count": 2,
+      "sessions": 1
+    },
+    "missing /shared/code-health": {
+      "count": 1,
+      "sessions": 1
+    },
+    "missing collect_branch_info.py": {
+      "count": 2,
+      "sessions": 1
+    },
+    "quick_validate failure": {
+      "count": 1,
+      "sessions": 1
+    },
+    "unable to resolve PR from current branch": {
+      "count": 2,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 38,
+      "sessions": 4
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 5,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "automation-creator": {
+      "count": 134,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 30,
+          "sessions": 1
+        },
+        "ERROR:xenon:block": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ERROR:xenon:module": {
+          "count": 2,
+          "sessions": 1
+        },
+        "Error: PRD file not found: prd.json": {
+          "count": 1,
+          "sessions": 1
+        },
+        "Error: could not open a new TTY": {
+          "count": 1,
+          "sessions": 1
+        },
+        "Error: unknown flag: --json": {
+          "count": 1,
+          "sessions": 1
+        },
+        "Error: unknown flag: --repo": {
+          "count": 1,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 29,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named 'yaml'": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No module named pytest": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 7,
+          "sessions": 1
+        },
+        "PyYAML install/run mention": {
+          "count": 1,
+          "sessions": 1
+        },
+        "Sandbox(Denied, PermissionError: [Errno 1] Operation not permitted, blocked by policy]": {
+          "count": 1,
+          "sessions": 1
+        },
+        "can't create temp file for here document: operation not permitted": {
+          "count": 1,
+          "sessions": 1
+        },
+        "command not found: grepai": {
+          "count": 1,
+          "sessions": 1
+        },
+        "command not found: pdfinfo": {
+          "count": 1,
+          "sessions": 1
+        },
+        "command not found: timeout": {
+          "count": 1,
+          "sessions": 1
+        },
+        "date: invalid argument 's' for -I": {
+          "count": 2,
+          "sessions": 1
+        },
+        "failed to send request to Ollama": {
+          "count": 2,
+          "sessions": 1
+        },
+        "fatal: not a git repository": {
+          "count": 1,
+          "sessions": 1
+        },
+        "frontmatter/YAML error": {
+          "count": 1,
+          "sessions": 1
+        },
+        "jq: parse error": {
+          "count": 1,
+          "sessions": 1
+        },
+        "ls: /automations/automatically-create-new-skills": {
+          "count": 2,
+          "sessions": 1
+        },
+        "missing /shared/code-health": {
+          "count": 1,
+          "sessions": 1
+        },
+        "missing collect_branch_info.py": {
+          "count": 2,
+          "sessions": 1
+        },
+        "quick_validate failure": {
+          "count": 1,
+          "sessions": 1
+        },
+        "unable to resolve PR from current branch": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 35,
+          "sessions": 1
+        }
+      }
+    },
+    "autopilot": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "cancel": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "code-health": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "code-review": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "doctor": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "gh-address-comments": {
+      "count": 6,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 3,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "gh-fix-review-comments": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "help": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "note": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "plan": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "pr-workflow": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "security-review": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "team": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "trace": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "visual-verdict": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "web-clone": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "worker": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ERROR:xenon:block",
+    "ERROR:xenon:module",
+    "ModuleNotFoundError: No module named",
+    "ModuleNotFoundError: No module named 'yaml'",
+    "No module named pytest",
+    "No such file or directory",
+    "date: invalid argument 's' for -I",
+    "failed to send request to Ollama",
+    "ls: /automations/automatically-create-new-skills",
+    "missing collect_branch_info.py",
+    "unable to resolve PR from current branch",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "automation-creator",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "help",
+      "note",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "automation-creator",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "help",
+      "note",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "automation-creator",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "help",
+      "note",
+      "omx-setup",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ],
+    "modified_7d": [
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "resume",
+      "scalene-profiler",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "automation-creator",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "help",
+      "imagegen",
+      "note",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "resume",
+      "scalene-profiler",
+      "security-review",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ]
+  }
+}
