@@ -352,6 +352,8 @@ Write the YAML frontmatter with `name` and `description`:
   - Include both what the Skill does and specific triggers/contexts for when to use it.
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
+  - Default to double-quoting the entire `description` value. This avoids YAML parse failures when the sentence contains `:`, brackets, or other punctuation common in natural-language trigger text.
+  - Before running validation, quickly re-read the frontmatter and confirm `description` is a single quoted YAML string, not a bare sentence.
 
 Do not include any other fields in YAML frontmatter.
 
