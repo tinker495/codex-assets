@@ -1,0 +1,299 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-02T01:40:59Z",
+  "files_scanned": 61,
+  "signals": {
+    "ERROR collecting": {
+      "count": 1,
+      "sessions": 1
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 5,
+      "sessions": 5
+    },
+    "No such file or directory": {
+      "count": 44,
+      "sessions": 22
+    },
+    "can't create temp file for here document: operation not permitted": {
+      "count": 2,
+      "sessions": 1
+    },
+    "fatal: not a git repository": {
+      "count": 2,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 5,
+      "sessions": 5
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 27,
+      "sessions": 13,
+      "signals": {
+        "No such file or directory": {
+          "count": 25,
+          "sessions": 12
+        },
+        "can't create temp file for here document: operation not permitted": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "autopilot": {
+      "count": 23,
+      "sessions": 10,
+      "signals": {
+        "No such file or directory": {
+          "count": 23,
+          "sessions": 10
+        }
+      }
+    },
+    "cancel": {
+      "count": 23,
+      "sessions": 10,
+      "signals": {
+        "No such file or directory": {
+          "count": 23,
+          "sessions": 10
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "desloppify": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "interface-design": {
+      "count": 15,
+      "sessions": 3,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 3
+        },
+        "No such file or directory": {
+          "count": 9,
+          "sessions": 3
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 3
+        }
+      }
+    },
+    "ralph": {
+      "count": 25,
+      "sessions": 11,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 23,
+          "sessions": 10
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "resume": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "skill-topology-adjuster": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "fatal: not a git repository": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "team": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 24,
+      "sessions": 11,
+      "signals": {
+        "No such file or directory": {
+          "count": 24,
+          "sessions": 11
+        }
+      }
+    },
+    "worker": {
+      "count": 4,
+      "sessions": 2,
+      "signals": {
+        "No such file or directory": {
+          "count": 4,
+          "sessions": 2
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named",
+    "No such file or directory",
+    "can't create temp file for here document: operation not permitted",
+    "fatal: not a git repository",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "deep-interview",
+      "desloppify",
+      "interface-design",
+      "ralph",
+      "resume",
+      "skill-topology-adjuster",
+      "team",
+      "ultrawork",
+      "worker"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "deep-interview",
+      "desloppify",
+      "interface-design",
+      "ralph",
+      "resume",
+      "skill-topology-adjuster",
+      "team",
+      "ultrawork",
+      "worker"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "desloppify",
+      "doctor",
+      "frontend-design",
+      "interface-design",
+      "non-test-bloat-reduction",
+      "note",
+      "plan",
+      "ralph",
+      "resume",
+      "skill-creator",
+      "skill-topology-adjuster",
+      "team",
+      "ultrawork",
+      "worker"
+    ],
+    "modified_7d": [
+      "branch-archive-rechunk-rebase",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralplan",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "desloppify",
+      "doctor",
+      "frontend-design",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "imagegen",
+      "interface-design",
+      "non-test-bloat-reduction",
+      "note",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "playwright",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "resume",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "team",
+      "ultrawork",
+      "worker"
+    ]
+  }
+}
