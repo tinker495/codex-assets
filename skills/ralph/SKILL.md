@@ -33,7 +33,7 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - Fire independent agent calls simultaneously -- never wait sequentially for independent work
 - Use `run_in_background: true` for long operations (installs, builds, test suites)
 - Always pass the `model` parameter explicitly when delegating to agents
-- Read the active workspace `AGENTS.md` agent catalog and Model Capability Table before first delegation; do not rely on a local `docs/shared/agent-tiers.md` file
+- Read `docs/shared/agent-tiers.md` before first delegation to select correct agent tiers
 - Deliver the full implementation: no scope reduction, no partial completion, no deleting tests to make them pass
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints

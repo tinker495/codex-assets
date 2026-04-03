@@ -28,13 +28,13 @@ Sequential task execution wastes time when tasks are independent. Ultrawork enab
 <Execution_Policy>
 - Fire all independent agent calls simultaneously -- never serialize independent work
 - Always pass the `model` parameter explicitly when delegating
-- Read the active workspace `AGENTS.md` agent catalog and Model Capability Table before first delegation; do not rely on a local `docs/shared/agent-tiers.md` file
+- Read `docs/shared/agent-tiers.md` before first delegation for agent selection guidance
 - Use `run_in_background: true` for operations over ~30 seconds (installs, builds, tests)
 - Run quick commands (git status, file reads, simple checks) in the foreground
 </Execution_Policy>
 
 <Steps>
-1. **Read agent reference**: Use the active workspace `AGENTS.md` agent catalog and Model Capability Table for tier selection
+1. **Read agent reference**: Load `docs/shared/agent-tiers.md` for tier selection
 2. **Classify tasks by independence**: Identify which tasks can run in parallel vs which have dependencies
 3. **Route to correct tiers**:
    - Simple lookups/definitions: LOW tier
