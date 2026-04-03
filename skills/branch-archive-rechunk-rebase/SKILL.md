@@ -121,11 +121,29 @@ git add path/to/file_a path/to/file_b
 git commit -m "<intent-focused message>"
 ```
 
-When a single file belongs to multiple clusters, split by hunk:
+When a single file belongs to multiple clusters, choose the least-lossy replay method first.
+
+For small overlaps, split by hunk:
 
 ```bash
 git add -p path/to/file
 ```
+
+For heavy overlaps across multiple original commits, replay the file state commit-by-commit instead of hand-splitting every hunk:
+
+```bash
+git restore --source <old-commit> --staged --worktree -- path/to/file_a path/to/file_b
+git commit -m "<intent-focused message>"
+```
+
+If the later cluster deletes a file that an earlier replay restored, remove it explicitly in the later cluster:
+
+```bash
+git rm path/to/file
+git commit -m "<intent-focused message>"
+```
+
+Use commit-state replay when it is easier to reproduce the original branch intent by restoring exact file states from old commits than by manually curating patches with `git add -p`.
 
 After each commit:
 - verify only the intended paths or hunks were included
@@ -215,6 +233,7 @@ Include in the final handoff:
 - Treat the archive branch as the rollback point for the entire run.
 - Re-read `git status --short` before every destructive git command.
 - Prefer path-scoped staging first; use `git add -p` only when the same file truly spans multiple intents.
+- If several planned clusters touch the same file, prefer deterministic `git restore --source <commit>` replay over fragile repeated hunk surgery.
 - Do not mix mechanical formatting with semantic changes unless the formatting is inseparable from the semantic edit.
 - Keep docs-only or test-only commits separate only when they are independently meaningful.
 - If the branch contains generated files, classify them with the source change they derive from.

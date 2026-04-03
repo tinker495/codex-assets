@@ -41,6 +41,7 @@ Good merge:
 If natural clusters are fewer than `N`:
 - split by sub-intent inside the same area
 - split by hunk with `git add -p` when one file spans multiple real intents
+- replay exact file states with `git restore --source <old-commit> --staged --worktree -- <paths>` when many overlapping files already align to original commit boundaries
 - split tests from runtime only when the tests are a meaningful standalone checkpoint
 
 Do not split only to create cosmetic micro-commits such as:
@@ -64,6 +65,10 @@ If the branch is mostly refactor work, order commits so each step leaves the pro
 Use `git add -p` only after answering yes to both:
 - does this file contain more than one real intent?
 - would separate commits improve review or rollback quality?
+
+Prefer `git restore --source` replay instead when:
+- the same file changed across multiple original commits and you can map those commits cleanly to new clusters
+- manual hunk selection would be long, error-prone, or likely to duplicate/drop edits
 
 After hunk splitting:
 - inspect staged diff with `git diff --cached`

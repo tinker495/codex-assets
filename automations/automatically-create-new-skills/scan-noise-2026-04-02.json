@@ -1,0 +1,282 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-03T01:41:23Z",
+  "files_scanned": 62,
+  "signals": {
+    "ERROR collecting": {
+      "count": 1,
+      "sessions": 1
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 21,
+      "sessions": 12
+    },
+    "No such file or directory": {
+      "count": 71,
+      "sessions": 32
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 6,
+      "sessions": 4
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 6,
+      "sessions": 5,
+      "signals": {
+        "No such file or directory": {
+          "count": 5,
+          "sessions": 5
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "code-review": {
+      "count": 7,
+      "sessions": 3,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 4,
+          "sessions": 3
+        },
+        "No such file or directory": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 9,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 4,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 4,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "plan": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "spec-diff": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "team": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 56,
+      "sessions": 23,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 4,
+          "sessions": 4
+        },
+        "No such file or directory": {
+          "count": 50,
+          "sessions": 20
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named",
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "code-review",
+      "deep-interview",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "spec-diff",
+      "team",
+      "ultrawork"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "code-review",
+      "deep-interview",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "spec-diff",
+      "team",
+      "ultrawork"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "configure-notifications",
+      "deep-interview",
+      "docs-codebase-alignment-audit",
+      "doctor",
+      "gh-address-comments",
+      "grepai-deep-analysis",
+      "help",
+      "hud",
+      "main-merge",
+      "note",
+      "omx-setup",
+      "omx-workspace-prune",
+      "plan",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "session-wrap-up",
+      "skill",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "spec-diff",
+      "team",
+      "todo-inventory",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ],
+    "modified_7d": [
+      "branch-archive-rechunk-rebase",
+      "doctor",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "omx-setup",
+      "plan",
+      "playwright",
+      "pr-workflow",
+      "ralplan",
+      "session-wrap-up",
+      "skill-creator",
+      "skill-installer"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "configure-notifications",
+      "deep-interview",
+      "docs-codebase-alignment-audit",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "help",
+      "hud",
+      "main-merge",
+      "note",
+      "omx-setup",
+      "omx-workspace-prune",
+      "plan",
+      "playwright",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "security-review",
+      "session-wrap-up",
+      "skill",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "spec-diff",
+      "team",
+      "todo-inventory",
+      "trace",
+      "ultrawork",
+      "visual-verdict",
+      "web-clone",
+      "worker"
+    ]
+  }
+}

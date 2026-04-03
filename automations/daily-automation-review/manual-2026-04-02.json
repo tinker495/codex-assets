@@ -1,0 +1,273 @@
+{
+  "files_scanned": 62,
+  "sessions_with_records": 62,
+  "top_operational": [
+    {
+      "label": "discovery/path probe failure",
+      "count": 42,
+      "sessions": 23
+    },
+    {
+      "label": "No such file or directory::docs/shared/agent-tiers.md",
+      "count": 19,
+      "sessions": 19
+    },
+    {
+      "label": "No such file or directory::/Users/mrx-ksjung/.codex/skills/ultrawork/docs/shared/agent-tiers.md",
+      "count": 16,
+      "sessions": 16
+    },
+    {
+      "label": "other failure",
+      "count": 12,
+      "sessions": 8
+    },
+    {
+      "label": "rg search syntax error",
+      "count": 12,
+      "sessions": 12
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 6,
+      "sessions": 4
+    },
+    {
+      "label": "zsh: no matches found",
+      "count": 4,
+      "sessions": 2
+    },
+    {
+      "label": "command not found",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "frontmatter/YAML error",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 19,
+      "sessions": 16
+    },
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 11,
+      "sessions": 9
+    },
+    {
+      "label": "ModuleNotFoundError::conftest",
+      "count": 4,
+      "sessions": 4
+    },
+    {
+      "label": "No such file or directory::tests/stowage/planner/spp/test_solver_anchored_window.py",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/solver/build.py",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "No such file or directory::scripts/_rotation_history.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ERROR collecting",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/solver/objective.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/support.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/solver/models.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/evaluator.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/solver_result.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/dataclasses/stowage_plan/overlay_engine.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/heuristic/bootstrap.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/test_packed_oog_integration.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/test_oog_real_case_zero_regressions.py",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 19,
+      "sessions": 16
+    },
+    {
+      "path": "docs/shared/agent-tiers.md",
+      "count": 19,
+      "sessions": 19
+    },
+    {
+      "path": "/Users/mrx-ksjung/.codex/skills/ultrawork/docs/shared/agent-tiers.md",
+      "count": 16,
+      "sessions": 16
+    },
+    {
+      "path": "tests/stowage/planner/spp/test_solver_anchored_window.py",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/solver/build.py",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "path": "scripts/_rotation_history.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/solver/objective.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/support.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/solver/models.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/evaluator.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/solver_result.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/dataclasses/stowage_plan/overlay_engine.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/heuristic/bootstrap.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/test_packed_oog_integration.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/test_oog_real_case_zero_regressions.py",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 11,
+      "sessions": 9
+    },
+    {
+      "module": "conftest",
+      "count": 4,
+      "sessions": 4
+    }
+  ],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-02T23-06-44-019d4e84-92fb-7cf0-8a92-7e3086dd5231.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/docs/shared/agent-tiers.md && sed -n '1,220p' /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/docs/shared/agent-tiers.md",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-02T23-06-44-019d4e84-92fb-7cf0-8a92-7e3086dd5231.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g 'agent-tiers.md' /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-02T23-06-44-019d4e84-92fb-7cf0-8a92-7e3086dd5231.jsonl",
+      "probe_type": "test -d",
+      "cmd": "test -d /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/src/stowage/planner/spp/domain && find /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/src/stowage/planner/spp/domain -maxdepth 2 -type f | sort",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/yaml-guardrail-check/SKILL.md => unmapped",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "mapping": "/skills/ai-slop-cleaner/SKILL.md => /Users/mrx-ksjung/.codex/skills/ai-slop-cleaner/SKILL.md",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/code-review/SKILL.md => /Users/mrx-ksjung/.codex/skills/code-review/SKILL.md",
+      "count": 2,
+      "sessions": 1
+    }
+  ]
+}
