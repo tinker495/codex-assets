@@ -25,7 +25,7 @@ ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
-description: "[TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]"
+description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
 ---
 
 # {skill_title}
@@ -326,9 +326,6 @@ def init_skill(skill_name, path, resources, include_examples, interface_override
         print("2. Create resource directories only if needed (scripts/, references/, assets/)")
     print("3. Update agents/openai.yaml if the UI metadata should differ")
     print("4. Run the validator when ready to check the skill structure")
-    print(
-        "5. Forward-test complex skills with realistic user requests to ensure they work as intended"
-    )
 
     return skill_dir
 
