@@ -1,0 +1,29 @@
+{
+  "files_scanned": 2,
+  "sessions_with_records": 2,
+  "top_operational": [],
+  "top_repo_specific": [
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/.codex/skills/code-review/SKILL.md => /Users/mrx-ksjung/.codex/skills/code-review/SKILL.md",
+      "count": 2,
+      "sessions": 1
+    }
+  ]
+}

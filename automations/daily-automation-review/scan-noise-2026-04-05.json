@@ -1,0 +1,68 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-06T01:51:08Z",
+  "files_scanned": 2,
+  "signals": {
+    "ModuleNotFoundError: No module named": {
+      "count": 2,
+      "sessions": 1
+    }
+  },
+  "skills": {
+    "code-review": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "code-review"
+    ],
+    "after_recently_touched": [
+      "code-review"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "code-review"
+    ],
+    "modified_7d": [
+      "branch-archive-rechunk-rebase",
+      "doctor",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "ralph",
+      "ralplan",
+      "skill-creator",
+      "skill-installer",
+      "ultrawork"
+    ],
+    "union": [
+      "branch-archive-rechunk-rebase",
+      "code-review",
+      "doctor",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "ralph",
+      "ralplan",
+      "skill-creator",
+      "skill-installer",
+      "ultrawork"
+    ]
+  }
+}
