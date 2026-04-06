@@ -53,21 +53,33 @@ def _collect_session_actions(omx_dir: Path, keep_session: str | None) -> list[Ac
     if not state_dir.exists():
         return actions
 
-    targets: list[Path] = []
     sessions_dir = state_dir / 'sessions'
+    sessions_archive_dir = sessions_dir / 'archive'
+    legacy_archive_dir = state_dir / 'archive'
+
+    targets: list[tuple[Path, Path | None]] = []
     if sessions_dir.exists():
-        targets.extend([p for p in sessions_dir.iterdir() if p.is_dir()])
-    targets.extend([p for p in state_dir.iterdir() if p.is_dir() and p.name.startswith('omx-')])
+        targets.extend(
+            (p, sessions_archive_dir / p.name)
+            for p in sessions_dir.iterdir()
+            if p.is_dir() and p.name != 'archive'
+        )
+    targets.extend(
+        (p, legacy_archive_dir / p.name)
+        for p in state_dir.iterdir()
+        if p.is_dir() and p.name.startswith('omx-')
+    )
 
     seen: set[Path] = set()
-    for target in targets:
+    for target, archive_target in targets:
         if target in seen:
             continue
         seen.add(target)
         if keep_session and target.name == keep_session:
             actions.append(Action('KEEP', target))
         else:
-            actions.append(Action('DELETE', target))
+            assert archive_target is not None
+            actions.append(Action('ARCHIVE', target, archive_target))
     return actions
 
 

@@ -20,7 +20,8 @@ Safely prune stale `.omx` state so future sessions start with a clean workspace 
 - Preserve `.omx/plans/ACTIVE.md` always.
 - Keep plans referenced by `ACTIVE.md` and latest `prd-*.md` / `test-spec-*.md`.
 - Move other root-level `.omx/plans/*.md` files into `.omx/plans/archive/` (never hard-delete plans).
-- Remove only stale session state directories and old logs.
+- Archive stale session state directories before deleting anything else.
+- Remove only old logs.
 
 ## Commands
 
@@ -41,6 +42,7 @@ python ~/.codex/skills/omx-workspace-prune/scripts/prune_workspace.py --workspac
 ## What gets pruned
 
 1. `.omx/state/sessions/*` and legacy `.omx/state/omx-*` directories except kept session.
+   Sessions are moved into `.omx/state/sessions/archive/` or `.omx/state/archive/`.
 2. `.omx/logs/*.jsonl` older than retention window.
 3. Root-level markdown plans in `.omx/plans/` that are not protected by ACTIVE contract or latest plan guards.
 
