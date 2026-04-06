@@ -24,6 +24,7 @@ Use this skill to produce:
 ## Mandatory Docs-First Workflow
 
 Use `$openai-docs` first whenever building or changing a ChatGPT Apps SDK app.
+Delegate current-doc retrieval and citation grounding to `openai-docs` before generating or revising code.
 
 1. Invoke `$openai-docs` (preferred) or call the OpenAI docs MCP server directly.
 2. Fetch current Apps SDK docs before writing code, especially (baseline pages):

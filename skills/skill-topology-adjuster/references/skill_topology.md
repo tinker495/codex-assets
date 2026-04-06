@@ -32,6 +32,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `automation-creator` | utility | Codex automation directive authoring |
 | `ask-claude` | utility | local Claude CLI consultation with reusable artifact capture |
 | `ask-gemini` | utility | local Gemini CLI consultation with reusable artifact capture |
+| `plugin-creator` | utility | Codex plugin scaffold generation and marketplace entry bootstrapping |
 | `cancel` | utility | active OMX mode cancellation and cleanup |
 | `configure-notifications` | utility | OMX notification configuration across supported platforms |
 | `doctor` | utility | oh-my-codex installation diagnostics and remediation |
@@ -47,6 +48,11 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `worker` | utility | tmux team worker protocol and mailbox lifecycle |
 | `agents-md-builder` | specialist | AGENTS.md authoring and repo-specific instruction synthesis |
 | `ai-slop-cleaner` | specialist | anti-slop cleanup/refactor workflow with regression-safety bias |
+| `imagegen` | specialist | raster image generation and editing workflow |
+| `openai-docs` | specialist | authoritative OpenAI docs retrieval and citation workflow |
+| `playwright` | specialist | terminal-driven real browser automation via Playwright CLI |
+| `simplify` | specialist | behavior-preserving code simplification and audit workflow |
+| `slides` | specialist | editable PowerPoint authoring and layout validation workflow |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
 | `code-health` | specialist | code-health pipeline and risk summary |
 | `code-review` | specialist | comprehensive code review with severity-rated findings |
@@ -73,9 +79,12 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `spreadsheet` | specialist | Python/openpyxl spreadsheet modeling and editing workflow |
 | `visual-verdict` | specialist | structured screenshot-to-reference visual QA verdicts |
 | `yeet` | specialist | explicit stage/commit/push/PR one-shot workflow |
+| `branch-archive-rechunk-rebase` | specialist-orchestrator | deterministic branch history rewrite with onboarding handoff |
+| `chatgpt-apps` | specialist-orchestrator | ChatGPT Apps SDK build workflow with docs-first handoff |
 | `deep-interview` | specialist-orchestrator | ambiguity-gated requirement interview with bounded planning handoff |
 | `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with bounded augmentation handoff |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
+| `resume` | specialist-orchestrator | worktree/session continuation preflight with bounded handoff |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent compression and bloat reduction |
 | `web-clone` | specialist-orchestrator | URL-driven website cloning with iterative visual verification handoff |
 | `autopilot` | orchestrator | end-to-end autonomous delivery from idea to verified code |
@@ -94,13 +103,13 @@ Define ownership and delegation boundaries across currently installed skills so 
 ```text
 Layer 0: Meta / Utility
   skill-creator, skill-installer, skill-topology-adjuster, find-skills,
-  automation-creator, ask-claude, ask-gemini, cancel,
+  automation-creator, ask-claude, ask-gemini, plugin-creator, cancel,
   configure-notifications, doctor, help, hud, note, omx-setup,
   omx-workspace-prune, ralplan, skill, trace, todo-inventory, worker
 
 Layer 1: Specialists (single-domain ownership)
-  agents-md-builder, ai-slop-cleaner, branch-onboarding-brief, code-health,
-  code-review,
+  agents-md-builder, ai-slop-cleaner, imagegen, openai-docs, playwright,
+  simplify, slides, branch-onboarding-brief, code-health, code-review,
   cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
   desloppify, doc, doc-separator,
   docs-codebase-alignment-audit, frontend-design, gh-address-comments,
@@ -109,8 +118,8 @@ Layer 1: Specialists (single-domain ownership)
   spec-diff, spreadsheet, visual-verdict, yeet
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
-  deep-interview, gh-fix-review-comments, grepai-deep-analysis, refresh-branch-docs,
-  non-test-bloat-reduction, web-clone
+  branch-archive-rechunk-rebase, chatgpt-apps, deep-interview, gh-fix-review-comments,
+  grepai-deep-analysis, refresh-branch-docs, resume, non-test-bloat-reduction, web-clone
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   autopilot, branch-health-remediation-workflow, complexity-loc-balancer,
@@ -161,7 +170,10 @@ flowchart LR
   PR --> CH
   PR --> GDA
 
+  BARR["branch-archive-rechunk-rebase"] --> BOB
+  CGA["chatgpt-apps"] --> OAID["openai-docs"]
   GFRC["gh-fix-review-comments"] --> GHC["gh-address-comments"]
+  RES["resume"] --> BOB
 
   SWU["session-wrap-up"] --> SC["skill-creator"]
   SWU --> TI["todo-inventory"]
@@ -181,7 +193,9 @@ flowchart LR
   ACLA["ask-claude"]
   AGEM["ask-gemini"]
   AP["autopilot"]
+  BARR["branch-archive-rechunk-rebase"]
   CAN["cancel"]
+  CGA["chatgpt-apps"]
   CSPA["cp-sat-performance-and-advanced-features"]
   CPS["cp-sat-primer-engineer"]
   CR["code-review"]
@@ -197,20 +211,27 @@ flowchart LR
   GHC["gh-address-comments"]
   HELP["help"]
   HUD["hud"]
+  IMG["imagegen"]
   IFD["interface-design"]
   JNB["jupyter-notebook"]
   LBTS["layer-boundary-test-scaffold"]
   NDF["no-deep-flag-review"]
   NOTE["note"]
+  OAID["openai-docs"]
   OSET["omx-setup"]
   PLAN["plan"]
+  PLUG["plugin-creator"]
+  PW["playwright"]
   RALPH["ralph"]
   RLP["ralplan"]
+  RES["resume"]
   SPROF["scalene-profiler"]
   SECR["security-review"]
   SHOT["screenshot"]
   SKILL["skill"]
   SI["skill-installer"]
+  SIMP["simplify"]
+  SLD["slides"]
   YEET["yeet"]
   TRC["trace"]
   TI["todo-inventory"]
@@ -252,16 +273,27 @@ flowchart TD
   ORCH --> TEAM["team"]
   ORCH --> UW["ultrawork"]
 
+  HYB --> BARR["branch-archive-rechunk-rebase"]
+  HYB --> CGA["chatgpt-apps"]
   HYB --> DI["deep-interview"]
   HYB --> GFRC["gh-fix-review-comments"]
   HYB --> GDA["grepai-deep-analysis"]
   HYB --> NTBR["non-test-bloat-reduction"]
   HYB --> RBD["refresh-branch-docs"]
+  HYB --> RES["resume"]
   HYB --> WCL["web-clone"]
+  BARR --> BOB
+  CGA --> OAID["openai-docs"]
   GFRC --> GHC["gh-address-comments"]
+  RES --> BOB
 
   SPEC --> AMB["agents-md-builder"]
   SPEC --> AISC["ai-slop-cleaner"]
+  SPEC --> IMG["imagegen"]
+  SPEC --> OAID
+  SPEC --> PW["playwright"]
+  SPEC --> SIMP["simplify"]
+  SPEC --> SLD["slides"]
   SPEC --> BOB["branch-onboarding-brief"]
   SPEC --> CH["code-health"]
   SPEC --> CR["code-review"]
@@ -291,6 +323,7 @@ flowchart TD
   META --> SC["skill-creator"]
   META --> SI["skill-installer"]
   META --> STA["skill-topology-adjuster"]
+  META --> PLUG["plugin-creator"]
   META --> FS["find-skills"]
   META --> AC["automation-creator"]
   META --> ACLA["ask-claude"]

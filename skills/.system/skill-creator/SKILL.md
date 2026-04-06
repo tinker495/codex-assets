@@ -230,6 +230,7 @@ Skill creation involves these steps:
 4. Edit the skill (implement resources and write SKILL.md)
 5. Validate the skill (run quick_validate.py)
 6. Iterate based on real usage and forward-test complex skills.
+7. Hand off topology reconciliation to `skill-topology-adjuster` after any create, update, or removal so role ownership and delegation docs stay synchronized.
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -414,3 +415,8 @@ Considerations when forward-testing:
 
 If forward-testing only succeeds when subagents see leaked context, tighten the skill or the
 forward-testing setup before trusting the result.
+
+## Topology handoff
+
+After creating or updating a skill, delegate topology reconciliation to `skill-topology-adjuster`.
+Use that handoff to classify the skill role, update topology artifacts, and keep ownership and delegation edges explicit.

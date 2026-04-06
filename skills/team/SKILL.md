@@ -32,6 +32,8 @@ When user triggers `$team`, the agent must:
 4. Keep team state alive until workers are terminal (unless explicit abort)
 5. Handle cleanup and stale-pane recovery when needed
 
+Delegate execution to `worker` panes through the OMX team runtime; do not inline the worker loop in the leader pane.
+
 If `omx team` is unavailable, stop with a hard error.
 
 ## Invocation Contract
