@@ -1,0 +1,362 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-07T01:51:23Z",
+  "files_scanned": 43,
+  "signals": {
+    "ModuleNotFoundError: No module named": {
+      "count": 5,
+      "sessions": 5
+    },
+    "No such file or directory": {
+      "count": 20,
+      "sessions": 20
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 5,
+      "sessions": 2
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 12,
+      "sessions": 11,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 11,
+          "sessions": 11
+        }
+      }
+    },
+    "autopilot": {
+      "count": 23,
+      "sessions": 20,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 18,
+          "sessions": 18
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "cancel": {
+      "count": 23,
+      "sessions": 20,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 18,
+          "sessions": 18
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "code-review": {
+      "count": 8,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 7,
+          "sessions": 7
+        }
+      }
+    },
+    "cp-sat-performance-and-advanced-features": {
+      "count": 4,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "cp-sat-primer-engineer": {
+      "count": 4,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 12,
+      "sessions": 9,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 7,
+          "sessions": 7
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "gh-address-comments": {
+      "count": 5,
+      "sessions": 3,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "gh-fix-ci": {
+      "count": 4,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "gh-fix-review-comments": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "plan": {
+      "count": 12,
+      "sessions": 9,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 7,
+          "sessions": 7
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 23,
+      "sessions": 20,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 18,
+          "sessions": 18
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 12,
+      "sessions": 9,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 2
+        },
+        "No such file or directory": {
+          "count": 7,
+          "sessions": 7
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "simplify": {
+      "count": 4,
+      "sessions": 4,
+      "signals": {
+        "No such file or directory": {
+          "count": 4,
+          "sessions": 4
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 12,
+      "sessions": 11,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "No such file or directory": {
+          "count": 11,
+          "sessions": 11
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named",
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "cp-sat-performance-and-advanced-features",
+      "cp-sat-primer-engineer",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "ultrawork"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "cp-sat-performance-and-advanced-features",
+      "cp-sat-primer-engineer",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "ultrawork"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "cp-sat-performance-and-advanced-features",
+      "cp-sat-primer-engineer",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "team",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "ask-claude",
+      "ask-gemini",
+      "branch-archive-rechunk-rebase",
+      "chatgpt-apps",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "cancel",
+      "chatgpt-apps",
+      "code-review",
+      "cp-sat-performance-and-advanced-features",
+      "cp-sat-primer-engineer",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ]
+  }
+}

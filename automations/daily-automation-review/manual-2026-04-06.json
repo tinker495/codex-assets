@@ -1,0 +1,115 @@
+{
+  "files_scanned": 43,
+  "sessions_with_records": 43,
+  "top_operational": [
+    {
+      "label": "No such file or directory::docs/shared/agent-tiers.md",
+      "count": 11,
+      "sessions": 11
+    },
+    {
+      "label": "other failure",
+      "count": 7,
+      "sessions": 4
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 5,
+      "sessions": 2
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "Error: unknown flag: --repo",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "command not found",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "unable to resolve PR from current branch",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::src/stowage/dataclasses/master_plan.py",
+      "count": 7,
+      "sessions": 7
+    },
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "label": "ModuleNotFoundError::scripts._rotation_history",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/solver/share/weight_constraints.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::radon",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "docs/shared/agent-tiers.md",
+      "count": 11,
+      "sessions": 11
+    },
+    {
+      "path": "src/stowage/dataclasses/master_plan.py",
+      "count": 7,
+      "sessions": 7
+    },
+    {
+      "path": "src/stowage/planner/spp/solver/share/weight_constraints.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "No such file or directory",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "module": "scripts._rotation_history",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "module": "radon",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [],
+  "partial_success_probes": [],
+  "skill_path_drift": []
+}
