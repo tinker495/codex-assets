@@ -7,8 +7,6 @@ description: URL-driven website cloning with visual + functional verification
 Clone a target website from its URL, replicating both visual appearance and core interactive functionality. Uses Playwright MCP for live page extraction, LLM-driven code generation, and iterative verification with `$visual-verdict` for visual scoring.
 </Purpose>
 
-Delegate screenshot comparison and iteration scoring to `visual-verdict` once a candidate clone is rendered.
-
 <Use_When>
 - User provides a target URL and wants the site replicated as working code
 - User says "clone site", "clone website", "copy webpage", or "web-clone"
