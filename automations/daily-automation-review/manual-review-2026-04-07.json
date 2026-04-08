@@ -9,16 +9,11 @@
     },
     {
       "label": "discovery/path probe failure",
-      "count": 5,
-      "sessions": 4
+      "count": 2,
+      "sessions": 2
     },
     {
       "label": "rg search syntax error",
-      "count": 1,
-      "sessions": 1
-    },
-    {
-      "label": "command not found",
       "count": 1,
       "sessions": 1
     }
@@ -26,8 +21,8 @@
   "top_repo_specific": [
     {
       "label": "No such file or directory::No such file or directory",
-      "count": 13,
-      "sessions": 12
+      "count": 11,
+      "sessions": 10
     },
     {
       "label": "No such file or directory::src/stowage/dataclasses/master_plan.py",
@@ -43,8 +38,8 @@
   "top_missing_paths": [
     {
       "path": "No such file or directory",
-      "count": 13,
-      "sessions": 12
+      "count": 11,
+      "sessions": 10
     },
     {
       "path": "src/stowage/dataclasses/master_plan.py",

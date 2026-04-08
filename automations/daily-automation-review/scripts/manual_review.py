@@ -50,23 +50,23 @@ PATH_PROBE_PREFIXES = (
     "rg --files -g ",
     "git rev-parse",
 )
-SHELL_FAILURE_MARKERS = (
-    "No such file or directory",
-    "command not found",
-    "fatal:",
-    "unknown flag",
-    "unable to resolve PR",
-    "jq: parse error",
-    "write_stdin failed",
-    "no matches found:",
-)
 EXIT_CODE_PATTERN = re.compile(r"Process exited with code (\d+)")
+COMMAND_NOT_FOUND_PATTERN = re.compile(
+    r"(?m)^(?:zsh:\d+:\s*)?[^:\n]+: command not found(?:[:\s]|$)"
+)
+FATAL_NOT_GIT_PATTERN = re.compile(r"(?m)^fatal: not a git repository")
+JQ_PARSE_ERROR_PATTERN = re.compile(r"(?m)^jq: parse error")
+NO_MATCHES_PATTERN = re.compile(r"(?m)^zsh:\d+:\s+no matches found:")
 NO_SUCH_FILE_PATTERN = re.compile(
     r"(?m)^(?:[^:\n]+: )?(?P<path>[^\n:]+): No such file or directory$"
 )
 MODULE_NOT_FOUND_PATTERN = re.compile(
     r"ModuleNotFoundError: No module named '([^']+)'"
 )
+UNKNOWN_FLAG_JSON_PATTERN = re.compile(r"(?m)^Error: unknown flag: --json\b")
+UNKNOWN_FLAG_REPO_PATTERN = re.compile(r"(?m)^Error: unknown flag: --repo\b")
+UNABLE_TO_RESOLVE_PR_PATTERN = re.compile(r"(?m)^unable to resolve PR from current branch\b")
+WRITE_STDIN_CLOSED_PATTERN = re.compile(r"(?m)^write_stdin failed: stdin is closed\b")
 SKILL_PATH_PATTERN = re.compile(r"(/[^\s\"']*SKILL\.md)")
 ENV_ASSIGNMENT_PATTERN = re.compile(
     r"^(?:[A-Za-z_][A-Za-z0-9_]*=(?:\"[^\"]*\"|'[^']*'|[^\s]+)\s+)+"
@@ -128,6 +128,23 @@ def is_archive_context(cmd: str) -> bool:
     return any(marker in cmd for marker in ARCHIVE_CONTEXT_MARKERS)
 
 
+def has_shell_failure(output: str) -> bool:
+    return any(
+        pattern.search(output)
+        for pattern in (
+            COMMAND_NOT_FOUND_PATTERN,
+            FATAL_NOT_GIT_PATTERN,
+            JQ_PARSE_ERROR_PATTERN,
+            NO_MATCHES_PATTERN,
+            NO_SUCH_FILE_PATTERN,
+            UNKNOWN_FLAG_JSON_PATTERN,
+            UNKNOWN_FLAG_REPO_PATTERN,
+            UNABLE_TO_RESOLVE_PR_PATTERN,
+            WRITE_STDIN_CLOSED_PATTERN,
+        )
+    )
+
+
 def looks_like_path_listing(line: str) -> bool:
     return "/" in line or line.endswith(".py") or line.endswith(".md")
 
@@ -153,23 +170,23 @@ def classify_failure(
 ) -> tuple[str, str] | None:
     stripped = strip_env_assignments(cmd)
 
-    if tool_name == "write_stdin" and "write_stdin failed: stdin is closed" in output:
+    if tool_name == "write_stdin" and WRITE_STDIN_CLOSED_PATTERN.search(output):
         return ("operational", "write_stdin failed: stdin is closed")
 
     if tool_name != "exec_command":
         return None
 
-    shell_failure = any(marker in output for marker in SHELL_FAILURE_MARKERS)
+    shell_failure = has_shell_failure(output)
     if is_read_only_command(cmd) and exit_code == 0 and is_archive_context(cmd):
         shell_failure = False
     if exit_code in (None, 0) and not shell_failure:
         return None
 
-    if "write_stdin failed: stdin is closed" in output:
+    if WRITE_STDIN_CLOSED_PATTERN.search(output):
         return ("operational", "write_stdin failed: stdin is closed")
     if "Invalid YAML in frontmatter" in output or "mapping values are not allowed here" in output:
         return ("operational", "frontmatter/YAML error")
-    if "no matches found:" in output:
+    if NO_MATCHES_PATTERN.search(output):
         return ("operational", "zsh: no matches found")
     if stripped.startswith("rg ") and (
         "unmatched \"" in output
@@ -177,13 +194,18 @@ def classify_failure(
         or 'the literal "\\n" is not allowed in a regex' in output
     ):
         return ("operational", "rg search syntax error")
+    if exit_code == 1 and not shell_failure:
+        if any(stripped.startswith(prefix) for prefix in PATH_PROBE_PREFIXES) or stripped == "pwd":
+            return ("operational", "discovery/path probe failure")
+        if stripped.startswith("rg "):
+            return None
     if "ModuleNotFoundError: No module named" in output:
         match = MODULE_NOT_FOUND_PATTERN.search(output)
         target = match.group(1) if match else "unknown"
         return ("repo_specific", f"ModuleNotFoundError::{target}")
     if "ERROR collecting" in output:
         return ("repo_specific", "ERROR collecting")
-    if "fatal: not a git repository" in output:
+    if FATAL_NOT_GIT_PATTERN.search(output):
         category = "repo_specific" if session_cwd and "/project/" in session_cwd else "operational"
         return (category, "fatal: not a git repository")
     if "No such file or directory" in output:
@@ -202,19 +224,17 @@ def classify_failure(
         else:
             category = "operational"
         return (category, f"No such file or directory::{target}")
-    if "Error: unknown flag: --json" in output:
+    if UNKNOWN_FLAG_JSON_PATTERN.search(output):
         return ("operational", "Error: unknown flag: --json")
-    if "Error: unknown flag: --repo" in output:
+    if UNKNOWN_FLAG_REPO_PATTERN.search(output):
         return ("operational", "Error: unknown flag: --repo")
-    if "jq: parse error" in output:
+    if JQ_PARSE_ERROR_PATTERN.search(output):
         return ("operational", "jq: parse error")
-    if "unable to resolve PR from current branch" in output:
+    if UNABLE_TO_RESOLVE_PR_PATTERN.search(output):
         return ("operational", "unable to resolve PR from current branch")
-    if "command not found" in output:
+    if COMMAND_NOT_FOUND_PATTERN.search(output):
         return ("operational", "command not found")
-    if any(stripped.startswith(prefix) for prefix in PATH_PROBE_PREFIXES) or stripped.startswith(
-        ("rg ", "pwd")
-    ):
+    if any(stripped.startswith(prefix) for prefix in PATH_PROBE_PREFIXES) or stripped == "pwd":
         return ("operational", "discovery/path probe failure")
     return ("operational", "other failure")
 
