@@ -1,0 +1,80 @@
+{
+  "files_scanned": 21,
+  "sessions_with_records": 21,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 9,
+      "sessions": 5
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 5,
+      "sessions": 4
+    },
+    {
+      "label": "rg search syntax error",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "command not found",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 13,
+      "sessions": 12
+    },
+    {
+      "label": "No such file or directory::src/stowage/dataclasses/master_plan.py",
+      "count": 7,
+      "sessions": 7
+    },
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 7,
+      "sessions": 7
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 13,
+      "sessions": 12
+    },
+    {
+      "path": "src/stowage/dataclasses/master_plan.py",
+      "count": 7,
+      "sessions": 7
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 7,
+      "sessions": 7
+    }
+  ],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-07T10-07-05-019d657a-94cd-7302-b3e5-3703a27595aa.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f scripts/fetch_comments.py && echo local || rg --files -g 'fetch_comments.py'",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-07T10-23-04-019d6589-3843-73d2-a691-66056c8124e5.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g 'fetch_comments.py'",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": []
+}

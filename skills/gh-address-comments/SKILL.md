@@ -19,8 +19,8 @@ Prereq:
 - Preferred: run `scripts/fetch_comments.py` directly (auto-resolves current repo PR, then fork upstream parent PR by head branch when needed).
 - Auto-resolution should prefer the current git branch name plus `gh pr list --head <branch>` over bare `gh pr view`, because `gh pr view` may infer the wrong branch in repos with stale local metadata.
 - Path guardrail (required, search-as-discovery):
-  - First verify local script path: `test -f scripts/fetch_comments.py`.
-  - If missing, search candidate paths before fallback: `rg --files -g 'fetch_comments.py'`.
+  - First verify local script path without treating absence as a failure: `test -f scripts/fetch_comments.py && echo local || echo missing`.
+  - If missing, search candidate paths before fallback without surfacing empty matches as operational noise: `rg --files -g 'fetch_comments.py' || true`.
   - If found, run the first exact path.
   - If still missing, fallback to bundled absolute path: `python /Users/mrx-ksjung/.codex/skills/gh-address-comments/scripts/fetch_comments.py`.
   - If all script paths are missing, switch to gh-only discovery:
@@ -85,7 +85,7 @@ Use this when the user already has final comment text and wants it uploaded to a
 - If the reply API returns `Parent comment not found`, assume a node-id/REST-id mismatch first. Re-fetch `gh api repos/{owner}/{repo}/pulls/{pr}/comments --paginate`, match `node_id`, and retry once with the numeric `id`.
 - If PR auto-resolution cannot determine the current branch PR, fallback to `gh pr list --author @me --state open --limit 20` and continue with explicit PR choice.
 - Before writing temp/output files, verify destination parent directory with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`.
-- Keep path filtering tight: run `rg --files -g 'fetch_comments.py'` before broad searches.
+- Keep path filtering tight: run `rg --files -g 'fetch_comments.py' || true` before broad searches, and treat empty stdout as a normal local-miss signal rather than a failed command.
 
 Notes:
 - If gh hits auth/rate issues mid-run, prompt the user to re-authenticate with `gh auth login`, then retry.

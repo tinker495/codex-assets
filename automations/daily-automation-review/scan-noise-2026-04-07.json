@@ -1,0 +1,277 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-08T01:51:37Z",
+  "files_scanned": 21,
+  "signals": {
+    "ModuleNotFoundError: No module named": {
+      "count": 7,
+      "sessions": 7
+    },
+    "No such file or directory": {
+      "count": 21,
+      "sessions": 12
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "autopilot": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "cancel": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "gh-address-comments": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "plan": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "ralph": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "ralplan": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    },
+    "simplify": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "trace": {
+      "count": 21,
+      "sessions": 7,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 7,
+          "sessions": 7
+        },
+        "No such file or directory": {
+          "count": 14,
+          "sessions": 7
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named",
+    "No such file or directory"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "deep-interview",
+      "gh-address-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "deep-interview",
+      "gh-address-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "ask-claude",
+      "ask-gemini",
+      "branch-archive-rechunk-rebase",
+      "chatgpt-apps",
+      "gh-address-comments",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "chatgpt-apps",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "web-clone"
+    ]
+  }
+}
