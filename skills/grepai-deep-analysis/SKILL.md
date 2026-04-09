@@ -10,7 +10,8 @@ Use a noise-aware multi-pass workflow to build a stable mental model of code beh
 Treat `grepai search` as discovery only, and ground final claims with dual-view anchors: semantic + topology + validation.
 
 ## Operational Noise Guardrails
-- Always run search-as-discovery first: narrow files with `rg --files`/`rg -n`, then verify exact paths with `test -f` before `cat`/`sed`.
+- Always run search-as-discovery first: narrow files with `rg --files`/`rg -n`, then verify each exact path with `test -f`/`test -d` before `cat`/`sed` or before passing multiple concrete path operands to `rg`.
+- If a hypothesized file or directory is missing, do not keep reusing that guess in follow-up reads. Recover from the repo root with `rg --files` (or a narrower `rg -n`) and only carry forward confirmed paths.
 - Before repository git fallback commands, verify context: `git rev-parse --is-inside-work-tree`.
 - If `grepai` is unavailable (`command not found: grepai`), switch immediately to `rg`-only discovery and continue with explicit limitation notes.
 - If embeddings fail against local Ollama (`failed to send request to Ollama` / `localhost:11434`), skip embeddings-based steps and continue with `rg`/trace evidence.

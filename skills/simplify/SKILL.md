@@ -56,6 +56,8 @@ Read, in parallel when possible:
 2. Every target file in full.
 3. Adjacent context that affects safe cleanup: imports, importers, shared types, shared helpers, and nearby tests.
 
+Before direct reads or targeted searches, verify each concrete file or directory operand with `test -f` or `test -d`. If a guessed path is missing, recover with repo-root-aware discovery such as `rg --files` instead of retrying the same path or assuming siblings like `src/tests` exist.
+
 Derive project conventions from the code you read:
 
 - naming
@@ -123,6 +125,10 @@ Before each file edit:
 1. Re-read the current file state.
 2. Confirm the cleanup metric being improved.
 3. Search references before deleting or renaming anything shared.
+
+Tooling guardrail:
+
+- If an interactive shell session needs follow-up input and `write_stdin` reports that stdin is closed, restart with a fresh `exec_command` using `tty=true` once instead of continuing to poke the dead session.
 
 Editing rules:
 
