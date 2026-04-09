@@ -1,0 +1,206 @@
+{
+  "files_scanned": 11,
+  "sessions_with_records": 11,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 16,
+      "sessions": 4
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "rg search syntax error",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "zsh: no matches found",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 8,
+      "sessions": 5
+    },
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 5,
+      "sessions": 4
+    },
+    {
+      "label": "ModuleNotFoundError::_solver_test_utils",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::stowage.planner.spp.load_assembly",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::conftest",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "label": "ERROR collecting",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "No such file or directory::/Users/mrx-ksjung/.nvm/versions/node/v20.20.1/lib/node_modules/oh-my-codex/dist/mcp/team-server.js",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/imdg_pair_gate.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/src/stowage/planner/spp/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::tests/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/dataclasses/master_plan/types.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/dataclasses/bay_planning/container_data.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/dataclasses/vessel_define/row_geometry.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::scripts._rotation_history",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::pytest",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 5,
+      "sessions": 4
+    },
+    {
+      "path": "/Users/mrx-ksjung/.nvm/versions/node/v20.20.1/lib/node_modules/oh-my-codex/dist/mcp/team-server.js",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/spp/imdg_pair_gate.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/src/stowage/planner/spp/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "tests/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/dataclasses/master_plan/types.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/dataclasses/bay_planning/container_data.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/dataclasses/vessel_define/row_geometry.py",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 8,
+      "sessions": 5
+    },
+    {
+      "module": "_solver_test_utils",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "module": "stowage.planner.spp.load_assembly",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "module": "conftest",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "module": "scripts._rotation_history",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "module": "pytest",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/SKILL.md => unmapped",
+      "count": 24,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/doctor/SKILL.md => /Users/mrx-ksjung/.codex/skills/doctor/SKILL.md",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/.codex/skills/antigravity-worktreeconfig-repair/SKILL.md => /Users/mrx-ksjung/.codex/skills/antigravity-worktreeconfig-repair/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/.agents/skills/desloppify/SKILL.md => /Users/mrx-ksjung/.codex/skills/desloppify/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/.agents/skills/spp-rotation-performance-brief/SKILL.md => /Users/mrx-ksjung/.codex/skills/spp-rotation-performance-brief/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    }
+  ]
+}

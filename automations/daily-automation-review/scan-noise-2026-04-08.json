@@ -1,0 +1,304 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-09T01:53:27Z",
+  "files_scanned": 11,
+  "signals": {
+    "ERROR collecting": {
+      "count": 4,
+      "sessions": 2
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 21,
+      "sessions": 6
+    },
+    "No such file or directory": {
+      "count": 18,
+      "sessions": 8
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 2,
+      "sessions": 2
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "autopilot": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 4,
+          "sessions": 1
+        }
+      }
+    },
+    "cancel": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "code-review": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "doctor": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "gh-fix-review-comments": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 33,
+      "sessions": 5,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 19,
+          "sessions": 5
+        },
+        "No such file or directory": {
+          "count": 11,
+          "sessions": 4
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "plan": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 2,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    },
+    "simplify": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "trace": {
+      "count": 29,
+      "sessions": 5,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 16,
+          "sessions": 4
+        },
+        "No such file or directory": {
+          "count": 9,
+          "sessions": 4
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ModuleNotFoundError: No module named",
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ],
+    "modified_7d": [
+      "ask-claude",
+      "ask-gemini",
+      "branch-archive-rechunk-rebase",
+      "chatgpt-apps",
+      "gh-address-comments",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "chatgpt-apps",
+      "code-health",
+      "code-review",
+      "deep-interview",
+      "doctor",
+      "gh-address-comments",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "web-clone"
+    ]
+  }
+}
