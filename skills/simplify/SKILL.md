@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: Improve code clarity, consistency, and maintainability while preserving exact behavior. Use when asked to simplify, refactor, clean up, improve readability, assess code quality, find problems, audit code, or review a module for structural, smell, or consistency issues. Do not use for feature work, formatting-only passes, dependency upgrades, broad architecture changes, or public API redesign.
+description: Improve code clarity, consistency, and maintainability while preserving exact behavior. Use when asked to simplify, refactor, clean up, improve readability, assess code quality, find problems, audit code, review a module for structural, smell, or consistency issues, or analyze commit, branch, or whole-codebase changes and carry out safe follow-up cleanup. Trigger this skill for requests such as recent commit follow-up, HEAD cleanup, branch-wide cleanup, latest refactor review, diff-driven cleanup, or whole-codebase forensic simplification before behavior-preserving fixes. Do not use for feature work, formatting-only passes, dependency upgrades, broad architecture changes, or public API redesign.
 ---
 
 # Simplify
@@ -30,9 +30,11 @@ Preserve behavior, stay in scope, and justify every change with concrete evidenc
 
 - **Refactor**: find issues and fix them.
 - **Audit**: find issues and report them without editing.
+- **Forensic-Followup**: analyze a commit, branch, diff, or full codebase slice in detail, classify cleanup patterns, and carry out safe follow-up fixes.
 
 Use **Audit** when the request says `find problems`, `audit`, `scan`, `what's wrong`, or otherwise asks for diagnosis only.
 Default to **Refactor** for `simplify`, `refactor`, `clean up`, `improve readability`, or similar requests.
+Use **Forensic-Followup** when the request is centered on a change set or a broad cleanup evidence pass, for example `last commit analysis`, `recent commit follow-up`, `HEAD cleanup`, `branch cleanup`, `diff-driven cleanup`, `whole codebase simplification`, `직전 커밋 분석`, `브랜치 단위 정리`, or `전체 코드베이스 기준 후속 수정`.
 
 ## Workflow
 
@@ -47,6 +49,22 @@ Resolve scope in this order:
 5. No files found: stop and ask for scope.
 
 Stay inside the declared scope. Do not use "while I'm here" reasoning.
+
+### Forensic-Followup scope
+
+When running in **Forensic-Followup** mode:
+
+1. Resolve the forensic unit first:
+   - explicit files or module
+   - explicit commit, SHA, or git range
+   - explicit branch or PR diff
+   - whole codebase
+   - otherwise default to `HEAD`
+2. For a single commit or `HEAD`, inspect it with `git log -1`, `git show --stat`, and `git diff --numstat HEAD~1 HEAD`.
+3. For a branch-level pass, inspect branch state with `git status --short --branch`, determine the comparison base from user input, repo docs, or the default branch, then inspect the branch diff with `git diff --stat` and `git diff --numstat` against the merge base.
+4. For a whole-codebase pass, inventory tracked source files, identify hotspots from recent changes, tests, lint/type errors, or complexity signals, then process the codebase in bounded clusters instead of pretending the entire repo is one edit batch.
+5. Read every touched or selected file in full before editing.
+6. Read adjacent importers, shared types, re-export surfaces, and nearby tests that could break from the refactor.
 
 ### 2. Load context
 
@@ -68,6 +86,8 @@ Derive project conventions from the code you read:
 - branching and helper extraction habits
 
 Never edit a file that was not read in the current session.
+
+For **Forensic-Followup**, read touched tests and import surfaces even when they are outside the edited set. The goal is to catch cleanup fallout, not only obvious local smells.
 
 ### 3. Analyze and plan before editing
 
@@ -110,11 +130,27 @@ Score each finding:
 - **26-50**: apply only if obvious and zero-risk
 - **0-25**: skip
 
+For **Forensic-Followup**, also classify each touched change into one of these archetypes before editing:
+
+- trivial wrapper removal or inline
+- single-use local removal
+- re-export or `__all__` cleanup
+- type annotation tightening
+- signature propagation into tests and importers
+- guard removal that may alter runtime contracts
+- concrete return-type drift
+
 Decision gate:
 
 - In **Audit** mode, return the findings report and stop.
 - If the work is fewer than 10 low-risk edits, proceed autonomously.
 - If the work exceeds 10 edits, requires structural rewrites, or risks API changes, stop after the plan and ask the user.
+
+Exception for **Forensic-Followup**:
+
+- Do not use raw edit count as the stop condition.
+- Proceed cluster by cluster when the changes are behavior-preserving and the risk is local.
+- Stop only for public API changes, ambiguous intent, destructive actions, or refactors that are no longer clearly cleanup.
 
 ### 4. Refactor safely
 
@@ -139,6 +175,17 @@ Editing rules:
 - Do not add dependencies.
 - Do not broaden scope.
 - Keep related edits in the same file together.
+
+Forensic-followup rules:
+
+- Treat the selected scope as forensic evidence, not as truth. Verify the cleanup did not leave drift in tests, imports, wrappers, or return contracts.
+- If the scope is a branch diff, validate both branch-local cleanup patterns and cross-file fallout introduced across the branch.
+- If the scope is the whole codebase, cluster by module or smell family and finish one cluster with verification before moving to the next.
+- Search references before removing or moving anything that used to be re-exported.
+- When a wrapper is removed, verify every new required argument is propagated at direct callers and tests.
+- When a guard such as `getattr`, `hasattr`, or `None` fallback is removed, confirm the surrounding contract is now truly strict and canonical.
+- When a refactor changes a return expression, check whether the concrete return type changed even if the value shape still passes shallow tests.
+- Prefer to finish safe follow-up fixes in the same run instead of stopping at analysis.
 
 Stop-loss:
 
@@ -197,6 +244,12 @@ Always include:
 - verification run
 - remaining risks or consciously deferred items
 
+For **Forensic-Followup**, also include:
+
+- scope summary
+- risk clusters
+- follow-up fixes applied because of the forensic review
+
 ## Parallelism
 
 - 1-5 files: analyze locally.
@@ -218,6 +271,18 @@ Before editing, verify every answer is `yes`:
 - Would a senior engineer unfamiliar with the task understand why each change was made?
 
 If any answer is `no`, stop and tighten the plan before editing.
+
+## Forensic-Followup Checklist
+
+Before applying follow-up edits after a commit, branch diff, or codebase forensic pass, verify every answer is `yes`:
+
+- Did you inspect the selected scope with the right inventory first: commit stats, branch diff stats, or repo hotspot inventory?
+- Did you read every touched or clustered file that could contain fallout?
+- Did you check importers, tests, and re-export surfaces for moved or removed symbols?
+- Did you check for concrete return-type drift such as `defaultdict` vs `dict`?
+- Did you verify wrapper removal propagated required arguments at every call site?
+- Did you verify removed guards were replaced by an intentional strict contract rather than wishful thinking?
+- Are you still doing behavior-preserving cleanup rather than silently redesigning APIs?
 
 ## Boundaries
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Simplify"
-  short_description: "Refactor code for clarity without changing behavior"
-  default_prompt: "Use $simplify to audit and simplify the recently changed module without changing behavior."
+  short_description: "Audit and simplify commit, branch, or repo fallout safely"
+  default_prompt: "Use $simplify to analyze the relevant commit, branch diff, or codebase slice and apply safe behavior-preserving follow-up cleanup."
