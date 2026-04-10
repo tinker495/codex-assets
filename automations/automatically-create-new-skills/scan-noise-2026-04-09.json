@@ -1,0 +1,239 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-10T01:41:18Z",
+  "files_scanned": 6,
+  "signals": {
+    "ModuleNotFoundError: No module named": {
+      "count": 5,
+      "sessions": 2
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 3,
+      "sessions": 2
+    }
+  },
+  "skills": {
+    "autopilot": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 8,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 2
+        }
+      }
+    },
+    "cancel": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "deep-interview": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 8,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 5,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 2
+        }
+      }
+    },
+    "plan": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 3,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "trace": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "deep-interview",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "trace"
+    ],
+    "after_recently_touched": [
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "deep-interview",
+      "grepai-deep-analysis",
+      "plan",
+      "ralph",
+      "ralplan",
+      "trace"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "trace"
+    ],
+    "modified_7d": [
+      "ask-claude",
+      "ask-gemini",
+      "chatgpt-apps",
+      "gh-address-comments",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "chatgpt-apps",
+      "code-health",
+      "deep-interview",
+      "gh-address-comments",
+      "gh-fix-ci",
+      "gh-fix-review-comments",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-workspace-prune",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "web-clone"
+    ]
+  }
+}
