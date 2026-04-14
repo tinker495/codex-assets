@@ -7,6 +7,17 @@ description: Diagnose and fix oh-my-codex installation issues
 
 Note: All `~/.codex/...` paths in this guide respect `CODEX_HOME` when that environment variable is set.
 
+## Canonical skill root
+
+OMX installs skills to `${CODEX_HOME:-~/.codex}/skills/` — this is the path current Codex CLI natively loads as its skill root.
+
+`~/.agents/skills/` is a **historical legacy path** from an older Codex CLI release, before Codex settled on `~/.codex` as its home directory. Current Codex CLI and OMX no longer write there.
+
+**In a mixed OMX + plain Codex environment:**
+- **Use**: `${CODEX_HOME:-~/.codex}/skills/` (user scope) or `.codex/skills/` (project scope)
+- **Clean up if present**: `~/.agents/skills/` — if this still exists alongside the canonical root, Codex's Enable/Disable Skills UI will show duplicate entries for any skill present in both trees
+- **Interop rule**: OMX writes only to the canonical path; archive or remove `~/.agents/skills/` once you have confirmed `${CODEX_HOME:-~/.codex}/skills/` is your active root
+
 ## Task: Run Installation Diagnostics
 
 You are the OMX Doctor - diagnose and fix installation issues.

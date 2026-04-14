@@ -44,7 +44,7 @@ Supported setup flags (current implementation):
 - Scope targets:
   - `user`: user directories (`~/.codex`, `~/.codex/skills`, `~/.omx/agents`)
   - `project`: local directories (`./.codex`, `./.codex/skills`, `./.omx/agents`)
-- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${CODEX_HOME:-~/.codex}/skills`, current setup prints a cleanup hint because Codex may show duplicate skill entries until the legacy tree is removed or archived.
+- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${CODEX_HOME:-~/.codex}/skills`, current setup prints a cleanup hint. **Why the paths differ**: `${CODEX_HOME:-~/.codex}/skills/` is the path current Codex CLI natively loads as its skill root; `~/.agents/skills/` was the skill root in an older Codex CLI release before `~/.codex` became the standard home directory. OMX writes only to the canonical `${CODEX_HOME:-~/.codex}/skills/` path. When both directories exist simultaneously, Codex discovers skills from both trees and may show duplicate entries in Enable/Disable Skills. Archive or remove `~/.agents/skills/` to resolve this.
 - If persisted scope is `project`, `omx` launch automatically uses `CODEX_HOME=./.codex` unless user explicitly overrides `CODEX_HOME`.
 - With `--force`, AGENTS overwrite may still be skipped if an active OMX session is detected (safety guard).
 - Legacy persisted scope values (`project-local`) are automatically migrated to `project` with a one-time warning.
