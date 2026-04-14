@@ -99,6 +99,7 @@ Analyze all targets across three dimensions:
    - large parameter lists
    - repeated branching
    - unnecessary wrapper layers
+   - redundant alias pairs or pass-through forwarders for the same concept
 2. **Smells**
    - duplication with 3+ materially identical blocks
    - dead code
@@ -172,6 +173,7 @@ Editing rules:
 - If behavior is not protected and cleanup is risky, add only the narrowest regression coverage needed to preserve current behavior.
 - Prefer deletion over extraction.
 - Reuse existing helpers before introducing new abstractions.
+- Do not introduce or preserve redundant alias/forwarder wrappers such as `_name()` forwarding to `name()` or one-line pass-through accessors for the same concept unless a documented compatibility boundary requires them.
 - Do not add dependencies.
 - Do not broaden scope.
 - Keep related edits in the same file together.
@@ -183,6 +185,7 @@ Forensic-followup rules:
 - If the scope is the whole codebase, cluster by module or smell family and finish one cluster with verification before moving to the next.
 - Search references before removing or moving anything that used to be re-exported.
 - When a wrapper is removed, verify every new required argument is propagated at direct callers and tests.
+- When a same-concept alias pair or pass-through forwarder is found, collapse it onto one canonical accessor instead of keeping both names alive unless an external compatibility contract requires otherwise.
 - When a guard such as `getattr`, `hasattr`, or `None` fallback is removed, confirm the surrounding contract is now truly strict and canonical.
 - When a refactor changes a return expression, check whether the concrete return type changed even if the value shape still passes shallow tests.
 - Prefer to finish safe follow-up fixes in the same run instead of stopping at analysis.
