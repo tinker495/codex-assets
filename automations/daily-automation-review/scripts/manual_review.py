@@ -93,6 +93,31 @@ def load_call_args(raw: str) -> dict[str, Any]:
         return {}
 
 
+def normalize_output(raw: Any) -> str:
+    if isinstance(raw, str):
+        return raw
+    if raw is None:
+        return ""
+    if isinstance(raw, list):
+        text_chunks: list[str] = []
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            for key in ("text", "output_text"):
+                value = item.get(key)
+                if isinstance(value, str):
+                    text_chunks.append(value)
+                    break
+        return "\n".join(text_chunks)
+    if isinstance(raw, dict):
+        for key in ("text", "output_text"):
+            value = raw.get(key)
+            if isinstance(value, str):
+                return value
+        return json.dumps(raw, ensure_ascii=False)
+    return str(raw)
+
+
 def extract_exit_code(output: str) -> int | None:
     match = EXIT_CODE_PATTERN.search(output)
     return int(match.group(1)) if match else None
@@ -283,7 +308,7 @@ def summarize(files: list[Path], codex_home: Path) -> dict[str, Any]:
                 tool_name = call.get("name")
                 args = call.get("args") or {}
                 cmd = args.get("cmd", "") if isinstance(args, dict) else ""
-                output = payload.get("output", "") or ""
+                output = normalize_output(payload.get("output"))
                 exit_code = extract_exit_code(output)
                 classification = classify_failure(
                     tool_name=tool_name,

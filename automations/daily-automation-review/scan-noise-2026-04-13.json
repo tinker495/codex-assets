@@ -1,0 +1,203 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-14T05:31:14Z",
+  "files_scanned": 31,
+  "signals": {
+    "ERROR collecting": {
+      "count": 7,
+      "sessions": 3
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 12,
+      "sessions": 4
+    },
+    "No such file or directory": {
+      "count": 1,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 11,
+      "sessions": 6
+    }
+  },
+  "skills": {
+    "branch-onboarding-brief": {
+      "count": 17,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 4,
+          "sessions": 2
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 9,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 4,
+          "sessions": 2
+        }
+      }
+    },
+    "graphify": {
+      "count": 17,
+      "sessions": 4,
+      "signals": {
+        "ERROR collecting": {
+          "count": 3,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 6,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 8,
+          "sessions": 4
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "omx-setup": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "resume": {
+      "count": 9,
+      "sessions": 2,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 6,
+          "sessions": 2
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 2
+        }
+      }
+    },
+    "reverse-doc": {
+      "count": 7,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 5,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ModuleNotFoundError: No module named",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "branch-onboarding-brief",
+      "graphify",
+      "grepai-deep-analysis",
+      "omx-setup",
+      "resume",
+      "reverse-doc"
+    ],
+    "after_recently_touched": [
+      "branch-onboarding-brief",
+      "graphify",
+      "grepai-deep-analysis",
+      "omx-setup",
+      "resume",
+      "reverse-doc"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "doctor",
+      "graphify",
+      "grepai-deep-analysis",
+      "main-merge",
+      "omx-setup",
+      "ralph",
+      "refresh-branch-docs",
+      "resume",
+      "reverse-doc",
+      "simplify",
+      "trace",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "ask-claude",
+      "ask-gemini",
+      "configure-notifications",
+      "doctor",
+      "gh-address-comments",
+      "graphify",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultrawork",
+      "web-clone"
+    ],
+    "union": [
+      "ask-claude",
+      "ask-gemini",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "configure-notifications",
+      "doctor",
+      "gh-address-comments",
+      "graphify",
+      "grepai-deep-analysis",
+      "imagegen",
+      "main-merge",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "ralph",
+      "refresh-branch-docs",
+      "resume",
+      "reverse-doc",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "trace",
+      "ultrawork",
+      "web-clone"
+    ]
+  }
+}
