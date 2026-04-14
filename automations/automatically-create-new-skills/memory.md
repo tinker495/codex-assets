@@ -1,3 +1,12 @@
+2026-04-14 14:48:31 KST
+
+- Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/04/13/*.jsonl` and saved the exact 31-file list at `/tmp/automatically-create-new-skills-2026-04-13-files.txt`.
+- Ran `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scripts/scan_noise.py` with repeated `--file` arguments and saved `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scan-noise-2026-04-13.json`.
+- Initial `python3 /Users/mrx-ksjung/.codex/automations/daily-automation-review/scripts/manual_review.py` failed, but `python3 -B /Users/mrx-ksjung/.codex/automations/daily-automation-review/scripts/manual_review.py` succeeded on the same file list and saved `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/manual-review-2026-04-13.json`.
+- Updated `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/automation.toml` and `/Users/mrx-ksjung/.codex/automations/daily-automation-review/automation.toml` so future runs call `manual_review.py` via `python3 -B` and avoid stale bytecode/source drift.
+- Kept all skill candidates unchanged this run: scanner high signals were `ERROR collecting`, `ModuleNotFoundError: No module named`, and `write_stdin failed: stdin is closed`, but manual review tied the strongest repo-specific evidence to repo-local import/path issues (`ModuleNotFoundError::stowage`, `ModuleNotFoundError::conftest`, `src/stowage/planner/spp/AGENTS.md`) and a `suppressed-read-only` graphify replay instead of a clean `~/.codex/skills/*` edit target.
+- Validation: rerun of `python3 -B .../manual_review.py` succeeded and both changed `automation.toml` files passed `python3 -B -c 'import tomllib'` parsing.
+
 2026-04-10 10:45:53 KST
 
 - Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/04/09/*.jsonl` and saved the exact 6-file list at `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/yesterday-2026-04-09-files.txt`.

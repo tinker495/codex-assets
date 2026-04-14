@@ -1,0 +1,196 @@
+{
+  "files_scanned": 31,
+  "sessions_with_records": 31,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 21,
+      "sessions": 8
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 11,
+      "sessions": 6
+    },
+    {
+      "label": "zsh: no matches found",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "rg search syntax error",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 6,
+      "sessions": 3
+    },
+    {
+      "label": "ModuleNotFoundError::conftest",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::tests.stowage.planner.spp.test_eval_integration",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "src/stowage/planner/spp/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 6,
+      "sessions": 3
+    },
+    {
+      "module": "conftest",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "module": "tests.stowage.planner.spp.test_eval_integration",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-13T12-07-00-019d84ce-87ab-7c73-8724-1a20f3d4331f.jsonl",
+      "probe_type": "suppressed-read-only",
+      "cmd": "set -euo pipefail\ncd /Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/docs\nPY=$(cat .graphify_python)\n\"$PY\" - <<'PY'\nimport json\nfrom graphify.benchmark import run_benchmark, print_benchmark\nfrom pathlib import Path\n\ndetection = json.loads(Path('.graphify_detect.json').read_text())\nresult = run_benchmark('graphify-out/graph.json', corpus_words=detection['total_words'])\nprint_benchmark(result)\nPY\n\"$PY\" - <<'PY'\nimport json, re\nfrom pathlib import Path\nfrom datetime import datetime, timezone\nfrom graphify.detect import save_manifest\n\ndetect = json.loads(Path('.graphify_detect.json').read_text())\nsave_manifest(detect['files'])\nextract = json.loads(Path('.graphify_extract.json').read_text())\ninput_tok = extract.get('input_tokens', 0)\noutput_tok = extract.get('output_tokens', 0)\ncost_path = Path('graphify-out/cost.json')\nif cost_path.exists():\n    cost = json.loads(cost_path.read_text())\nelse:\n    cost = {'runs': [], 'total_input_tokens': 0, 'total_output_tokens': 0}\ncost['runs'].append({\n    'date': datetime.now(timezone.utc).isoformat(),\n    'input_tokens': input_tok,\n    'output_tokens': output_tok,\n    'files': detect.get('total_files', 0),\n})\ncost['total_input_tokens'] += input_tok\ncost['total_output_tokens'] += output_tok\ncost_path.write_text(json.dumps(cost, ensure_ascii=False, indent=2))\nprint(f'This run: {input_tok:,} input tokens, {output_tok:,} output tokens')\nprint(f'All time: {cost['\"'\"'total_input_tokens'\"'\"']:,} input, {cost['\"'\"'total_output_tokens'\"'\"']:,} output ({len(cost['\"'\"'runs'\"'\"'])} runs)')\nreport = Path('graphify-out/GRAPH_REPORT.md').read_text(encoding='utf-8', errors='ignore')\nfor heading in ['## God Nodes (most connected - your core abstractions)', '## Surprising Connections (you probably didn\\'t know these)', '## Suggested Questions']:\n    m = re.search(rf'{re.escape(heading)}\\n(.*?)(\\n## |\\Z)', report, re.S)\n    print('===SECTION===')\n    print(heading)\n    print((m.group(1).strip() if m else '(not found)')[:4000])\nPY\nrm -f .graphify_extract.json .graphify_ast.json .graphify_semantic.json .graphify_analysis.json .graphify_labels.json 2>/dev/null || true\nrm -f graphify-out/.needs_update 2>/dev/null || true",
+      "exit_code": 1,
+      "body": "graphify token reduction benchmark\n──────────────────────────────────────────────────\n  Corpus:          1,236,012 words → ~1,648,016 tokens (naive)\n  Graph:           122 nodes, 357 edges\n  Avg query cost:  ~4,326 tokens\n  Reduction:       381.0x fewer tokens per query\n\n  Per question:\n    [2891.3x"
+    },
+    {
+      "session": "rollout-2026-04-13T14-26-42-019d854e-6c98-7ec3-9a83-c21e78794ebf.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f src/stowage/planner/spp/AGENTS.md && sed -n '1,220p' src/stowage/planner/spp/AGENTS.md",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/SKILL.md => unmapped",
+      "count": 67,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/ralph/SKILL.md => /Users/mrx-ksjung/.codex/skills/ralph/SKILL.md",
+      "count": 4,
+      "sessions": 2
+    },
+    {
+      "mapping": "/.codex/skills/ultrawork/SKILL.md => /Users/mrx-ksjung/.codex/skills/ultrawork/SKILL.md",
+      "count": 3,
+      "sessions": 2
+    },
+    {
+      "mapping": "/.codex/skills/autopilot/SKILL.md => /Users/mrx-ksjung/.codex/skills/autopilot/SKILL.md",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "mapping": "/.codex/skills/plan/SKILL.md => /Users/mrx-ksjung/.codex/skills/plan/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/deep-interview/SKILL.md => /Users/mrx-ksjung/.codex/skills/deep-interview/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/ralplan/SKILL.md => /Users/mrx-ksjung/.codex/skills/ralplan/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/team/SKILL.md => /Users/mrx-ksjung/.codex/skills/team/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/cancel/SKILL.md => /Users/mrx-ksjung/.codex/skills/cancel/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/code-review/SKILL.md => /Users/mrx-ksjung/.codex/skills/code-review/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/security-review/SKILL.md => /Users/mrx-ksjung/.codex/skills/security-review/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/web-clone/SKILL.md => /Users/mrx-ksjung/.codex/skills/web-clone/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/ambrosino/.codex/skills/checks/SKILL.md => /Users/mrx-ksjung/.codex/skills/checks/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/using-git-worktrees/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/test-driven-development/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/systematic-debugging/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/using-superpowers/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/dispatching-parallel-agents/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/find-skills/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/_disabled_skills_20260211/executing-plans/SKILL.md => unmapped",
+      "count": 1,
+      "sessions": 1
+    }
+  ]
+}
