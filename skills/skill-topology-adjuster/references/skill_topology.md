@@ -51,6 +51,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `imagegen` | specialist | raster image generation and editing workflow |
 | `openai-docs` | specialist | authoritative OpenAI docs retrieval and citation workflow |
 | `playwright` | specialist | terminal-driven real browser automation via Playwright CLI |
+| `probe-deep-search` | specialist | probe-first codebase search, symbol tracing, AST queries, and exact code extraction |
 | `simplify` | specialist | behavior-preserving code simplification and audit workflow |
 | `slides` | specialist | editable PowerPoint authoring and layout validation workflow |
 | `branch-onboarding-brief` | specialist | branch diff onboarding and briefing |
@@ -108,6 +109,7 @@ Layer 0: Meta / Utility
 
 Layer 1: Specialists (single-domain ownership)
   agents-md-builder, ai-slop-cleaner, imagegen, openai-docs, playwright,
+  probe-deep-search,
   simplify, slides, branch-onboarding-brief, code-health, code-review,
   cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
   desloppify, doc, doc-separator,
@@ -214,6 +216,7 @@ flowchart LR
   OSET["omx-setup"]
   PLAN["plan"]
   PLUG["plugin-creator"]
+  PDS["probe-deep-search"]
   PW["playwright"]
   RALPH["ralph"]
   RLP["ralplan"]
@@ -302,6 +305,7 @@ flowchart TD
   SPEC --> LBTS["layer-boundary-test-scaffold"]
   SPEC --> NDF["no-deep-flag-review"]
   SPEC --> PDF["pdf"]
+  SPEC --> PDS["probe-deep-search"]
   SPEC --> RD["reverse-doc"]
   SPEC --> SPROF["scalene-profiler"]
   SPEC --> SECR["security-review"]

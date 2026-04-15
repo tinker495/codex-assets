@@ -375,6 +375,8 @@ After testing the skill, you may detect the skill is complex enough that it requ
 
 User testing often this happens right after using the skill, with fresh context of how the skill performed.
 
+After creating or materially updating a skill, hand off to [$skill-topology-adjuster](/Users/mrx-ksjung/.codex/skills/skill-topology-adjuster/SKILL.md) to classify the skill's role, update topology artifacts, and keep delegation boundaries explicit.
+
 **Forward-testing and iteration workflow:**
 
 1. Use the skill on real tasks

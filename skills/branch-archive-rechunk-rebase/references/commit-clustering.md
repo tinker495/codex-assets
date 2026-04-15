@@ -1,6 +1,6 @@
 # Commit Clustering Heuristics
 
-Use this rubric when the user supplies a target commit count `N` and the branch must be rewritten into exactly `N` logical commits.
+Use this rubric when the user supplies a target commit count `N` and the branch must be rewritten into exactly `N` logical commits. The purpose is to produce a branch that cleanly expresses the real semantic changes, not to salvage or merge the original fragmented commit sequence.
 
 ## Primary signals
 
@@ -26,7 +26,7 @@ Prefer clusters that another engineer can review or revert independently:
 ## Merge-down rule when natural clusters exceed N
 
 If natural clusters exceed `N`:
-- merge the closest related clusters by dependency and reviewer context
+- merge the closest related semantic clusters by dependency and reviewer context, not the closest original commits by chronology
 - keep high-risk refactors isolated as long as possible
 - merge docs/tests into the owning runtime change before merging unrelated runtime work together
 
@@ -45,6 +45,7 @@ If natural clusters are fewer than `N`:
 - split tests from runtime only when the tests are a meaningful standalone checkpoint
 
 Do not split only to create cosmetic micro-commits such as:
+- preserving historical fragment boundaries with new commit wrappers when the underlying semantic work belongs together
 - one commit per file with no independent intent
 - one commit for formatting that is not reviewable on its own
 - one commit for generated output without its source change

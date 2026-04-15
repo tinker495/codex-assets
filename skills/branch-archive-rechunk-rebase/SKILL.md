@@ -1,13 +1,13 @@
 ---
 name: branch-archive-rechunk-rebase
-description: "Rebuild the current branch history through a fixed git workflow: onboard the branch, archive the full pre-rewrite state to a legacy branch, regroup the total branch diff into exactly N logical commits, and rebase the rewritten branch onto origin/main when it is not already directly based on main. Use when asked to clean up a noisy feature branch, split one large branch into N commits, archive legacy history before rewriting, or restack current work onto main without losing recoverability."
+description: "Rebuild the current branch history through a fixed git workflow: onboard the branch, archive the full pre-rewrite state to a legacy branch, regroup the total branch diff into exactly N logical commits centered on the branch's real semantic changes rather than the old commit boundaries, and rebase the rewritten branch onto origin/main when it is not already directly based on main. Use when asked to clean up a noisy feature branch, reorganize fragmented semantic changes into N commits, archive legacy history before rewriting, or restack current work onto main without losing recoverability."
 ---
 
 # Branch Archive Rechunk Rebase
 
 ## Overview
 
-Run a deterministic history-rewrite workflow for the current branch. Collect onboarding context first, create a recoverable legacy branch before any rewrite, collapse the branch delta back to its base, rebuild it into exactly N intent-based commits, then rebase onto `origin/main` only when the rewritten branch is not already stacked on it.
+Run a deterministic history-rewrite workflow for the current branch. Treat rechunking as semantic branch reconstruction: the goal is not to preserve or merely merge existing commits, but to rebuild the branch around the fragmented semantic changes that matter now. Collect onboarding context first, create a recoverable legacy branch before any rewrite, collapse the branch delta back to its base, rebuild it into exactly N intent-based commits, then rebase onto `origin/main` only when the rewritten branch is not already stacked on it.
 
 Assume local-only history rewriting by default. Do not push, force-push, or delete archive branches unless the user explicitly asks.
 
@@ -83,7 +83,7 @@ git diff --name-status "${base_commit}...${original_head}"
 git diff --stat "${base_commit}...${original_head}"
 ```
 
-Before deriving clusters, inspect actual changed code on the branch. Git history alone is insufficient for reliable rechunking.
+Before deriving clusters, inspect actual changed code on the branch. Git history alone is insufficient for reliable rechunking, because the target branch should express consolidated semantic changes rather than a cleaned-up copy of the old commit boundaries.
 
 Minimum clustering-grounding contract:
 - start from the changed-file list from onboarding and `git diff ... --name-status`
@@ -103,6 +103,7 @@ Then derive exactly `N` clusters using `references/commit-clustering.md`.
 
 Clustering rules:
 - group by code intent proven by changed-file inspection first, not by file extension or commit subject alone
+- treat original commits as raw evidence only; do not merge or preserve them mechanically when the semantic change boundaries should be redrawn
 - keep schema/model changes ahead of dependent runtime changes
 - keep tests with the runtime change they prove unless the test work is a standalone intent
 - isolate risky cross-cutting rewrites into their own cluster when possible
@@ -250,6 +251,7 @@ Include in the final handoff:
 ## Operational guardrails
 
 - Treat the archive branch as the rollback point for the entire run.
+- Optimize for a reviewable semantic branch, not for maximum fidelity to the original commit graph.
 - Re-read `git status --short` before every destructive git command.
 - Prefer path-scoped staging first; use `git add -p` only when the same file truly spans multiple intents. If a file appears in multiple candidate clusters, inspect it structurally with `probe` before choosing between split-by-hunk and commit-state replay.
 - If several planned clusters touch the same file, prefer deterministic `git restore --source <commit>` replay over fragile repeated hunk surgery.

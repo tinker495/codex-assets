@@ -1,4 +1,4 @@
 interface:
   display_name: "Branch Archive Rechunk Rebase"
-  short_description: "Archive branch, split changes into N commits"
-  default_prompt: "Use $branch-archive-rechunk-rebase to onboard the current branch, archive legacy history, regroup the diff into N commits, and rebase onto origin/main."
+  short_description: "Archive branch, regroup semantic changes into N commits"
+  default_prompt: "Use $branch-archive-rechunk-rebase to onboard the current branch, archive legacy history, reorganize fragmented semantic changes into N commits, and rebase onto origin/main."
