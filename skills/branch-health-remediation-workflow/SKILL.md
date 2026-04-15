@@ -1,6 +1,6 @@
 ---
 name: branch-health-remediation-workflow
-description: Chain branch onboarding, code-health, and non-test grepai analysis, then produce a remediation plan that reduces inefficiency and fragmentation while meeting branch goals. Use when asked to link branch-onboarding-brief, code-health, and grepai-deep-analysis into one workflow or to propose non-test remediation steps for the current branch.
+description: Chain branch onboarding, code-health, and non-test code analysis, then produce a remediation plan that reduces inefficiency and fragmentation while meeting branch goals. Use when asked to link branch-onboarding-brief, code-health, and targeted localization into one workflow or to propose non-test remediation steps for the current branch.
 ---
 
 # Branch Health Remediation Workflow
@@ -37,18 +37,18 @@ Use the `code-health` skill.
 Keep non-test diff minimization central and call out net non-test growth.
 
 3. Analyze non-test inefficiency and fragmentation.
-Use the `grepai-deep-analysis` skill by default and follow its Deep Analysis Protocol.
+Start with direct localization using `probe search`, `probe extract`, and exact-match follow-up via `rg -n`.
 Non-test scope: exclude `tests/`, `**/test_*.py`, `**/*_test.py`, `**/conftest.py`.
-If grepai results include tests, re-run with narrower entry points or ignore test-only hits in synthesis.
+If discovery pulls in tests, re-run with narrower path filters or ignore test-only hits in synthesis.
 Focus areas: hot loops, large functions, duplicate logic, repeated normalization, cache misuse, redundant I/O, and split responsibilities across many small modules.
-Read `references/non_test_grepai_queries.md` for query templates before the first pass.
+Read `references/non_test_localization_queries.md` for query templates before the first pass.
 
 4. Delegate to `rpg-loop-reasoning` when dual-view localization is needed.
 Use `rpg-loop-reasoning` in `hybrid` mode when at least one condition holds:
 - high-yield candidates touch 2+ modules
 - dependency drift is suspected from code-health or trace output
 - branch objective requires both understanding and generation-style planning
-If none hold, continue with direct `grepai-deep-analysis` localization.
+If none hold, continue with direct `probe`/`rg` localization.
 
 5. Run graph-guided localization on top candidates.
 For each high-yield candidate, anchor proposed changes with:
@@ -85,9 +85,8 @@ Include a structural impact check per proposal:
 ## Delegation Boundaries
 - `branch-onboarding-brief` owns branch onboarding collection and briefing.
 - `code-health` owns health pipeline execution and health metrics.
-- `grepai-deep-analysis` owns deep-analysis protocol and evidence gating.
 - `rpg-loop-reasoning` owns dual-view closed-loop localization and incremental evolution planning.
 - This skill owns sequencing and non-test remediation synthesis.
 
 ## Resources
-- `references/non_test_grepai_queries.md`
+- `references/non_test_localization_queries.md`

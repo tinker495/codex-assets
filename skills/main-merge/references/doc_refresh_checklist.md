@@ -18,7 +18,7 @@ Prioritize:
 ## 2) Ground every doc claim
 
 For each updated behavior statement, require:
-- one call-path anchor (`grepai trace graph` output)
+- one call-path or dependency anchor (`probe extract` plus nearby call-site evidence, or `rpg-loop-reasoning` output)
 - one symbol anchor (`rg -n`)
 - one test/spec anchor when available
 

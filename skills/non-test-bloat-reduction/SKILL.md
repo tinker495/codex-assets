@@ -83,7 +83,7 @@ export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 ```
 
 3. Build intent clusters before editing.
-- Use `code-health` and `grepai-deep-analysis` to gather candidate evidence.
+- Use `code-health` plus direct `probe`/`rg` localization to gather candidate evidence.
 - If clusters span multiple modules or show dependency drift, delegate localization to `rpg-loop-reasoning` in `hybrid` mode before proposing edits.
 - Load both resources before the first pass:
   - `references/non_test_reduction_queries.md`
@@ -156,7 +156,6 @@ Use deterministic fallbacks when tool CLI contracts differ by version.
 
 | Tool | Preferred | Fallback | Stop Condition |
 | --- | --- | --- | --- |
-| `grepai status/watch` | `--json` | run without `--json`, then continue with `grepai search --json --compact` | same command fails twice |
 | `xenon` | project command from `make code-health` | quote exclude globs explicitly (example: `-e 'tests/*'`) | argument parsing still fails |
 | topology/code-health scripts | `$CODEX_HOME` path | resolve with absolute `$HOME/.codex/...` path | path still unresolved |
 
@@ -194,7 +193,6 @@ When fallback is used, record one-line evidence in the cycle report.
 ## Delegation Boundaries
 - `code-health` owns health metrics and diff summary tooling.
 - `code-health` also owns complexity gate evidence (`radon`/`xenon`) for this workflow.
-- `grepai-deep-analysis` owns deep evidence gathering and confidence gates.
 - `rpg-loop-reasoning` owns dual-view localization and incremental delta framing when cluster intent crosses module boundaries.
 - This skill owns loop control, per-commit discipline, and quota gating.
 - This skill also owns intent clustering and abstraction gate decisions.

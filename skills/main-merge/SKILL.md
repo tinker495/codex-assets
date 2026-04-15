@@ -98,7 +98,6 @@ Include:
 - `branch-onboarding-brief`: mandatory before merge.
 - `refresh-branch-docs`: mandatory after merge succeeds.
 - `rpg-loop-reasoning`: preferred when conflict intent spans multiple modules or needs dual-view (semantic + topology) resolution.
-- `grepai-deep-analysis`: use for focused deep analysis when dual-view loop is not required.
 - `code-health`: use when merge introduces large non-test churn or quality regressions.
 
 ## Resources

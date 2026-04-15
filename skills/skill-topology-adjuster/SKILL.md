@@ -127,7 +127,7 @@ When keeping topology current, maintain an explicit "preferred activator" lane f
 
 Minimum scenario coverage:
 
-- grep/search-heavy discovery where retries are likely (`grepai-deep-analysis` and related orchestrators)
+- large discovery workloads where retries are likely (`probe`/`rg` heavy orchestrators and related review flows)
 - strict parity/overlap validation that benefits from independent fresh-context confirmation (`skill-topology-adjuster`)
 - long-running forensic collection (`gh-fix-ci`, large logs) or broad retrospective evidence scans (`session-wrap-up`)
 

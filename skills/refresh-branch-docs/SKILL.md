@@ -1,6 +1,6 @@
 ---
 name: refresh-branch-docs
-description: Execute branch-scoped, end-to-end documentation refresh after code changes. Use when users ask to comprehensively rewrite/update docs and AGENTS based on current branch diff, onboarding context, repo-local docs as SSOT, and grepai evidence, including refreshes to design/plan/quality docs that preserve agent legibility. Prefer this for broad behavior/narrative synchronization; use docs-codebase-alignment-audit for narrow integrity audit/fix tasks.
+description: Execute branch-scoped, end-to-end documentation refresh after code changes. Use when users ask to comprehensively rewrite/update docs and AGENTS based on current branch diff, onboarding context, repo-local docs as SSOT, and code evidence, including refreshes to design/plan/quality docs that preserve agent legibility. Prefer this for broad behavior/narrative synchronization; use docs-codebase-alignment-audit for narrow integrity audit/fix tasks.
 ---
 
 # Refresh Branch Docs
@@ -14,7 +14,7 @@ Prefer repo-local, versioned artifacts over external summaries. If important ope
 ```mermaid
 flowchart LR
   A["Branch Onboarding"] --> B["Impact Mapping"]
-  B --> C["Grepai Deep Analysis"]
+  B --> C["Code Evidence"]
   C --> D["Doc Rewrite"]
   D --> E["Mechanical Validation"]
   E --> F["Delivery Brief"]
@@ -65,11 +65,11 @@ Always prioritize:
 - map/contract docs (`AGENTS.md`, `docs/index.md`, `docs/_meta/docs-contract.md`) when doc navigation or boundaries changed
 - design, execution-plan, quality, reliability, security, or tech-debt docs that index or grade the changed area
 
-5. Run required deep analysis.
-Delegate protocol execution to `grepai-deep-analysis`.
-Use `references/grepai_doc_refresh_queries.md` only as doc-refresh-specific seed/query guidance.
+5. Run required evidence collection.
+Use `probe search` for discovery, `probe extract` for symbol blocks, and `rg -n` for exact anchors.
+Use `references/doc_refresh_localization_queries.md` only as doc-refresh-specific seed/query guidance.
 Require evidence for each doc claim:
-- one call-path anchor from `grepai trace`
+- one call-path or dependency anchor from `probe extract` plus adjacent call-site search, or from `rpg-loop-reasoning` when cross-module flow remains unclear
 - one symbol/usage anchor from `rg -n`
 - one test/spec anchor when available
 - one repo-local artifact anchor when the claim depends on a plan, quality grade, or operating policy
@@ -133,11 +133,10 @@ Report:
 ## Delegation Boundaries
 
 - `branch-onboarding-brief` owns branch diff collection and onboarding synthesis.
-- `grepai-deep-analysis` owns noise control, pass sequencing, and evidence-gating protocol.
-- `rpg-loop-reasoning` may supply upstream dual-view localization context; this skill remains the owner of doc impact mapping, doc rewrites, and doc consistency validation.
+- `rpg-loop-reasoning` may supply upstream dual-view localization context; this skill remains the owner of doc impact mapping, evidence gathering, doc rewrites, and doc consistency validation.
 
 ## Resources
 - `scripts/collect_doc_refresh_context.py`: map branch diff to candidate docs.
 - `../_shared/references/docs_harness_checklist.md`: shared harness checklist for map/SSOT/progressive-disclosure/docs-check.
 - `references/doc_update_matrix.md`: code-path to doc mapping matrix.
-- `references/grepai_doc_refresh_queries.md`: reusable grepai query sets for doc refresh.
+- `references/doc_refresh_localization_queries.md`: reusable `probe`/`rg` query sets for doc refresh.

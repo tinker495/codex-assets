@@ -82,13 +82,12 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `branch-archive-rechunk-rebase` | specialist-orchestrator | deterministic branch history rewrite with onboarding handoff |
 | `chatgpt-apps` | specialist-orchestrator | ChatGPT Apps SDK build workflow with docs-first handoff |
 | `deep-interview` | specialist-orchestrator | ambiguity-gated requirement interview with bounded planning handoff |
-| `grepai-deep-analysis` | specialist-orchestrator | deep code analysis protocol with bounded augmentation handoff |
 | `refresh-branch-docs` | specialist-orchestrator | doc impact mapping and branch-grounded doc rewrite |
 | `resume` | specialist-orchestrator | worktree/session continuation preflight with bounded handoff |
 | `non-test-bloat-reduction` | specialist-orchestrator | per-commit non-test intent compression and bloat reduction |
 | `web-clone` | specialist-orchestrator | URL-driven website cloning with iterative visual verification handoff |
 | `autopilot` | orchestrator | end-to-end autonomous delivery from idea to verified code |
-| `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + grepai remediation synthesis |
+| `branch-health-remediation-workflow` | orchestrator | branch onboarding + health + targeted remediation synthesis |
 | `complexity-loc-balancer` | orchestrator | complexity reduction with non-test net growth guardrail |
 | `main-merge` | orchestrator | merge sequence and conflict/doc handoff |
 | `plan` | orchestrator | strategic planning with direct or interview-driven intake |
@@ -119,7 +118,7 @@ Layer 1: Specialists (single-domain ownership)
 
 Layer 2: Specialist-Orchestrators (domain workflow + bounded handoff)
   branch-archive-rechunk-rebase, chatgpt-apps, deep-interview, gh-fix-review-comments,
-  grepai-deep-analysis, refresh-branch-docs, resume, non-test-bloat-reduction, web-clone
+  refresh-branch-docs, resume, non-test-bloat-reduction, web-clone
 
 Layer 3: Primary Orchestrators (task-level delivery ownership)
   autopilot, branch-health-remediation-workflow, complexity-loc-balancer,
@@ -127,7 +126,7 @@ Layer 3: Primary Orchestrators (task-level delivery ownership)
   ultrawork
 
 Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
-  branch-health-remediation-workflow, gh-fix-ci, grepai-deep-analysis,
+  branch-health-remediation-workflow, gh-fix-ci,
   non-test-bloat-reduction, skill-topology-adjuster, session-wrap-up
 ```
 
@@ -137,8 +136,7 @@ Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
 
 | Skill | Prefer `codex-exec-sub-agent` When... | Expected Benefit |
 | --- | --- | --- |
-| grepai-deep-analysis | grep/search results are noisy across many modules and retries are needed | fresh context per cycle, less context contamination |
-| branch-health-remediation-workflow | branch evidence collection spans onboarding + health + deep analysis | isolate heavy scans and keep the orchestrator thin |
+| branch-health-remediation-workflow | branch evidence collection spans onboarding + health + targeted localization | isolate heavy scans and keep the orchestrator thin |
 | non-test-bloat-reduction | repeated candidate-cluster sweeps are needed over broad code areas | bounded long-running passes with traceable logs |
 | skill-topology-adjuster | strict parity checks or O(N^2) overlap validation is requested | independent verification lane for drift adjudication |
 | session-wrap-up | retrospective requires broad evidence mining before synthesis | offload heavy background scans while preserving summary context |
@@ -150,25 +148,20 @@ Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
 flowchart LR
   BHRW["branch-health-remediation-workflow"] --> BOB["branch-onboarding-brief"]
   BHRW --> CH["code-health"]
-  BHRW --> GDA["grepai-deep-analysis"]
 
   NTBR["non-test-bloat-reduction"] --> CH
-  NTBR --> GDA
 
   CLB["complexity-loc-balancer"] --> NTBR
   CLB --> CH
 
   MM["main-merge"] --> BOB
   MM --> RBD["refresh-branch-docs"]
-  MM --> GDA
   MM --> CH
 
   RBD --> BOB
-  RBD --> GDA
 
   PR["pr-workflow"] --> BOB
   PR --> CH
-  PR --> GDA
 
   BARR["branch-archive-rechunk-rebase"] --> BOB
   CGA["chatgpt-apps"] --> OAID["openai-docs"]
@@ -241,7 +234,6 @@ flowchart LR
   WORKER["worker"]
 
   ANY["Any Skill (Universal Access)"] --> CESA["codex-exec-sub-agent"]
-  GDA --> CESA
   BHRW --> CESA
   NTBR --> CESA
   STA --> CESA
@@ -277,7 +269,6 @@ flowchart TD
   HYB --> CGA["chatgpt-apps"]
   HYB --> DI["deep-interview"]
   HYB --> GFRC["gh-fix-review-comments"]
-  HYB --> GDA["grepai-deep-analysis"]
   HYB --> NTBR["non-test-bloat-reduction"]
   HYB --> RBD["refresh-branch-docs"]
   HYB --> RES["resume"]
@@ -344,25 +335,20 @@ flowchart TD
 
   BHRW --> BOB
   BHRW --> CH
-  BHRW --> GDA
 
   NTBR --> CH
-  NTBR --> GDA
 
   CLB --> NTBR
   CLB --> CH
 
   MM --> BOB
   MM --> RBD
-  MM --> GDA
   MM --> CH
 
   RBD --> BOB
-  RBD --> GDA
 
   PR --> BOB
   PR --> CH
-  PR --> GDA
 
   SWU --> SC
   SWU --> TI
@@ -377,7 +363,6 @@ flowchart TD
   SS --> PDF
 
   ANY["Any Skill (Universal Access)"] --> CESA["codex-exec-sub-agent"]
-  GDA --> CESA
   BHRW --> CESA
   NTBR --> CESA
   STA --> CESA
