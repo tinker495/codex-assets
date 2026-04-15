@@ -1,3 +1,12 @@
+2026-04-15 10:47:28 KST
+
+- Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/04/14/*.jsonl` and saved the exact 30-file list at `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/yesterday-2026-04-14-files.txt`.
+- Ran `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scripts/scan_noise.py` and `python3 -B /Users/mrx-ksjung/.codex/automations/daily-automation-review/scripts/manual_review.py` with the same repeated `--file` arguments. Saved outputs to `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scan-noise-2026-04-14.json` and `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/manual-review-2026-04-14.json`.
+- Strongest joined evidence was an actual `ultrawork` load at `/Users/mrx-ksjung/.codex/skills/ultrawork/SKILL.md` followed by failing path probes for `src/stowage/planner/spp/AGENTS.md` and `docs/shared/agent-tiers.md` in `/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl`.
+- Updated `/Users/mrx-ksjung/.codex/skills/ultrawork/SKILL.md` so `docs/shared/agent-tiers.md` is read only when present and the fallback is the in-scope AGENTS model-routing guidance instead of guessed repo-local docs paths.
+- Validation: `/Users/mrx-ksjung/.codex/skills/.system/skill-creator/scripts/quick_validate.py` passed for `ultrawork` via `UV_CACHE_DIR=/tmp/uv-cache-codex`.
+- Left other candidates unchanged: repeated `write_stdin failed: stdin is closed` remains operational noise without stronger skill-specific evidence, and runtime-vs-edit-path drift still points at `/Users/mrx-ksjung/.agents/skills/{grepai-deep-analysis,reverse-doc}/SKILL.md` vs `/Users/mrx-ksjung/.codex/skills/...`, so `$CODEX_HOME` edits there were not justified this run.
+
 2026-04-14 14:48:31 KST
 
 - Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/04/13/*.jsonl` and saved the exact 31-file list at `/tmp/automatically-create-new-skills-2026-04-13-files.txt`.

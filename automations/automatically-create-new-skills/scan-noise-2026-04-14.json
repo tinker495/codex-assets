@@ -1,0 +1,291 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-15T01:41:26Z",
+  "files_scanned": 30,
+  "signals": {
+    "ERROR collecting": {
+      "count": 4,
+      "sessions": 2
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 3,
+      "sessions": 2
+    },
+    "No such file or directory": {
+      "count": 1,
+      "sessions": 1
+    },
+    "command not found: grepai": {
+      "count": 1,
+      "sessions": 1
+    },
+    "failed to send request to Ollama": {
+      "count": 1,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 7,
+      "sessions": 5
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 7,
+      "sessions": 4,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 3
+        }
+      }
+    },
+    "autopilot": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "branch-onboarding-brief": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "cancel": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "code-review": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "graphify": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "grepai-deep-analysis": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "command not found: grepai": {
+          "count": 1,
+          "sessions": 1
+        },
+        "failed to send request to Ollama": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "reverse-doc": {
+      "count": 3,
+      "sessions": 1,
+      "signals": {
+        "command not found: grepai": {
+          "count": 1,
+          "sessions": 1
+        },
+        "failed to send request to Ollama": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "simplify": {
+      "count": 7,
+      "sessions": 4,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 3
+        }
+      }
+    },
+    "trace": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ModuleNotFoundError: No module named",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "graphify",
+      "grepai-deep-analysis",
+      "ralph",
+      "reverse-doc",
+      "simplify",
+      "trace",
+      "ultrawork"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "graphify",
+      "grepai-deep-analysis",
+      "ralph",
+      "reverse-doc",
+      "simplify",
+      "trace",
+      "ultrawork"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "gh-address-comments",
+      "graphify",
+      "grepai-deep-analysis",
+      "main-merge",
+      "omx-workspace-prune",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "reverse-doc",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-topology-adjuster",
+      "todo-inventory",
+      "trace",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "configure-notifications",
+      "doctor",
+      "gh-address-comments",
+      "graphify",
+      "grepai-deep-analysis",
+      "omx-setup",
+      "simplify",
+      "skill-creator",
+      "skill-installer"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "code-review",
+      "configure-notifications",
+      "doctor",
+      "gh-address-comments",
+      "graphify",
+      "grepai-deep-analysis",
+      "main-merge",
+      "omx-setup",
+      "omx-workspace-prune",
+      "plan",
+      "pr-workflow",
+      "ralph",
+      "reverse-doc",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "todo-inventory",
+      "trace",
+      "ultrawork"
+    ]
+  }
+}

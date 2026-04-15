@@ -1,0 +1,182 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-15T02:06:25Z",
+  "files_scanned": 23,
+  "signals": {
+    "ERROR collecting": {
+      "count": 2,
+      "sessions": 1
+    },
+    "ModuleNotFoundError: No module named": {
+      "count": 3,
+      "sessions": 2
+    },
+    "No such file or directory": {
+      "count": 1,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 2,
+      "sessions": 2
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 6,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "autopilot": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "cancel": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "code-review": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "simplify": {
+      "count": 6,
+      "sessions": 3,
+      "signals": {
+        "ERROR collecting": {
+          "count": 2,
+          "sessions": 1
+        },
+        "ModuleNotFoundError: No module named": {
+          "count": 2,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 2,
+      "sessions": 2,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 2,
+          "sessions": 2
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "ModuleNotFoundError: No module named",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "ralph",
+      "simplify",
+      "ultrawork"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "ralph",
+      "simplify",
+      "ultrawork"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "plan",
+      "ralph",
+      "simplify",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "configure-notifications",
+      "doctor",
+      "graphify",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "ultrawork"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "cancel",
+      "code-review",
+      "configure-notifications",
+      "doctor",
+      "graphify",
+      "grepai-deep-analysis",
+      "imagegen",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "ralph",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "ultrawork"
+    ]
+  }
+}

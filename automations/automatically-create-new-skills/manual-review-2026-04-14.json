@@ -1,0 +1,98 @@
+{
+  "files_scanned": 30,
+  "sessions_with_records": 30,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 16,
+      "sessions": 8
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 7,
+      "sessions": 5
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 3,
+      "sessions": 2
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ERROR collecting",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::tests",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "module": "tests",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f src/stowage/planner/spp/AGENTS.md && echo src/stowage/planner/spp/AGENTS.md && sed -n '1,220p' src/stowage/planner/spp/AGENTS.md",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f docs/shared/agent-tiers.md && sed -n '1,220p' docs/shared/agent-tiers.md",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-14T20-41-38-019d8bcc-0980-7ad0-9c9b-3b7c548027ef.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f src/stowage/planner/spp/graphify-out/GRAPH_REPORT.md && sed -n '1,260p' src/stowage/planner/spp/graphify-out/GRAPH_REPORT.md",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/grepai-deep-analysis/SKILL.md => /Users/mrx-ksjung/.codex/skills/grepai-deep-analysis/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/reverse-doc/SKILL.md => /Users/mrx-ksjung/.codex/skills/reverse-doc/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    }
+  ]
+}

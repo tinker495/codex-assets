@@ -1,0 +1,75 @@
+{
+  "files_scanned": 23,
+  "sessions_with_records": 23,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 2,
+      "sessions": 2
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::stowage",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "ModuleNotFoundError::tests",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [
+    {
+      "module": "stowage",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "module": "tests",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f src/stowage/planner/spp/AGENTS.md && echo src/stowage/planner/spp/AGENTS.md && sed -n '1,220p' src/stowage/planner/spp/AGENTS.md",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f docs/shared/agent-tiers.md && sed -n '1,220p' docs/shared/agent-tiers.md",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": []
+}

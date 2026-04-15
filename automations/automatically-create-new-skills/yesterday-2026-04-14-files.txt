@@ -1,3 +1,4 @@
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T00-37-35-019d877d-b5e5-7082-b648-bdd25b021df7.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T00-39-13-019d877f-3254-7c51-9b11-4caa36113fbe.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T00-39-13-019d877f-3400-74a1-9f1c-c3f7e51f9386.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T00-39-14-019d877f-361b-7731-bf72-34f86ddffb3e.jsonl
@@ -10,14 +11,20 @@
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T10-10-34-019d898a-4967-7163-b1a5-303a78c9bc23.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T10-10-56-019d898a-a027-7b01-9952-c081306f3d70.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T10-18-05-019d8991-2ca0-7ff0-b3a8-d1a95ff8095b.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T10-36-55-019d89a2-676c-7bb2-94a6-06113b5ab8cc.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T11-57-42-019d89ec-5e94-7561-a6c8-2a545a3eab23.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T13-58-35-019d8a5b-0a0f-7932-994c-e3c93d706489.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T13-58-46-019d8a5b-3520-7d71-b339-08243b0ea08e.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T14-10-11-019d8a65-aa9d-7a92-b4ba-86c8f2cd7e49.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T14-10-12-019d8a65-ac31-7ed3-8552-2af1980be33f.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T14-10-13-019d8a65-af13-77c1-ad31-0a2adc0888ce.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-49-40-019d8ac0-bef9-7a43-a6c5-3b306297d5a1.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-51-44-019d8ac2-a285-7913-8fca-ddcadb3a5b50.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-51-45-019d8ac2-a3f7-7933-a979-2386f1e7fa0b.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-51-45-019d8ac2-a720-7d53-b60d-cc2f3d73790b.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-51-46-019d8ac2-a9cd-7fc3-ac04-1d29b37bcb62.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-51-47-019d8ac2-adbd-7fd2-b2a3-05c397782ec3.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T15-52-44-019d8ac3-8a98-7ae2-977a-beb402b205a9.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T19-56-25-019d8ba2-a6df-7563-a370-7ab41abbe84b.jsonl
+/Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T20-41-38-019d8bcc-0980-7ad0-9c9b-3b7c548027ef.jsonl
 /Users/mrx-ksjung/.codex/sessions/2026/04/14/rollout-2026-04-14T20-46-48-019d8bd0-c617-7980-a4f2-9a056d0e79e7.jsonl
