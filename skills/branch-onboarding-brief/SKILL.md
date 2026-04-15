@@ -7,7 +7,7 @@ description: Analyze current git branch differences against main (or a specified
 
 ## Overview
 
-Create a reliable, repeatable onboarding phase that summarizes the current branch vs base, then produce a structured branch briefing and immediately hand off to the requested next action.
+Create a reliable, repeatable onboarding phase that summarizes the current branch vs base, grounds that summary in actual changed-code inspection, then produces a structured branch briefing and immediately hands off to the requested next action.
 
 ## Workflow
 
@@ -57,7 +57,32 @@ If the repo does not use `main`, detect the default base:
 git symbolic-ref refs/remotes/origin/HEAD
 ```
 
-### 2) Onboarding phase (always before new work)
+### 2) Ground the diff in actual code before briefing
+
+Do not stop at commit subjects, file counts, or diff stats. Before writing the briefing, inspect the actual changed code on the current branch.
+
+Minimum grounding contract:
+- start from the changed-file list produced by the collector or `git diff ... --name-only`
+- read every high-risk or cross-cutting changed file, plus at least one representative changed file from each major area
+- inspect the exact functions, classes, and symbols touched in changed Python modules with AST-first tools
+- summarize concrete code-level intents and boundary shifts, not just directory names
+
+Preferred tool order:
+1. `probe symbols <changed-file>`
+2. `probe extract <changed-file>#<symbol>` or `probe extract <changed-file>:<line-range>`
+3. `probe query <pattern> <changed-path> --language python` for structural matches
+4. `rg` / `sed` / direct file reads only when `probe` is unavailable or insufficient
+
+Suggested commands:
+```bash
+probe symbols src/stowage/planner/spp/pipeline.py
+probe extract src/stowage/planner/spp/pipeline.py#run_loading_spp_pipeline_result
+probe query "def $NAME($$$)" src/stowage/planner/spp --language python
+```
+
+If the branch is large, still read all risky/core files and inspect at least the top churn modules plus one representative file per remaining changed area before briefing.
+
+### 3) Onboarding phase (always before new work)
 
 Provide this phase **before** taking any additional task actions unless the user explicitly says to skip it.
 
@@ -67,15 +92,16 @@ Include:
 - File count and top changed areas
 - Net LOC summary
 - Risk scan (high-churn files, core modules, data format changes)
+- Code-grounded findings (actual changed files/symbols inspected, key boundary or behavior shifts)
 - Test status (only mention tests you actually ran; otherwise mark as not run)
 
-### 3) Branch briefing (well-formatted)
+### 4) Branch briefing (well-formatted)
 
 Use the template in `"$CODEX_HOME/skills/branch-onboarding-brief/assets/branch_brief_template.md"`. Keep the formatting tight and use the **PR Workflow** style as a reference (sections like Overview, Key Changes, Metrics, Risks, Tests, Review Focus).
 
-When categorizing changes, make your criteria explicit (for example: tests by `tests/`, TUI by `src/tui/`, domain logic by `src/stowage/`). If categorization is heuristic, say so.
+When categorizing changes, make your criteria explicit (for example: tests by `tests/`, TUI by `src/tui/`, domain logic by `src/stowage/`). If categorization is heuristic, say so. Include at least a short code-grounded subsection describing which changed files/symbols were actually inspected and what they imply for the next task.
 
-### 4) Handoff behavior (no decision gate)
+### 5) Handoff behavior (no decision gate)
 
 - If the user request includes onboarding + another task, execute that next task immediately after onboarding.
 - If this skill is called by another skill, return onboarding output as supporting context and continue parent workflow.
@@ -84,7 +110,8 @@ When categorizing changes, make your criteria explicit (for example: tests by `t
 
 ## Operational Noise Controls
 - Use search-as-discovery: run the bundled `"$CODEX_HOME/skills/branch-onboarding-brief/scripts/collect_branch_info.py"` first; do not start with broad repo-wide scans.
-- Apply path filtering: prioritize changed-file lists from branch diff output before expanding to repository-wide search.
+- Treat git metadata as discovery only; the onboarding pass is incomplete until representative changed files have been read and risky changed modules have been inspected structurally.
+- Apply path filtering: prioritize changed-file lists from branch diff output before expanding to repository-wide search. Use `probe` against those changed paths before any broad text search.
 - Use trace-plus-rg evidence gating: run targeted `rg` on identified files/modules first; only then expand with `rg --files`.
 - Before any repo-scoped script or git command, verify repo context with `git rev-parse --is-inside-work-tree`; if it fails, stop branch-only analysis and report.
 - Path-sensitive guardrail: never assume the current repo contains `scripts/collect_branch_info.py`; verify the bundled skill path with `test -f` first, then use `rg --files "$CODEX_HOME/skills" -g 'collect_branch_info.py'` before any repo-wide search.

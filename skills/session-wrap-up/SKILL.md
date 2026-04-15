@@ -42,6 +42,7 @@ Classify each candidate into one of:
 - ownership/delegation boundary gap
 - reusable resource gap (script/reference/template)
 Treat small but repeatable operator mistakes or tool-usage slips as `workflow gap` candidates when a guardrail, clearer instruction, validator, or helper script would have prevented them.
+If a branch-analysis, onboarding, or history-rewrite workflow relied on git metadata without reading representative changed files or without AST/code-topology grounding, classify that as a reusable `workflow gap`.
 Drop one-off observations that are unlikely to recur, were cheap to recover from, and did not change the result or the session process.
 
 3. Decide action type per insight.
@@ -49,6 +50,7 @@ Choose `none` when value is non-reusable.
 Choose `update-existing-skill` when ownership already exists or when an installed skill is the obvious home.
 Choose `create-new-skill` only when repeated value + clear ownership boundary + no installed owner are all true.
 Choose retirement/removal guidance only when the asset is superseded or harmful; otherwise keep scope to additive updates.
+Prefer `update-existing-skill` when the gap belongs to an installed branch workflow such as `branch-onboarding-brief` or `branch-archive-rechunk-rebase`.
 Do not dismiss a small failure just because recovery was easy if it exposed a reusable missing guardrail; otherwise allow `none` for trivial one-off recoveries.
 If every candidate resolves to `none`, publish a no-op wrap-up and stop after reporting.
 
@@ -58,6 +60,7 @@ Provide a compact handoff packet:
 - target path (`$CODEX_HOME/skills/<skill-name>`)
 - action (`update-existing-skill`, `create-new-skill`, `retire-skill`, or `none`)
 - problem statement and reusable evidence
+- workflow delta when applicable (for example: require changed-file reading + AST inspection before branch clustering)
 - frontmatter description delta (what to trigger on, what to stop claiming)
 - role (`specialist`, `orchestrator`, `utility`, or `meta`)
 - ownership statement

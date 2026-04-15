@@ -15,7 +15,7 @@ Assume local-only history rewriting by default. Do not push, force-push, or dele
 
 ### 1. Run onboarding first
 
-Delegate branch diff collection and risk briefing to `branch-onboarding-brief` before touching history.
+Delegate branch diff collection and risk briefing to `branch-onboarding-brief` before touching history. The onboarding output must be code-grounded: it must include actual changed-file reading and AST-oriented inspection of risky modules, not just git metadata.
 
 Capture and keep:
 - current branch name
@@ -23,6 +23,7 @@ Capture and keep:
 - changed areas and file count
 - net LOC summary
 - risky or cross-cutting files
+- code-grounded findings from changed files and symbols actually inspected
 
 Do not duplicate the onboarding collector inside this skill.
 
@@ -82,13 +83,30 @@ git diff --name-status "${base_commit}...${original_head}"
 git diff --stat "${base_commit}...${original_head}"
 ```
 
+Before deriving clusters, inspect actual changed code on the branch. Git history alone is insufficient for reliable rechunking.
+
+Minimum clustering-grounding contract:
+- start from the changed-file list from onboarding and `git diff ... --name-status`
+- read all risky or cross-cutting changed files and any file touched by multiple original commits or candidate clusters
+- use `probe symbols`, `probe extract`, and `probe query` on changed Python modules to understand the real function/class boundaries
+- when commit subjects disagree with code evidence, trust the changed-file code evidence
+- record 1-3 anchor files or symbols for each planned cluster
+
+Suggested commands:
+```bash
+probe symbols src/stowage/planner/spp/pipeline.py
+probe extract src/stowage/planner/spp/pipeline.py#run_loading_spp_pipeline_result
+probe query "class $NAME: $$$" src/stowage/planner/spp --language python
+```
+
 Then derive exactly `N` clusters using `references/commit-clustering.md`.
 
 Clustering rules:
-- group by intent first, not by file extension alone
+- group by code intent proven by changed-file inspection first, not by file extension or commit subject alone
 - keep schema/model changes ahead of dependent runtime changes
 - keep tests with the runtime change they prove unless the test work is a standalone intent
 - isolate risky cross-cutting rewrites into their own cluster when possible
+- inspect same-file overlaps structurally before deciding whether clusters should merge or split
 - preserve dependency order so every intermediate commit is coherent
 
 Exact-`N` contract:
@@ -224,6 +242,7 @@ Include in the final handoff:
 - archive branch name
 - requested `N` and delivered commit count
 - cluster titles and ordering rationale
+- code-grounding evidence used for clustering (key changed files / symbols inspected)
 - whether rebase was skipped or executed
 - validation commands actually run and their results
 - any remaining risks, especially around hunk-splitting or conflict resolution
@@ -232,9 +251,10 @@ Include in the final handoff:
 
 - Treat the archive branch as the rollback point for the entire run.
 - Re-read `git status --short` before every destructive git command.
-- Prefer path-scoped staging first; use `git add -p` only when the same file truly spans multiple intents.
+- Prefer path-scoped staging first; use `git add -p` only when the same file truly spans multiple intents. If a file appears in multiple candidate clusters, inspect it structurally with `probe` before choosing between split-by-hunk and commit-state replay.
 - If several planned clusters touch the same file, prefer deterministic `git restore --source <commit>` replay over fragile repeated hunk surgery.
 - Do not mix mechanical formatting with semantic changes unless the formatting is inseparable from the semantic edit.
+- Do not finalize the cluster plan until representative changed files and risky symbols have been read directly.
 - Keep docs-only or test-only commits separate only when they are independently meaningful.
 - If the branch contains generated files, classify them with the source change they derive from.
 
