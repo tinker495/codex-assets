@@ -1,0 +1,109 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-16T01:42:01Z",
+  "files_scanned": 19,
+  "signals": {
+    "ModuleNotFoundError: No module named": {
+      "count": 2,
+      "sessions": 2
+    },
+    "No such file or directory": {
+      "count": 1,
+      "sessions": 1
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 1,
+      "sessions": 1
+    }
+  },
+  "skills": {
+    "probe-deep-search": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ModuleNotFoundError: No module named": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ModuleNotFoundError: No module named"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "probe-deep-search"
+    ],
+    "after_recently_touched": [
+      "probe-deep-search"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "graphify",
+      "main-merge",
+      "probe-deep-search",
+      "ralph",
+      "simplify",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "branch-archive-rechunk-rebase",
+      "branch-health-remediation-workflow",
+      "branch-onboarding-brief",
+      "configure-notifications",
+      "doctor",
+      "graphify",
+      "imagegen",
+      "main-merge",
+      "non-test-bloat-reduction",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "pr-workflow",
+      "probe-deep-search",
+      "refresh-branch-docs",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "ultrawork"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-health-remediation-workflow",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-health",
+      "configure-notifications",
+      "doctor",
+      "graphify",
+      "imagegen",
+      "main-merge",
+      "non-test-bloat-reduction",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "pr-workflow",
+      "probe-deep-search",
+      "ralph",
+      "refresh-branch-docs",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "ultrawork"
+    ]
+  }
+}
