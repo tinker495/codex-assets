@@ -192,6 +192,11 @@ When the user provides the `--prd` flag, initialize a Product Requirements Docum
 ### Detecting PRD Mode
 Check if `{{PROMPT}}` contains `--prd` or `--PRD`.
 
+Prompt-side `$ralph` workflow activation is lighter-weight than `omx ralph --prd ...`.
+It seeds Ralph workflow state and guidance, but it does not implicitly launch the
+CLI entrypoint or apply the PRD startup gate. Treat `omx ralph --prd ...` as the
+explicit PRD-gated path.
+
 ### Detecting `--no-deslop`
 Check if `{{PROMPT}}` contains `--no-deslop`.
 If `--no-deslop` is present, skip the deslop pass entirely after Step 7 and continue using the latest successful pre-deslop verification evidence.
@@ -242,6 +247,8 @@ User input: `--prd build a todo app with React and TypeScript`
 Workflow: Detect flag, extract task, create `.omx/plans/prd-{slug}.md`, create `.omx/state/{scope}/ralph-progress.json`, begin ralph loop.
 
 ### Legacy compatibility
+- During the compatibility window, Ralph `--prd` startup still validates machine-readable story state from `.omx/prd.json`.
+- `.omx/plans/prd-{slug}.md` remains the canonical storage/documentation artifact, but it is not yet the startup validation source.
 - If `.omx/prd.json` exists and canonical PRD is absent, migrate one-way into `.omx/plans/prd-{slug}.md`.
 - If `.omx/progress.txt` exists and canonical progress ledger is absent, import one-way into `.omx/state/{scope}/ralph-progress.json`.
 - Keep legacy files unchanged for one release cycle.
