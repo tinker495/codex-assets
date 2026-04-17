@@ -1,0 +1,165 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-04-17T01:41:29Z",
+  "files_scanned": 24,
+  "signals": {
+    "ERROR collecting": {
+      "count": 2,
+      "sessions": 2
+    },
+    "No such file or directory": {
+      "count": 5,
+      "sessions": 3
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 3,
+      "sessions": 2
+    }
+  },
+  "skills": {
+    "ai-slop-cleaner": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "desloppify": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "simplify": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ultrawork": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "ERROR collecting": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "ERROR collecting",
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "ai-slop-cleaner",
+      "desloppify",
+      "simplify",
+      "ultrawork"
+    ],
+    "after_recently_touched": [
+      "ai-slop-cleaner",
+      "desloppify",
+      "simplify",
+      "ultrawork"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "deep-interview",
+      "desloppify",
+      "doctor",
+      "plan",
+      "ralph",
+      "ralplan",
+      "reverse-doc",
+      "simplify",
+      "spec-diff",
+      "team",
+      "ultrawork"
+    ],
+    "modified_7d": [
+      "branch-archive-rechunk-rebase",
+      "branch-health-remediation-workflow",
+      "branch-onboarding-brief",
+      "configure-notifications",
+      "doctor",
+      "graphify",
+      "imagegen",
+      "main-merge",
+      "non-test-bloat-reduction",
+      "omx-setup",
+      "openai-docs",
+      "plugin-creator",
+      "pr-workflow",
+      "probe-deep-search",
+      "ralph",
+      "refresh-branch-docs",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "slides",
+      "spreadsheets",
+      "ultrawork",
+      "wiki"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "autopilot",
+      "branch-archive-rechunk-rebase",
+      "branch-health-remediation-workflow",
+      "branch-onboarding-brief",
+      "cancel",
+      "code-review",
+      "configure-notifications",
+      "deep-interview",
+      "desloppify",
+      "doctor",
+      "graphify",
+      "imagegen",
+      "main-merge",
+      "non-test-bloat-reduction",
+      "omx-setup",
+      "openai-docs",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "probe-deep-search",
+      "ralph",
+      "ralplan",
+      "refresh-branch-docs",
+      "reverse-doc",
+      "session-wrap-up",
+      "simplify",
+      "skill-creator",
+      "skill-installer",
+      "skill-topology-adjuster",
+      "slides",
+      "spec-diff",
+      "spreadsheets",
+      "team",
+      "ultrawork",
+      "wiki"
+    ]
+  }
+}
