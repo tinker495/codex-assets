@@ -1,0 +1,63 @@
+{
+  "files_scanned": 24,
+  "sessions_with_records": 24,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 11,
+      "sessions": 5
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 3,
+      "sessions": 2
+    },
+    {
+      "label": "zsh: no matches found",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 2,
+      "sessions": 1
+    },
+    {
+      "label": "ERROR collecting",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 2,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-04-16T18-31-43-019d95a1-d0d7-7e93-ac08-6dd7edc6be02.jsonl",
+      "probe_type": "test -f",
+      "cmd": "test -f docs/shared/agent-tiers.md && sed -n '1,220p' docs/shared/agent-tiers.md",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [],
+  "skill_path_drift": [
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/desloppify/SKILL.md => /Users/mrx-ksjung/.codex/skills/desloppify/SKILL.md",
+      "count": 4,
+      "sessions": 1
+    }
+  ]
+}
