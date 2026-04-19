@@ -80,6 +80,7 @@ Before consensus planning or execution handoff, ensure a grounded context snapsh
    - unknowns/open questions
    - likely codebase touchpoints
 4. If ambiguity remains high, gather brownfield facts first. When session guidance enables `USE_OMX_EXPLORE_CMD`, prefer `omx explore` for simple read-only repository lookups with narrow, concrete prompts; otherwise use the richer normal explore path. Then run `$deep-interview --quick <task>` before continuing.
+5. If the plan depends on official docs, version-aware framework guidance, best practices, or external dependency behavior, auto-delegate `researcher` before finalizing the planning handoff so execution does not start from repo-local recall alone.
 
 Do not hand off to execution modes until this intake is complete; if urgency forces progress, explicitly document the risk tradeoffs.
 
