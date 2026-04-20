@@ -52,6 +52,10 @@ Answer the user’s actual question first.
 - Scale the depth to the request: for simple or obvious questions, reduce swarm intensity and answer directly after enough reading.
 - For broader questions, expand the search surface but keep the final answer tightly synthesized.
 
+## Delegation Boundary
+
+When the answer depends on broad repository discovery, cross-file symbol tracing, or exact body extraction, delegate that investigation pass to `probe-deep-search` first. Keep ranked explanation, evidence-vs-inference labeling, and confidence judgment in `analyze`.
+
 ## Evidence rules
 
 Maintain an explicit **evidence-vs-inference distinction**. Every material claim must be labeled as one of:

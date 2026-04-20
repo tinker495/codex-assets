@@ -39,6 +39,8 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - role map/layers/graph/tree stay synchronized
    - every runtime edge declared in Delegation Graph also appears in Delegation Tree
    - delegation targets exist and reflect specialization boundaries
+   - deep code-inspection skills explicitly delegate probe-first discovery and structural extraction to `probe-deep-search` instead of copying that ownership inline
+   - if a skill is listed in the topology's `Probe-Deep-Search Delegation Policy`, its `SKILL.md` must explicitly reference `probe-deep-search` and the graph/tree must include `skill -> probe-deep-search`
    - `codex-exec-sub-agent` is explicitly represented as reusable by any skill role
    - for every graph-declared `source -> target` edge between installed skills, the source skill `SKILL.md` must contain an explicit reference to the target skill
    - for every graph-declared `skill -> codex-exec-sub-agent` preferred edge, that source skill `SKILL.md` must also contain scenario-bound `codex-exec-sub-agent` delegation guidance
@@ -49,6 +51,8 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - delegation depth stays one hop unless explicitly allowed
    - detect responsibility-overlap candidates across skills by directly reading SKILL text, then check explicit delegation/reference exists between the pair
    - every skill has a per-skill audit status (`pass`/`needs-fix`) with reason
+   - review-oriented skills listed in `Review Execution Policy` explicitly name `critic` as the default baseline review lane
+   - review-oriented skills preserve specialist ownership by treating domain-specific reviewers as escalation or second-pass lanes, not as ownership replacements
    - apply strict role checks:
      - `orchestrator`, `specialist-orchestrator`, or `meta-orchestrator`: require explicit cross-skill references and delegation/handoff wording
      - `meta`: require explicit delegation signal or explicit standalone note (`standalone`, `delegation optional`)
@@ -63,6 +67,8 @@ Detect topology drift across all installed skills and apply minimal corrective e
    - update topology artifacts in one change:
    - Role map table
    - Orchestration layers
+   - Probe-Deep-Search Delegation Policy table (when changed)
+   - Review Execution Policy table (when changed)
    - Sub-agent activation scenario catalog (when changed)
    - Delegation graph (Mermaid)
    - Delegation tree (Mermaid)
@@ -98,6 +104,20 @@ Default correction policy:
 1. Restore specialist ownership wording in the specialist skill.
 2. Remove copied internals from non-owning skills.
 3. Replace copied internals with explicit delegation to the specialist owner.
+
+## Review Lane Drift Check
+
+Treat the following as topology drift when the topology document lists a skill in `Review Execution Policy`:
+
+- the skill executes a formal review or approval pass but does not mention `critic`
+- the skill presents a specialist reviewer as the unconditional default even though the topology says `critic` is the baseline lane
+- the skill blurs ownership by replacing the specialist workflow entirely instead of keeping the specialist reviewer as escalation or a deeper second pass
+
+Default correction policy:
+
+1. Add explicit `critic` baseline-review wording to the affected skill.
+2. Keep specialist reviewer guidance only as escalation or second-pass guidance when applicable.
+3. Update `skill_topology.md` and the strict auditor in the same change when the review-policy catalog changes.
 
 ## Real-Time Adjustment Loop
 
@@ -187,3 +207,4 @@ Quick validation guardrail:
 - Before writing topology artifacts, verify destination parent directory is writable with `test -w`; if not writable, fallback to repo root or `$CODEX_HOME`, otherwise stop and report.
 
 If topology changed, verify role map + graph + tree are synchronized in `skill-topology-adjuster/references/skill_topology.md`.
+If review-lane policy changed, verify the `Review Execution Policy` table and the affected `SKILL.md` files remain aligned.

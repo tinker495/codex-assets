@@ -64,6 +64,7 @@ Do not stop at commit subjects, file counts, or diff stats. Before writing the b
 Minimum grounding contract:
 - start from the changed-file list produced by the collector or `git diff ... --name-only`
 - read every high-risk or cross-cutting changed file, plus at least one representative changed file from each major area
+- delegate the AST-first changed-file discovery and symbol extraction pass to `probe-deep-search`
 - inspect the exact functions, classes, and symbols touched in changed Python modules with AST-first tools
 - summarize concrete code-level intents and boundary shifts, not just directory names
 

@@ -34,6 +34,13 @@ Enforce one-time branching at the system boundary. Keep lower layers mode-agnost
    - Select strategy/delegate once at boundary.
    - Inject behavior to lower layers; lower layers invoke behavior only.
 
+## Review Delegation
+
+- Use `probe-deep-search` for repo-wide flag discovery, call-chain tracing, and exact code extraction before concluding how deep a mode flag propagates.
+- Default baseline review uses the `critic` subagent.
+- Escalate to `architect` only when the fix direction requires meaningful redesign tradeoffs across boundaries or public interfaces.
+- Keep the `critic` pass focused on evidence: flag propagation depth, repeated branching, and the smallest viable boundary-only fix direction.
+
 ## Violation Criteria
 
 - Non-entry layer contains `if/elif/switch` based on mode-like control flags.

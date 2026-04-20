@@ -36,6 +36,10 @@ Use **Audit** when the request says `find problems`, `audit`, `scan`, `what's wr
 Default to **Refactor** for `simplify`, `refactor`, `clean up`, `improve readability`, or similar requests.
 Use **Forensic-Followup** when the request is centered on a change set or a broad cleanup evidence pass, for example `last commit analysis`, `recent commit follow-up`, `HEAD cleanup`, `branch cleanup`, `diff-driven cleanup`, `whole codebase simplification`, `직전 커밋 분석`, `브랜치 단위 정리`, or `전체 코드베이스 기준 후속 수정`.
 
+## Delegation Boundary
+
+Use `probe-deep-search` for cross-file discovery, structural code tracing, and exact body extraction before cleanup edits when the scope is broader than a trivial local read. `simplify` keeps ownership of the cleanup plan, edit decisions, and verification.
+
 ## Workflow
 
 ### 1. Scope the pass

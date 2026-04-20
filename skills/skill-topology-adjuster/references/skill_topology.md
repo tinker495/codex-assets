@@ -48,6 +48,7 @@ Define ownership and delegation boundaries across currently installed skills so 
 | `worker` | utility | tmux team worker protocol and mailbox lifecycle |
 | `agents-md-builder` | specialist | AGENTS.md authoring and repo-specific instruction synthesis |
 | `ai-slop-cleaner` | specialist | anti-slop cleanup/refactor workflow with regression-safety bias |
+| `analyze` | specialist | read-only deep repository analysis and cross-file code explanation |
 | `imagegen` | specialist | raster image generation and editing workflow |
 | `openai-docs` | specialist | authoritative OpenAI docs retrieval and citation workflow |
 | `playwright` | specialist | terminal-driven real browser automation via Playwright CLI |
@@ -108,7 +109,7 @@ Layer 0: Meta / Utility
   omx-workspace-prune, ralplan, skill, trace, todo-inventory, worker
 
 Layer 1: Specialists (single-domain ownership)
-  agents-md-builder, ai-slop-cleaner, imagegen, openai-docs, playwright,
+  agents-md-builder, ai-slop-cleaner, analyze, imagegen, openai-docs, playwright,
   probe-deep-search,
   simplify, slides, branch-onboarding-brief, code-health, code-review,
   cp-sat-performance-and-advanced-features, cp-sat-primer-engineer,
@@ -144,14 +145,55 @@ Layer 4: Sub-Agent Preferred Activators (optional, scenario-bound)
 | session-wrap-up | retrospective requires broad evidence mining before synthesis | offload heavy background scans while preserving summary context |
 | gh-fix-ci | Actions logs are large, multi-run, or require repeated forensic extraction | isolate log-heavy analysis with reproducible artifacts |
 
+## Probe-Deep-Search Delegation Policy
+
+Skills whose core workflow depends on probe-first discovery, symbol tracing, AST-pattern hunting, or exact body extraction must delegate that investigation layer to `probe-deep-search` instead of owning a copied probe checklist.
+
+| Skill | Delegate `probe-deep-search` For... | Caller still owns... |
+| --- | --- | --- |
+| `analyze` | broad repository discovery and cross-file evidence gathering before synthesis | ranked explanation, evidence vs inference, and confidence |
+| `branch-onboarding-brief` | changed-file structural inspection and symbol extraction before briefing | branch summary, risk framing, and onboarding handoff |
+| `branch-health-remediation-workflow` | non-test localization across candidate modules | remediation sequencing and proposal quality |
+| `branch-archive-rechunk-rebase` | changed-module structural inspection for semantic clustering | exact-`N` clustering, replay order, and rewrite validation |
+| `code-review` | broad or unfamiliar code-surface discovery before findings | severity judgment, review findings, and approval recommendation |
+| `no-deep-flag-review` | call-chain tracing and repeated mode-branch discovery | violation classification and minimal fix direction |
+| `non-test-bloat-reduction` | cross-file intent-cluster discovery and exact code extraction | abstraction-gate decisions, quota control, and edit loop |
+| `pr-workflow` | breaking-change impact localization across modules | PR narrative, category metrics, and publish gating |
+| `refresh-branch-docs` | evidence collection from code paths and symbol blocks | doc impact mapping, rewrites, and doc validation |
+| `reverse-doc` | module-internal structural mapping and exact body extraction | As-Is documentation shape and anomaly tagging |
+| `security-review` | code-surface discovery before security-specific analysis | security finding severity and remediation guidance |
+| `simplify` | cross-file discovery and structural code tracing before cleanup edits | cleanup plan, refactor decisions, and verification |
+
+## Review Execution Policy
+
+Review-oriented skills keep their existing specialist ownership, but their default baseline review lane uses the `critic` subagent. Specialist reviewer roles remain escalation or second-pass lanes when domain depth is required.
+
+| Skill | Review responsibility | Default baseline reviewer | Specialist escalation |
+| --- | --- | --- | --- |
+| `plan` | existing-plan review and consensus approval gate | `critic` | `architect` continues as the pre-critic design review lane |
+| `ralplan` | consensus approval gate | `critic` | `architect` continues as the pre-critic design review lane |
+| `code-review` | general code-quality review | `critic` | `code-reviewer` for broad, unfamiliar, or high-stakes deep review |
+| `security-review` | security-focused review | `critic` | `security-reviewer` for auth, crypto, trust-boundary, or production-risk deep audit |
+| `no-deep-flag-review` | architecture flag-passing review | `critic` | `architect` when redesign tradeoffs become material |
+| `autopilot` | Phase 4 validation baseline review | `critic` | `code-reviewer` and `security-reviewer` when the validation scope warrants specialist passes |
+
+Rules:
+
+1. If a skill executes a formal review or approval pass, start with `critic` unless the topology explicitly documents a stricter specialist-only gate.
+2. Keep specialist reviewers as second-pass or escalation lanes so this policy does not erode specialist ownership.
+3. Skills listed in this table must mention `critic` explicitly in their `SKILL.md` guidance.
+
 ## Delegation Graph
 
 ```mermaid
 flowchart LR
+  ANL["analyze"] --> PDS["probe-deep-search"]
   BHRW["branch-health-remediation-workflow"] --> BOB["branch-onboarding-brief"]
   BHRW --> CH["code-health"]
+  BHRW --> PDS
 
   NTBR["non-test-bloat-reduction"] --> CH
+  NTBR --> PDS
 
   CLB["complexity-loc-balancer"] --> NTBR
   CLB --> CH
@@ -161,11 +203,14 @@ flowchart LR
   MM --> CH
 
   RBD --> BOB
+  RBD --> PDS
 
   PR["pr-workflow"] --> BOB
   PR --> CH
+  PR --> PDS
 
   BARR["branch-archive-rechunk-rebase"] --> BOB
+  BARR --> PDS
   CGA["chatgpt-apps"] --> OAID["openai-docs"]
   GFRC["gh-fix-review-comments"] --> GHC["gh-address-comments"]
   RES["resume"] --> BOB
@@ -178,8 +223,14 @@ flowchart LR
   WCL["web-clone"] --> VV["visual-verdict"]
 
   DOC["doc"] --> PDF["pdf"]
+  CR["code-review"] --> PDS
+  NDF["no-deep-flag-review"] --> PDS
+  RD["reverse-doc"] --> PDS
+  SECR["security-review"] --> PDS
+  SIMP["simplify"] --> PDS
   SPD["spec-diff"] --> DSEP["doc-separator"]
   SPD --> RD["reverse-doc"]
+  BOB["branch-onboarding-brief"] --> PDS
   SS["spreadsheet"] --> PDF
 
   AMB["agents-md-builder"]
@@ -187,6 +238,7 @@ flowchart LR
   AC["automation-creator"]
   ACLA["ask-claude"]
   AGEM["ask-gemini"]
+  ANL["analyze"]
   AP["autopilot"]
   BARR["branch-archive-rechunk-rebase"]
   CAN["cancel"]
@@ -277,12 +329,14 @@ flowchart TD
   HYB --> RES["resume"]
   HYB --> WCL["web-clone"]
   BARR --> BOB
+  BARR --> PDS
   CGA --> OAID["openai-docs"]
   GFRC --> GHC["gh-address-comments"]
   RES --> BOB
 
   SPEC --> AMB["agents-md-builder"]
   SPEC --> AISC["ai-slop-cleaner"]
+  SPEC --> ANL["analyze"]
   SPEC --> IMG["imagegen"]
   SPEC --> OAID
   SPEC --> PW["playwright"]
@@ -315,6 +369,7 @@ flowchart TD
   SPEC --> VV["visual-verdict"]
   SPEC --> YEET["yeet"]
 
+  ANL --> PDS
   META --> SC["skill-creator"]
   META --> SI["skill-installer"]
   META --> STA["skill-topology-adjuster"]
@@ -339,8 +394,10 @@ flowchart TD
 
   BHRW --> BOB
   BHRW --> CH
+  BHRW --> PDS
 
   NTBR --> CH
+  NTBR --> PDS
 
   CLB --> NTBR
   CLB --> CH
@@ -349,10 +406,14 @@ flowchart TD
   MM --> RBD
   MM --> CH
 
+  BOB --> PDS
+
   RBD --> BOB
+  RBD --> PDS
 
   PR --> BOB
   PR --> CH
+  PR --> PDS
 
   SWU --> SC
   SWU --> TI
@@ -361,7 +422,12 @@ flowchart TD
   TEAM --> WORKER
   WCL --> VV
 
+  CR --> PDS
   DOC --> PDF
+  NDF --> PDS
+  RD --> PDS
+  SECR --> PDS
+  SIMP --> PDS
   SPD --> DSEP
   SPD --> RD
   SS --> PDF

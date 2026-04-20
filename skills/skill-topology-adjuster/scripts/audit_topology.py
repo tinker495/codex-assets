@@ -32,6 +32,7 @@ SUB_AGENT_GUIDANCE_KEYWORDS = (
     "timeout",
     "run.sh",
 )
+REVIEW_POLICY_DEFAULT_REVIEWER = "critic"
 STANDALONE_MARKERS = ("standalone", "delegation optional")
 ORCHESTRATOR_ROLES = {"orchestrator", "specialist-orchestrator"}
 META_ORCHESTRATOR_ROLES = {"meta-orchestrator"}
@@ -165,8 +166,10 @@ def load_skills(skills_root: Path) -> list[SkillRecord]:
 
 
 def parse_role_map(topology_text: str) -> dict[str, str]:
+    role_map_section_match = re.search(r"^## Role Map\n(.*?)(?=^## |\Z)", topology_text, flags=re.M | re.S)
+    role_map_text = role_map_section_match.group(1) if role_map_section_match else ""
     role_map: dict[str, str] = {}
-    for line in topology_text.splitlines():
+    for line in role_map_text.splitlines():
         match = re.match(r"\| `([^`]+)` \| ([^|]+) \|", line)
         if match:
             role_map[match.group(1)] = match.group(2).strip()
@@ -285,6 +288,23 @@ def parse_mermaid_aliases_and_edges(section_text: str) -> tuple[dict[str, str], 
     return alias_to_label, edges
 
 
+def parse_review_policy_defaults(section_text: str) -> dict[str, str]:
+    defaults: dict[str, str] = {}
+    for raw in section_text.splitlines():
+        line = raw.strip()
+        if not line.startswith("|"):
+            continue
+        columns = [column.strip() for column in line.strip("|").split("|")]
+        if len(columns) < 3:
+            continue
+        skill = columns[0].strip().strip("`")
+        reviewer = columns[2].strip().strip("`").lower()
+        if not skill or skill.lower() == "skill" or set(skill) == {"-"} or reviewer == "---":
+            continue
+        defaults[skill] = reviewer
+    return defaults
+
+
 def detect_responsibility_overlaps(
     names: list[str],
     name_to_skill: dict[str, SkillRecord],
@@ -348,8 +368,10 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
     role_map_names = sorted(role_map)
 
     layers_section = extract_section(topology_text, "Orchestration Layers")
+    review_policy_section = extract_section(topology_text, "Review Execution Policy")
     graph_section = extract_section(topology_text, "Delegation Graph")
     tree_section = extract_section(topology_text, "Delegation Tree (Operational View)")
+    review_policy_defaults = parse_review_policy_defaults(review_policy_section)
     graph_alias_to_label, graph_edges = parse_mermaid_aliases_and_edges(graph_section)
     tree_alias_to_label, tree_edges = parse_mermaid_aliases_and_edges(tree_section)
     missing_graph_edges_in_tree = sorted(graph_edges - tree_edges)
@@ -399,6 +421,7 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
     missing_graph_edge_docs: list[str] = []
     missing_sub_agent_doc_skills: list[str] = []
     weak_sub_agent_doc_skills: list[str] = []
+    review_policy_missing_critic: list[str] = []
     for name in installed_names:
         text = name_to_skill[name].text
         lower = text.lower()
@@ -459,6 +482,12 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
                     "delegation graph declares skill -> codex-exec-sub-agent but SKILL.md lacks scenario-bound delegation wording near that reference"
                 )
                 weak_sub_agent_doc_skills.append(name)
+        expected_default_reviewer = review_policy_defaults.get(name)
+        if expected_default_reviewer == REVIEW_POLICY_DEFAULT_REVIEWER and "critic" not in lower:
+            issues.append(
+                "review execution policy requires critic as the default baseline review lane but SKILL.md lacks explicit critic guidance"
+            )
+            review_policy_missing_critic.append(name)
         for candidate in overlap_index.get(name, []):
             peer = candidate["skills"][0] if candidate["skills"][1] == name else candidate["skills"][1]
             issues.append(
@@ -479,6 +508,7 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
             "requires_sub_agent_doc": name in required_sub_agent_doc_skills,
             "has_sub_agent_reference": has_sub_agent_ref,
             "has_sub_agent_guidance": has_sub_agent_guidance,
+            "review_policy_default_reviewer": expected_default_reviewer,
             "standalone_markers": standalone,
             "overlap_candidates": overlap_index.get(name, []),
             "status": "needs-fix" if issues else "pass",
@@ -533,6 +563,11 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
                 + ", ".join(f"{row['skills'][0]}<->{row['skills'][1]}" for row in overlap_candidates)
             )
         )
+    if review_policy_defaults and review_policy_missing_critic:
+        global_findings.append(
+            "review-policy skills missing critic default guidance: "
+            + ", ".join(sorted(review_policy_missing_critic))
+        )
 
     needs_fix = sorted(name for name, row in per_skill.items() if row["status"] == "needs-fix")
     return {
@@ -555,6 +590,8 @@ def audit(skills: list[SkillRecord], role_map: dict[str, str], topology_text: st
         "sub_agent_graph_requirements": sorted(required_sub_agent_doc_skills),
         "sub_agent_doc_missing": sorted(missing_sub_agent_doc_skills),
         "sub_agent_doc_weak": sorted(weak_sub_agent_doc_skills),
+        "review_policy_skills": review_policy_defaults,
+        "review_policy_missing_critic": sorted(review_policy_missing_critic),
         "responsibility_overlap_candidates": overlap_candidates,
         "needs_fix_count": len(needs_fix),
         "needs_fix_skills": needs_fix,

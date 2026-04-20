@@ -27,6 +27,7 @@ description: Use when documenting actual code behavior before refactoring, inves
 2. **해석하지 않는다.** "이건 아마 ~하려는 것 같다"가 아니라 "이 코드는 ~한다"로 기술. "X is broken", "silently fails", "accidentally works" 같은 판단은 하지 않는다. 대신 "X는 Y를 한다. 타입 선언은 Z이다." 처럼 사실만 기술.
 3. **누락보다 과잉이 낫다.** 확실하지 않은 side effect도 기록하고 `[확인필요]` 태그를 붙인다.
 4. **모듈 경계를 지킨다.** 이 모듈의 코드만 문서화한다. 호출자(caller)를 검색하거나 외부 모듈의 내부 구현을 참조하지 않는다.
+5. **구조 탐색은 위임하고 범위는 유지한다.** 모듈 내부의 심볼 맵핑이나 exact body 추출이 필요하면 `probe-deep-search`를 사용하되, 호출자 추적이나 외부 모듈 내부 읽기로 범위를 넓히지 않는다.
 
 ## 분석 대상 항목
 

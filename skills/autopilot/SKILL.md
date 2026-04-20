@@ -31,6 +31,7 @@ Most non-trivial software tasks require coordinated phases: understanding requir
 - Parallel execution is used within phases where possible (Phase 2 and Phase 4)
 - QA cycles repeat up to 5 times; if the same error persists 3 times, stop and report the fundamental issue
 - Validation requires approval from all reviewers; rejected items get fixed and re-validated
+- Validation starts with a mandatory `critic` baseline review; specialist reviewers run only when the validation scope or risk profile warrants them
 - Cancel with `/cancel` at any time; progress is preserved for resume
 - If a deep-interview spec exists, use it as high-clarity phase input instead of re-expanding from scratch
 - If input is too vague for reliable expansion, offer/trigger `$deep-interview` first
@@ -79,10 +80,11 @@ Most non-trivial software tasks require coordinated phases: understanding requir
    - Stop early if the same error repeats 3 times (indicates a fundamental issue)
 
 5. **Phase 4 - Validation**: Multi-perspective review in parallel
-   - Architect: Functional completeness
-   - Security-reviewer: Vulnerability check
-   - Code-reviewer: Quality review
-   - All must approve; fix and re-validate on rejection
+   - Critic: Mandatory baseline review and approval gate
+   - Architect: Functional completeness when structural or boundary changes matter
+   - Security-reviewer: Vulnerability check when auth, secrets, trust boundaries, or production-risk security surfaces changed
+   - Code-reviewer: Deep quality review when the critic flags broad maintainability/correctness risk or the user asked for exhaustive review
+   - Critic must approve; any triggered specialist reviewers must also approve. Fix and re-validate on rejection.
 
 6. **Phase 5 - Cleanup**: Clear all mode state via OMX MCP tools on successful completion
    - `state_clear({mode: "autopilot"})`
@@ -94,9 +96,10 @@ Most non-trivial software tasks require coordinated phases: understanding requir
 
 <Tool_Usage>
 - Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools
+- Use `ask_codex` with `agent_role: "critic"` for the default Phase 4 validation pass
 - Use `ask_codex` with `agent_role: "architect"` for Phase 4 architecture validation
-- Use `ask_codex` with `agent_role: "security-reviewer"` for Phase 4 security review
-- Use `ask_codex` with `agent_role: "code-reviewer"` for Phase 4 quality review
+- Use `ask_codex` with `agent_role: "security-reviewer"` only when Phase 4 scope triggers a specialist security pass
+- Use `ask_codex` with `agent_role: "code-reviewer"` only when Phase 4 scope triggers a deeper quality pass
 - Agents form their own analysis first, then consult Codex for cross-validation
 - If ToolSearch finds no MCP tools or Codex is unavailable, proceed without it -- never block on external tools
 </Tool_Usage>

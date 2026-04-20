@@ -66,7 +66,7 @@ Always prioritize:
 - design, execution-plan, quality, reliability, security, or tech-debt docs that index or grade the changed area
 
 5. Run required evidence collection.
-Use `probe search` for discovery, `probe extract` for symbol blocks, and `rg -n` for exact anchors.
+Delegate discovery and structural code extraction to `probe-deep-search`, then use `rg -n` for exact anchors.
 Use `references/doc_refresh_localization_queries.md` only as doc-refresh-specific seed/query guidance.
 Require evidence for each doc claim:
 - one call-path or dependency anchor from `probe extract` plus adjacent call-site search, or from `rpg-loop-reasoning` when cross-module flow remains unclear

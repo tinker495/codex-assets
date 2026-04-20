@@ -19,6 +19,12 @@ Keep the workflow evidence-driven: broaden with `probe search`, narrow with stru
 - Fall back to `rg`, `grep`, or direct file reads only when `probe` fails, the index is unavailable, or the target is outside code that `probe` can interpret well.
 - State when you are falling back and why.
 
+## Delegation Contract
+
+- When another skill needs probe-first repository discovery, symbol tracing, AST-pattern hunting, or exact code-body extraction, delegate that investigation layer to `probe-deep-search`.
+- Parent skills keep domain ownership. `probe-deep-search` owns the `probe search -> probe symbols/query -> probe extract` loop; the caller still owns review severity, remediation decisions, rewrite policy, or documentation synthesis.
+- Prefer a short explicit handoff such as: "Use `probe-deep-search` for the discovery/structural pass, then continue here with domain-specific judgment."
+
 ## Investigation Workflow
 
 ### 1. Frame the search

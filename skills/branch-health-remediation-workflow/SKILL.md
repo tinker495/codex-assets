@@ -37,7 +37,7 @@ Use the `code-health` skill.
 Keep non-test diff minimization central and call out net non-test growth.
 
 3. Analyze non-test inefficiency and fragmentation.
-Start with direct localization using `probe search`, `probe extract`, and exact-match follow-up via `rg -n`.
+Delegate deep-code discovery and structural localization to `probe-deep-search` first, then use exact-match follow-up via `rg -n`.
 Non-test scope: exclude `tests/`, `**/test_*.py`, `**/*_test.py`, `**/conftest.py`.
 If discovery pulls in tests, re-run with narrower path filters or ignore test-only hits in synthesis.
 Focus areas: hot loops, large functions, duplicate logic, repeated normalization, cache misuse, redundant I/O, and split responsibilities across many small modules.

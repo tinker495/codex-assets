@@ -83,7 +83,7 @@ export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 ```
 
 3. Build intent clusters before editing.
-- Use `code-health` plus direct `probe`/`rg` localization to gather candidate evidence.
+- Use `code-health` plus `probe-deep-search` for cross-file discovery and structural extraction, then use `rg` only for exact follow-up anchors.
 - If clusters span multiple modules or show dependency drift, delegate localization to `rpg-loop-reasoning` in `hybrid` mode before proposing edits.
 - Load both resources before the first pass:
   - `references/non_test_reduction_queries.md`

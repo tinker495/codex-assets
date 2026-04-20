@@ -106,7 +106,7 @@ Look for:
 - Changed function signatures
 - Removed configuration options
 
-Run first-pass impact localization with `probe search`, `probe extract`, and exact-match follow-up via `rg -n` before finalizing breaking-change notes.
+Run first-pass impact localization through `probe-deep-search`, then do exact-match follow-up via `rg -n` before finalizing breaking-change notes.
 When change impact still spans multiple modules or naming drift remains ambiguous after that pass, use `rpg-loop-reasoning` in `understanding` mode as a bounded augmentation lane.
 
 ### 6) Draft PR Description

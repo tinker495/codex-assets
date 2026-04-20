@@ -24,7 +24,8 @@ This skill activates when:
 - If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the review is grounded.
 - Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent.
 
-Delegates to the `code-reviewer` agent (THOROUGH tier) for deep analysis:
+Default baseline review delegates to the `critic` agent. Use `code-reviewer` as the deeper second-pass lane when the user asks for exhaustive review, the critic flags high-risk areas, or the code surface is broad, unfamiliar, or especially sensitive.
+When the review needs broad repository discovery, cross-file symbol tracing, or exact code extraction before findings are formed, delegate that investigation pass to `probe-deep-search`. Keep severity judgment, approval recommendation, and review write-up ownership in `code-review`.
 
 1. **Identify Changes**
    - Run `git diff` to find changed files
@@ -52,7 +53,7 @@ Delegates to the `code-reviewer` agent (THOROUGH tier) for deep analysis:
 
 ```
 delegate(
-  role="code-reviewer",
+  role="critic",
   tier="THOROUGH",
   prompt="CODE REVIEW TASK
 
@@ -76,9 +77,11 @@ Output: Code review report with:
 )
 ```
 
+Escalate to `code-reviewer` after the critic pass when the review needs a deeper language/framework-specific second opinion or the scope is too broad for a baseline pass.
+
 ## External Model Consultation (Preferred)
 
-The code-reviewer agent SHOULD consult Codex for cross-validation.
+The default `critic` pass MAY consult `code-reviewer` for cross-validation.
 
 ### Protocol
 1. **Form your OWN review FIRST** - Complete the review independently
@@ -100,8 +103,9 @@ The code-reviewer agent SHOULD consult Codex for cross-validation.
 
 ### Tool Usage
 Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools.
-Use `mcp__x__ask_codex` with `agent_role: "code-reviewer"`.
-If ToolSearch finds no MCP tools, fall back to the `code-reviewer` agent.
+Use `mcp__x__ask_codex` with `agent_role: "critic"` for the default review pass.
+Escalate to `agent_role: "code-reviewer"` when the critic pass finds broad or high-stakes follow-up.
+If ToolSearch finds no MCP tools, fall back to the same role ordering: `critic` first, `code-reviewer` second.
 
 **Note:** Codex calls can take up to 1 hour. Consider the review timeline before consulting.
 
@@ -150,7 +154,7 @@ Critical security issues must be addressed before merge.
 
 ## Review Checklist
 
-The code-reviewer agent checks:
+The baseline `critic` pass checks:
 
 ### Security
 - [ ] No hardcoded secrets (API keys, passwords, tokens)

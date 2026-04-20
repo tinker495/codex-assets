@@ -88,6 +88,7 @@ Before deriving clusters, inspect actual changed code on the branch. Git history
 Minimum clustering-grounding contract:
 - start from the changed-file list from onboarding and `git diff ... --name-status`
 - read all risky or cross-cutting changed files and any file touched by multiple original commits or candidate clusters
+- delegate changed-module structural inspection and exact code extraction to `probe-deep-search`
 - use `probe symbols`, `probe extract`, and `probe query` on changed Python modules to understand the real function/class boundaries
 - when commit subjects disagree with code evidence, trust the changed-file code evidence
 - record 1-3 anchor files or symbols for each planned cluster
