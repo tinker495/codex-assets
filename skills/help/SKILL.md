@@ -1,6 +1,6 @@
 ---
 name: help
-description: Guide on using oh-my-codex plugin
+description: "[OMX] Guide on using oh-my-codex plugin"
 ---
 
 # How OMX Works

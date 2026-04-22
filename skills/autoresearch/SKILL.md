@@ -1,6 +1,6 @@
 ---
 name: autoresearch
-description: Stateful validator-gated research loop with native-hook persistence
+description: "[OMX] Stateful validator-gated research loop with native-hook persistence"
 ---
 
 # Autoresearch

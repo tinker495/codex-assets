@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Run a comprehensive security review on code
+description: "[OMX] Run a comprehensive security review on code"
 ---
 
 # Security Review Skill
@@ -26,8 +26,7 @@ This skill activates when:
 - If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the security review is grounded.
 - Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent.
 
-Default baseline review delegates to the `critic` agent for the initial security-focused pass. Escalate to `security-reviewer` for auth, crypto, dependency, trust-boundary, or production-risk deep audit, or whenever the critic finds potential CRITICAL/HIGH issues that need specialist confirmation.
-When the security audit needs broad code-surface discovery, cross-file symbol tracing, or exact code extraction before security analysis is credible, delegate that investigation pass to `probe-deep-search`. Keep security finding severity and remediation guidance ownership in `security-review`.
+Delegates to the `security-reviewer` agent (THOROUGH tier) for deep security analysis:
 
 1. **OWASP Top 10 Scan**
    - A01: Broken Access Control
@@ -70,7 +69,7 @@ When the security audit needs broad code-surface discovery, cross-file symbol tr
 
 ```
 delegate(
-  role="critic",
+  role="security-reviewer",
   tier="THOROUGH",
   prompt="SECURITY REVIEW TASK
 
@@ -94,11 +93,9 @@ Output: Security review report with:
 )
 ```
 
-Escalate to `security-reviewer` after the critic pass when the scope includes authentication, cryptography, external trust boundaries, sensitive data handling, or other specialist-depth security concerns.
-
 ## External Model Consultation (Preferred)
 
-The default `critic` pass MAY consult `security-reviewer` for cross-validation.
+The security-reviewer agent SHOULD consult Codex for cross-validation.
 
 ### Protocol
 1. **Form your OWN security analysis FIRST** - Complete the review independently
@@ -121,9 +118,8 @@ The default `critic` pass MAY consult `security-reviewer` for cross-validation.
 
 ### Tool Usage
 Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools.
-Use `mcp__x__ask_codex` with `agent_role: "critic"` for the default security review pass.
-Escalate to `agent_role: "security-reviewer"` when the critic pass identifies specialist-depth risks or when the user asks for a deep security audit.
-If ToolSearch finds no MCP tools, fall back to the same role ordering: `critic` first, `security-reviewer` second.
+Use `mcp__x__ask_codex` with `agent_role: "security-reviewer"`.
+If ToolSearch finds no MCP tools, fall back to the `security-reviewer` agent.
 
 **Note:** Security second opinions are high-value. Consider consulting for CRITICAL/HIGH findings.
 
@@ -209,7 +205,7 @@ Recommendation: DO NOT DEPLOY until CRITICAL and HIGH issues resolved.
 
 ## Security Checklist
 
-The baseline `critic` pass verifies:
+The security-reviewer agent verifies:
 
 ### Authentication & Authorization
 - [ ] Passwords hashed with strong algorithm (bcrypt/argon2)

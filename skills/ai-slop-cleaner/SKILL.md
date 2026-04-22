@@ -1,6 +1,6 @@
 ---
 name: ai-slop-cleaner
-description: Run an anti-slop cleanup/refactor/deslop workflow
+description: "[OMX] Run an anti-slop cleanup/refactor/deslop workflow"
 ---
 
 # AI Slop Cleaner Skill

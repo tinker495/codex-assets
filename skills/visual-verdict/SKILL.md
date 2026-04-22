@@ -1,6 +1,6 @@
 ---
 name: visual-verdict
-description: Structured visual QA verdict for screenshot-to-reference comparisons
+description: "[OMX] Structured visual QA verdict for screenshot-to-reference comparisons"
 ---
 
 <Purpose>

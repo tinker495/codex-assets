@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: "Run read-only deep repository analysis and return a ranked synthesis with explicit confidence, concrete file references, and clear evidence-vs-inference boundaries. Use when a user says 'analyze', 'investigate', 'why does', 'what's causing', or needs grounded cross-file explanation before any changes are proposed."
+description: "[OMX] Run read-only deep repository analysis and return a ranked synthesis with explicit confidence, concrete file references, and clear evidence-vs-inference boundaries. Use when a user says 'analyze', 'investigate', 'why does', 'what's causing', or needs grounded cross-file explanation before any changes are proposed."
 ---
 
 # Analyze — Read-Only Deep Analysis
@@ -51,10 +51,6 @@ Answer the user’s actual question first.
 - Keep the synthesis scoped to what the user needs to know.
 - Scale the depth to the request: for simple or obvious questions, reduce swarm intensity and answer directly after enough reading.
 - For broader questions, expand the search surface but keep the final answer tightly synthesized.
-
-## Delegation Boundary
-
-When the answer depends on broad repository discovery, cross-file symbol tracing, or exact body extraction, delegate that investigation pass to `probe-deep-search` first. Keep ranked explanation, evidence-vs-inference labeling, and confidence judgment in `analyze`.
 
 ## Evidence rules
 

@@ -1,6 +1,6 @@
 ---
 name: web-clone
-description: URL-driven website cloning with visual + functional verification
+description: "[OMX] URL-driven website cloning with visual + functional verification"
 ---
 
 <Purpose>

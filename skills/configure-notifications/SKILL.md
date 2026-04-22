@@ -1,6 +1,6 @@
 ---
 name: configure-notifications
-description: Configure OMX notifications - unified entry point for all platforms
+description: "[OMX] Configure OMX notifications - unified entry point for all platforms"
 triggers:
   - "configure notifications"
   - "setup notifications"

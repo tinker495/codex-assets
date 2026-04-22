@@ -1,6 +1,6 @@
 ---
 name: wiki
-description: Persistent markdown project wiki stored under .omx/wiki with keyword search and lifecycle capture
+description: "[OMX] Persistent markdown project wiki stored under .omx/wiki with keyword search and lifecycle capture"
 triggers: ["wiki add", "wiki lint", "wiki query", "wiki read", "wiki delete"]
 ---
 

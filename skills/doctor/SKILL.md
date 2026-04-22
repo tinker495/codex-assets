@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: Diagnose and fix oh-my-codex installation issues
+description: "[OMX] Diagnose and fix oh-my-codex installation issues"
 ---
 
 # Doctor Skill

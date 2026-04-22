@@ -1,6 +1,6 @@
 ---
 name: omx-setup
-description: Setup and configure oh-my-codex using current CLI behavior
+description: "[OMX] Setup and configure oh-my-codex using current CLI behavior"
 ---
 
 # OMX Setup

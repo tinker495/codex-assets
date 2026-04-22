@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Strategic planning with optional interview workflow
+description: "[OMX] Strategic planning with optional interview workflow"
 ---
 
 <Purpose>

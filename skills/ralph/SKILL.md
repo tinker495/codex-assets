@@ -1,6 +1,6 @@
 ---
 name: ralph
-description: Self-referential loop until task completion with architect verification
+description: "[OMX] Self-referential loop until task completion with architect verification"
 ---
 
 [RALPH + ULTRAWORK - ITERATION {{ITERATION}}/{{MAX}}]

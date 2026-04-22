@@ -1,6 +1,6 @@
 ---
 name: deep-interview
-description: Socratic deep interview with mathematical ambiguity gating before execution
+description: "[OMX] Socratic deep interview with mathematical ambiguity gating before execution"
 argument-hint: "[--quick|--standard|--deep] [--autoresearch] <idea or vague description>"
 ---
 
@@ -52,6 +52,7 @@ If no flag is provided, use **Standard**.
 - Reduce user effort: ask only the highest-leverage unresolved question, and never ask the user for codebase facts that can be discovered directly
 - For brownfield work, prefer evidence-backed confirmation questions such as "I found X in Y. Should this change follow that pattern?"
 - In Codex CLI, deep-interview uses `omx question` as the required OMX-owned structured questioning path for every interview round
+- If you launch `omx question` in a background terminal, immediately wait for that background terminal to finish and read its JSON answer before scoring ambiguity, asking another round, or handing off
 - If `omx question` is unavailable in the current runtime, treat that as a blocker/error for deep-interview rather than falling back to `request_user_input` or plain-text questioning
 - Re-score ambiguity after each answer and show progress transparently
 - Do not hand off to execution while ambiguity remains above threshold unless user explicitly opts to proceed with warning
@@ -152,6 +153,96 @@ Use OMX-owned structured questioning via `omx question` for every interview roun
 Round {n} | Target: {weakest_dimension} | Ambiguity: {score}%
 
 {question}
+```
+
+`omx question` payload guidance for interview rounds:
+- Use canonical `type` values instead of authoring raw `multi_select` flags by hand. `type: "single-answerable"` is the default for one-path decisions; `type: "multi-answerable"` is the canonical shape for bounded multi-select rounds. The runtime will keep `multi_select` aligned with `type`.
+- Use `single-answerable` when exactly one answer should drive the next branch, the options are mutually exclusive, or selecting more than one answer would blur the decision boundary. Typical cases: handoff lane selection, choosing the primary failure mode, or confirming which of several competing interpretations is correct.
+- Use `multi-answerable` when multiple options may all be true at once and you need to capture a bounded set of coexisting constraints, non-goals, risks, or acceptance checks in one round. Typical cases: selecting all out-of-scope items, all success metrics that must hold, or all deployment constraints that apply together.
+- If one selected option would immediately require a follow-up question to disambiguate the others, prefer a `single-answerable` round now and ask the follow-up next. Do not hide a branching interview tree inside one overloaded multi-select prompt.
+- Keep interview options bounded and concrete. If the valid answers are already known, set `allow_other: false`; only leave `allow_other: true` when the interview genuinely needs one user-supplied option that cannot be enumerated in advance.
+- Read answers structurally. For `single-answerable`, expect one decisive selection in `answer.value` plus `answer.selected_values`. For `multi-answerable`, treat `answer.selected_values` as the source of truth for all chosen constraints/non-goals and preserve the full set in the transcript/spec.
+
+Canonical bounded single-choice payload:
+
+```json
+{
+  "question": "Which execution lane should own this once the interview is complete?",
+  "type": "single-answerable",
+  "options": [
+    {
+      "label": "Plan first",
+      "value": "ralplan",
+      "description": "Need architecture and test-shape review before execution"
+    },
+    {
+      "label": "Execute directly",
+      "value": "autopilot",
+      "description": "Requirements are already explicit enough for planning plus execution"
+    },
+    {
+      "label": "Refine further",
+      "value": "refine",
+      "description": "Clarification is still needed before any handoff"
+    }
+  ],
+  "allow_other": false,
+  "other_label": "Other",
+  "source": "deep-interview"
+}
+```
+
+Canonical bounded multi-select payload:
+
+```json
+{
+  "question": "Which non-goals must stay out of scope for the first pass?",
+  "type": "multi-answerable",
+  "options": [
+    {
+      "label": "No UI redesign",
+      "value": "no-ui-redesign",
+      "description": "Keep layout and styling unchanged"
+    },
+    {
+      "label": "No new dependencies",
+      "value": "no-new-dependencies",
+      "description": "Work within the existing toolchain"
+    },
+    {
+      "label": "No API contract changes",
+      "value": "no-api-contract-changes",
+      "description": "Preserve external request and response shapes"
+    }
+  ],
+  "allow_other": false,
+  "other_label": "Other",
+  "source": "deep-interview"
+}
+```
+
+Canonical answer-shape reminders:
+
+```json
+{
+  "answer": {
+    "kind": "option",
+    "value": "ralplan",
+    "selected_labels": ["Plan first"],
+    "selected_values": ["ralplan"]
+  }
+}
+```
+
+```json
+{
+  "answer": {
+    "kind": "multi",
+    "value": ["no-new-dependencies", "no-api-contract-changes"],
+    "selected_labels": ["No new dependencies", "No API contract changes"],
+    "selected_values": ["no-new-dependencies", "no-api-contract-changes"]
+  }
+}
 ```
 
 ### 2c) Score ambiguity

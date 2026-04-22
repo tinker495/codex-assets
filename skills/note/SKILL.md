@@ -1,6 +1,6 @@
 ---
 name: note
-description: Save notes to notepad.md for compaction resilience
+description: "[OMX] Save notes to notepad.md for compaction resilience"
 ---
 
 # Note Skill
