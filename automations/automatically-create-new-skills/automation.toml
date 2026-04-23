@@ -8,6 +8,6 @@ rrule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10;BYMINUTE=40"
 model = "gpt-5.4"
 reasoning_effort = "xhigh"
 execution_environment = "local"
-cwds = ["~"]
+cwds = ["~/.codex"]
 created_at = 1770210925008
 updated_at = 1776398794987
