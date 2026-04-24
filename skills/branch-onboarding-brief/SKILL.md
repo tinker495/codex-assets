@@ -1,13 +1,13 @@
 ---
 name: branch-onboarding-brief
-description: Analyze current git branch differences against main (or a specified base), run an onboarding context phase, and produce a well-formatted branch briefing that directly supports the current user request or parent-skill workflow. Use when asked to compare branches, summarize diffs, prepare onboarding context, or provide prerequisite branch context for another skill.
+description: Analyze current git branch changes from the branch fork point (resolved from origin/HEAD or a specified upstream base), run an onboarding context phase, and produce a well-formatted branch briefing that directly supports the current user request or parent-skill workflow. Use when asked to compare branches, summarize branch diffs, inspect branch-scoped changes, prepare onboarding context, or provide prerequisite branch context for another skill.
 ---
 
 # Branch Onboarding Brief
 
 ## Overview
 
-Create a reliable, repeatable onboarding phase that summarizes the current branch vs base, grounds that summary in actual changed-code inspection, then produces a structured branch briefing and immediately hands off to the requested next action.
+Create a reliable, repeatable onboarding phase that summarizes the current branch changes since its fork point, grounds that summary in actual changed-code inspection, then produces a structured branch briefing and immediately hands off to the requested next action.
 
 ## Workflow
 
@@ -24,19 +24,21 @@ Prefer the bundled script for deterministic data:
 ```bash
 CODEX_HOME=${CODEX_HOME:-$HOME/.codex}
 SKILL_DIR="$CODEX_HOME/skills/branch-onboarding-brief"
-test -f "$SKILL_DIR/scripts/collect_branch_info.py" && python "$SKILL_DIR/scripts/collect_branch_info.py" --base main --format json
+test -f "$SKILL_DIR/scripts/collect_branch_info.py" && python "$SKILL_DIR/scripts/collect_branch_info.py" --format json
 ```
 
 Bundled collector semantics:
-- commit subjects use `base..HEAD`
-- file list / numstat / diff stat use `base...HEAD` to match GitHub PR delta semantics
+- `--base` names the upstream branch used only to resolve the branch fork point; omit it to default to `origin/HEAD`, then `main`/`master`
+- the fork point is resolved with `git merge-base --fork-point <base> HEAD`, falling back to `git merge-base <base> HEAD`
+- commit subjects, file list, numstat, and diff stat use `fork_point..HEAD`
 - the JSON payload now exposes `compare_mode` so parent workflows can see which range each metric used
+- the JSON payload also exposes `base` and `fork_point`
 
 If the bundled skill path is missing, search exact candidates under `"$CODEX_HOME/skills"` first and run the first returned absolute path:
 
 ```bash
 rg --files "$CODEX_HOME/skills" -g 'collect_branch_info.py'
-python /absolute/path/from-search/collect_branch_info.py --base main --format json
+python /absolute/path/from-search/collect_branch_info.py --format json
 ```
 
 If the script is unavailable (or script path check fails), fall back to:
@@ -45,13 +47,15 @@ If the script is unavailable (or script path check fails), fall back to:
 git log --since=1.week --name-only
 git diff --stat
 git branch --show-current
-git log main..HEAD --oneline
-git diff main...HEAD --name-only
-git diff main...HEAD --numstat
-git diff --stat main...HEAD
+base=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || printf '%s\n' main)
+fork=$(git merge-base --fork-point "$base" HEAD 2>/dev/null || git merge-base "$base" HEAD)
+git log "$fork"..HEAD --oneline
+git diff "$fork"..HEAD --name-only
+git diff "$fork"..HEAD --numstat
+git diff --stat "$fork"..HEAD
 ```
 
-If the repo does not use `main`, detect the default base:
+If the repo does not use `main`, detect the default upstream branch:
 
 ```bash
 git symbolic-ref refs/remotes/origin/HEAD
@@ -88,7 +92,7 @@ If the branch is large, still read all risky/core files and inspect at least the
 Provide this phase **before** taking any additional task actions unless the user explicitly says to skip it.
 
 Include:
-- Branch name and base branch
+- Branch name, upstream base branch used for fork-point detection, and fork-point commit
 - Commit count and short log
 - File count and top changed areas
 - Net LOC summary

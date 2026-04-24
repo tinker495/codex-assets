@@ -146,19 +146,35 @@ def get_branch_name() -> str:
     return "detached"
 
 
-def resolve_main_ref() -> str:
-    candidates = [
-        "refs/remotes/origin/main",
-        "refs/heads/main",
-    ]
-    for ref in candidates:
+def git_output(*args: str) -> str | None:
+    result = subprocess.run(["git", *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def resolve_upstream_ref() -> str:
+    symbolic = git_output("symbolic-ref", "refs/remotes/origin/HEAD")
+    if symbolic and symbolic.startswith("refs/remotes/origin/"):
+        return symbolic.removeprefix("refs/remotes/origin/")
+    for ref, name in (
+        ("refs/remotes/origin/main", "origin/main"),
+        ("refs/heads/main", "main"),
+        ("refs/remotes/origin/master", "origin/master"),
+        ("refs/heads/master", "master"),
+    ):
         result = subprocess.run(["git", "show-ref", "--verify", "--quiet", ref])
         if result.returncode == 0:
-            if ref.startswith("refs/remotes/"):
-                return ref.replace("refs/remotes/", "")
-            if ref.startswith("refs/heads/"):
-                return ref.replace("refs/heads/", "")
+            return name
     return "main"
+
+
+def resolve_fork_point(base: str) -> str:
+    return (
+        git_output("merge-base", "--fork-point", base, "HEAD")
+        or git_output("merge-base", base, "HEAD")
+        or base
+    )
 
 
 def slugify(value: str) -> str:
@@ -235,8 +251,9 @@ def write_report(
     mode: str,
     top: int,
     diff_out: str,
-    main_diff_out: str,
-    main_ref: str,
+    branch_diff_out: str,
+    base_ref: str,
+    fork_point: str,
     code_out: str,
     coverage_out: str,
     jscpd_data: dict[str, Any],
@@ -265,15 +282,15 @@ def write_report(
     lines.append(f"- Coverage hotspots: {'skipped' if coverage_skipped else 'included'}")
     lines.append("")
 
-    lines.append(f"## Diff Summary (main: {main_ref}...HEAD)")
+    lines.append(f"## Diff Summary (fork point: {fork_point}..HEAD; upstream {base_ref})")
     lines.append("```text")
     lines.append(diff_out or "(no diff output)")
     lines.append("```")
     lines.append("")
 
-    lines.append(f"## Diff Summary (main deep: {main_ref}...HEAD)")
+    lines.append(f"## Diff Summary (fork point deep: {fork_point}..HEAD; upstream {base_ref})")
     lines.append("```text")
-    lines.append(main_diff_out or "(no main diff output)")
+    lines.append(branch_diff_out or "(no branch diff output)")
     lines.append("```")
     lines.append("")
 
@@ -328,7 +345,7 @@ def main() -> None:
         "--base",
         type=str,
         default=None,
-        help="Diff base ref (default: origin/main when present, else main)",
+        help="Upstream ref used only to resolve the branch fork point (default: origin/HEAD, then main/master)",
     )
     parser.add_argument("--top", type=int, default=20)
     parser.add_argument("--top-files", type=int, default=10)
@@ -348,7 +365,8 @@ def main() -> None:
         if args.status_json is not None
         else default_status_path(json_path, fallback_dir=out_dir, stem=f"{project}__{branch}__code_health")
     )
-    main_ref = args.base if args.base else resolve_main_ref()
+    base_ref = args.base if args.base else resolve_upstream_ref()
+    fork = resolve_fork_point(base_ref)
     tracker = StatusTracker(
         status_path=status_path,
         script_name="code-health",
@@ -356,7 +374,8 @@ def main() -> None:
             "repo_root": str(repo_root),
             "project": project,
             "branch": branch,
-            "base_ref": main_ref,
+            "base_ref": base_ref,
+            "fork_point": fork,
             "mode": args.mode,
             "top": args.top,
             "top_files": args.top_files,
@@ -367,11 +386,11 @@ def main() -> None:
     tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
     tracker.set_phase(
         "initializing",
-        message=f"code-health start: base={main_ref}, mode={args.mode}, skip_coverage={args.skip_coverage}",
+        message=f"code-health start: upstream={base_ref}, fork_point={fork}, mode={args.mode}, skip_coverage={args.skip_coverage}",
         output_dir=str(out_dir),
     )
     diff_out = ""
-    main_diff_out = ""
+    branch_diff_out = ""
     code_out = ""
     coverage_out = ""
     coverage_pytest_completed = False
@@ -385,19 +404,19 @@ def main() -> None:
     jscpd_data = parse_jscpd_json(jscpd_json)
 
     try:
-        tracker.set_phase("diff", message=f"collecting diff summaries against {main_ref}")
+        tracker.set_phase("diff", message=f"collecting diff summaries from fork point {fork}")
         diff_out = run_python_script(
             "diff_summary",
             skill_dir / "diff_summary_compact.py",
-            ["--base", main_ref],
+            ["--base", base_ref],
             tracker=tracker,
         )
-        main_diff_out = run_python_script(
+        branch_diff_out = run_python_script(
             "diff_summary_deep",
             skill_dir / "diff_summary_compact.py",
             [
                 "--base",
-                main_ref,
+                base_ref,
                 "--deep",
                 "--all-files",
                 "--top-files",
@@ -479,7 +498,9 @@ def main() -> None:
         "mode": args.mode,
         "top": args.top,
         "top_files": args.top_files,
-        "main_ref": main_ref,
+        "base_ref": base_ref,
+        "fork_point": fork,
+        "main_ref": base_ref,
         "duplication": jscpd_data,
         "xenon_status": parse_xenon_status(code_out),
         "coverage_skipped": args.skip_coverage,
@@ -497,8 +518,9 @@ def main() -> None:
         mode=args.mode,
         top=args.top,
         diff_out=diff_out,
-        main_diff_out=main_diff_out,
-        main_ref=main_ref,
+        branch_diff_out=branch_diff_out,
+        base_ref=base_ref,
+        fork_point=fork,
         code_out=code_out,
         coverage_out=coverage_out,
         jscpd_data=jscpd_data,

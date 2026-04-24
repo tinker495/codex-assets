@@ -12,11 +12,12 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 ## Workflow
 1. Confirm repo root (the script expects to run from the repository root).
 2. Ensure tools exist in the environment: `pytest`, `coverage`, `vulture`, `radon`, `xenon`, and `jscpd` (via `npx` or global install). Use `uv` if available.
-3. Run pipeline (preferred, origin/main baseline):
+3. Run pipeline (preferred, branch fork-point baseline):
    - `test -f /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py || rg --files /Users/mrx-ksjung/.codex/skills/code-health -g 'run_code_health.py'`
-   - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20 --base origin/main`
-   - Use `--mode full` for deeper scans (keep origin/main baseline).
-   - Use `--top-files 20` to expand the main-branch churn list.
+   - `python /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py --mode summary --top 20`
+   - Use `--base <upstream>` only to override the upstream branch used for fork-point detection.
+   - Use `--mode full` for deeper scans (keep the same fork-point baseline).
+   - Use `--top-files 20` to expand the branch churn list.
    - The script now emits stage progress to `stderr` and can write a live status file with `--status-json /path/to/code_health.status.json`.
    - When `--status-json` is omitted, the script writes a sibling `*.status.json` next to the normal report JSON/output directory when it has enough path context.
    - The built-in coverage lane runs standard `pytest --cov=stowage --cov=tui -q`; treat that as evidence for the normal test lane only, never as `make test-full` or any full-dataset substitute.
@@ -51,7 +52,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 ## Report template
 - Summary: duplication %, xenon status, coverage included/skipped.
 - Diff summary: net non-test lines (minimize), net test lines (no constraint), new/deleted files split by type.
-- Main diff (deep): top churn files vs main, split non-test/test.
+- Branch diff (deep): top churn files since the branch fork point, split non-test/test.
 - Duplication: clones, duplicated lines, top offenders if present.
 - Dead code: top vulture findings with confidence.
 - Complexity: top cyclomatic entries (radon).

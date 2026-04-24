@@ -114,7 +114,11 @@ def build_default_artifacts_dir(repo_root: Path) -> Path:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Single-entry PR workflow launcher")
     parser.add_argument("--repo-root", type=Path, default=Path("."))
-    parser.add_argument("--base", default="origin/main")
+    parser.add_argument(
+        "--base",
+        default="",
+        help="Upstream branch used only to resolve the fork point; omit to auto-detect origin/HEAD, then main/master.",
+    )
     parser.add_argument("--artifacts-dir", type=Path, default=None)
     parser.add_argument("--output-json", type=Path, default=None)
     parser.add_argument("--pr-title", default="")
@@ -153,7 +157,7 @@ def main() -> None:
         initial_state={
             "repo_root": str(repo_root),
             "artifacts_dir": str(artifacts_dir),
-            "base": args.base,
+            "base": args.base or "(auto fork-point upstream)",
         },
     )
     tracker.set_artifact("status_json", str(status_path) if status_path is not None else None)
@@ -175,8 +179,6 @@ def main() -> None:
         str(run_script),
         "--repo-root",
         str(repo_root),
-        "--base",
-        args.base,
         "--output-json",
         str(workflow_json_path),
         "--pr-brief-output",
@@ -184,6 +186,8 @@ def main() -> None:
         "--status-json",
         str(run_status_path),
     ]
+    if args.base.strip():
+        run_command_args.extend(["--base", args.base.strip()])
     if args.pr_title.strip():
         run_command_args.extend(["--pr-title", args.pr_title.strip()])
     if args.code_health_json is not None:

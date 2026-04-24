@@ -98,6 +98,13 @@ def run(cmd: list[str], *, cwd: Path) -> str:
     return subprocess.check_output(cmd, cwd=str(cwd), text=True).strip()
 
 
+def maybe_run(cmd: list[str], *, cwd: Path) -> str | None:
+    try:
+        return run(cmd, cwd=cwd)
+    except subprocess.CalledProcessError:
+        return None
+
+
 def parse_numstat(text: str) -> list[NumstatRow]:
     rows: list[NumstatRow] = []
     for line in text.splitlines():
@@ -108,6 +115,24 @@ def parse_numstat(text: str) -> list[NumstatRow]:
             continue
         rows.append(NumstatRow(path=path, added=int(added), deleted=int(deleted)))
     return rows
+
+
+def default_base_branch(repo: Path) -> str:
+    symbolic = maybe_run(["git", "symbolic-ref", "refs/remotes/origin/HEAD"], cwd=repo)
+    if symbolic and symbolic.startswith("refs/remotes/origin/"):
+        return symbolic.removeprefix("refs/remotes/origin/")
+    for candidate in ("origin/main", "main", "origin/master", "master"):
+        if maybe_run(["git", "rev-parse", "--verify", candidate], cwd=repo):
+            return candidate
+    return "HEAD~1"
+
+
+def fork_point(repo: Path, base: str) -> str:
+    return (
+        maybe_run(["git", "merge-base", "--fork-point", base, "HEAD"], cwd=repo)
+        or maybe_run(["git", "merge-base", base, "HEAD"], cwd=repo)
+        or base
+    )
 
 
 def area_counts(paths: list[str]) -> dict[str, int]:
@@ -202,15 +227,22 @@ def compute_doc_impact(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Collect branch diff context for documentation refresh.")
-    parser.add_argument("--base", default="main", help="Base branch to compare against.")
+    parser.add_argument(
+        "--base",
+        default=None,
+        help="Upstream branch used only to resolve the fork point; defaults to origin/HEAD, then main/master.",
+    )
     parser.add_argument("--repo", default=".", help="Repository root path.")
     parser.add_argument("--format", default="json", choices=("json", "md"), help="Output format.")
     args = parser.parse_args()
 
     repo = Path(args.repo).resolve()
     branch = run(["git", "branch", "--show-current"], cwd=repo)
-    name_only = run(["git", "diff", f"{args.base}..HEAD", "--name-only"], cwd=repo)
-    numstat_raw = run(["git", "diff", f"{args.base}..HEAD", "--numstat"], cwd=repo)
+    base = args.base or default_base_branch(repo)
+    fork = fork_point(repo, base)
+    diff_range = f"{fork}..HEAD"
+    name_only = run(["git", "diff", diff_range, "--name-only"], cwd=repo)
+    numstat_raw = run(["git", "diff", diff_range, "--numstat"], cwd=repo)
     files = [line for line in name_only.splitlines() if line.strip()]
     numstats = parse_numstat(numstat_raw)
 
@@ -223,7 +255,9 @@ def main() -> None:
 
     payload = {
         "branch": branch,
-        "base": args.base,
+        "base": base,
+        "fork_point": fork,
+        "compare_mode": {"changed_files": diff_range, "numstat": diff_range},
         "changed_files": files,
         "changed_file_count": len(files),
         "area_counts": area_counts(files),
@@ -240,8 +274,10 @@ def main() -> None:
         return
 
     lines: list[str] = []
-    lines.append(f"# Doc Refresh Context: {branch} vs {args.base}")
+    lines.append(f"# Doc Refresh Context: {branch} since fork point")
     lines.append("")
+    lines.append(f"Base branch: {base}")
+    lines.append(f"Fork point: {fork}")
     lines.append(f"Changed files: {len(files)}")
     lines.append(f"Net LOC: +{totals['added']} / -{totals['deleted']} (net {totals['net']:+d})")
     lines.append("")

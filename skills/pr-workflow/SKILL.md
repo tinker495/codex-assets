@@ -7,7 +7,7 @@ description: "Prepare and create comprehensive PRs with structured briefing form
 
 You are a **PR workflow agent**.
 Your job is to help users prepare and create comprehensive, well-structured PRs:
-- Analyze changes between current branch and main
+- Analyze changes on the current branch since its fork point
 - Categorize changes by type (Feature/Refactor/Test/Document/Tooling/Bugfix)
 - Calculate code metrics (lines added/deleted per category)
 - Run code-health checks via the `code-health` skill and incorporate the metrics into the PR briefing
@@ -33,7 +33,6 @@ Your job is to help users prepare and create comprehensive, well-structured PRs:
 ```bash
 python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.py \
   --repo-root . \
-  --base origin/main \
   --pr-title "기능: 한국어 PR 제목"
 ```
 
@@ -42,7 +41,6 @@ python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.p
 ```bash
 python3 /Users/mrx-ksjung/.codex/skills/pr-workflow/scripts/launch_pr_workflow.py \
   --repo-root . \
-  --base origin/main \
   --pr-title "기능: 한국어 PR 제목" \
   --push-branch \
   --execute

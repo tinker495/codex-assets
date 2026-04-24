@@ -9,18 +9,27 @@ import subprocess
 TEST_RE = re.compile(r"(^|/)(tests?|__tests__)/|\.test\.|\.spec\.")
 
 
+def git_output(*args: str) -> str | None:
+    result = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
 def get_base_ref() -> str:
-    """Resolve base ref: origin/main -> main -> HEAD."""
-    candidates = [
-        "refs/remotes/origin/main",
-        "refs/heads/main",
-    ]
-    for ref in candidates:
+    """Resolve upstream ref used for fork-point detection."""
+    symbolic = git_output("symbolic-ref", "refs/remotes/origin/HEAD")
+    if symbolic and symbolic.startswith("refs/remotes/origin/"):
+        return symbolic.removeprefix("refs/remotes/origin/")
+    for ref, name in (
+        ("refs/remotes/origin/main", "origin/main"),
+        ("refs/heads/main", "main"),
+        ("refs/remotes/origin/master", "origin/master"),
+        ("refs/heads/master", "master"),
+    ):
         result = subprocess.run(["git", "show-ref", "--verify", "--quiet", ref], check=False)
         if result.returncode == 0:
-            if ref.startswith("refs/remotes/"):
-                return ref.replace("refs/remotes/", "")
-            return ref.replace("refs/heads/", "")
+            return name
     return "HEAD"
 
 
@@ -28,6 +37,14 @@ def resolve_base_ref(base: str | None) -> str:
     if base:
         return base
     return get_base_ref()
+
+
+def resolve_fork_point(base: str) -> str:
+    return (
+        git_output("merge-base", "--fork-point", base, "HEAD")
+        or git_output("merge-base", base, "HEAD")
+        or base
+    )
 
 
 def summarize_numstat(numstat: str) -> tuple[int, int, int, int]:
@@ -178,23 +195,23 @@ def print_top_churn(entries: list[tuple[str, int, int, bool]], label: str, top_n
         print(f"  {total:5d}  +{add:4d}/-{rem:4d}  {path}")
 
 
-def git_diff_numstat(base: str | None, staged: bool, all_files: bool) -> str:
+def git_diff_numstat(compare_ref: str | None, staged: bool, all_files: bool) -> str:
     cmd = ["git", "diff", "--numstat"]
     if staged:
         cmd.append("--staged")
-    elif base:
-        cmd.append(f"{base}...HEAD")
+    elif compare_ref:
+        cmd.append(f"{compare_ref}..HEAD")
     if not all_files:
         cmd.extend(["--", "*.py"])
     return subprocess.run(cmd, capture_output=True, text=True).stdout
 
 
-def git_diff_name_status(base: str | None, staged: bool, all_files: bool) -> str:
+def git_diff_name_status(compare_ref: str | None, staged: bool, all_files: bool) -> str:
     cmd = ["git", "diff", "--name-status"]
     if staged:
         cmd.append("--staged")
-    elif base:
-        cmd.append(f"{base}...HEAD")
+    elif compare_ref:
+        cmd.append(f"{compare_ref}..HEAD")
     if not all_files:
         cmd.extend(["--", "*.py"])
     return subprocess.run(cmd, capture_output=True, text=True).stdout
@@ -209,25 +226,26 @@ def main() -> None:
     args = parser.parse_args()
 
     base = resolve_base_ref(args.base)
+    fork = resolve_fork_point(base)
     all_files = args.all_files
 
     # Branch diff
-    numstat = git_diff_numstat(base, staged=False, all_files=all_files)
-    name_status = git_diff_name_status(base, staged=False, all_files=all_files)
+    numstat = git_diff_numstat(fork, staged=False, all_files=all_files)
+    name_status = git_diff_name_status(fork, staged=False, all_files=all_files)
     add, rem, tadd, trem = summarize_numstat(numstat)
     new_f, del_f, new_tf, del_tf = summarize_name_status(name_status)
-    print_diff(f"Branch ({base}...HEAD)", add, rem, tadd, trem, new_f, del_f, new_tf, del_tf)
+    print_diff(f"Branch fork point ({fork}..HEAD; upstream {base})", add, rem, tadd, trem, new_f, del_f, new_tf, del_tf)
 
     # Staged diff
-    numstat = git_diff_numstat(base=None, staged=True, all_files=all_files)
-    name_status = git_diff_name_status(base=None, staged=True, all_files=all_files)
+    numstat = git_diff_numstat(compare_ref=None, staged=True, all_files=all_files)
+    name_status = git_diff_name_status(compare_ref=None, staged=True, all_files=all_files)
     add, rem, tadd, trem = summarize_numstat(numstat)
     new_f, del_f, new_tf, del_tf = summarize_name_status(name_status)
     print_diff("Staged", add, rem, tadd, trem, new_f, del_f, new_tf, del_tf)
 
     # Working diff
-    numstat = git_diff_numstat(base=None, staged=False, all_files=all_files)
-    name_status = git_diff_name_status(base=None, staged=False, all_files=all_files)
+    numstat = git_diff_numstat(compare_ref=None, staged=False, all_files=all_files)
+    name_status = git_diff_name_status(compare_ref=None, staged=False, all_files=all_files)
     add, rem, tadd, trem = summarize_numstat(numstat)
     new_f, del_f, new_tf, del_tf = summarize_name_status(name_status)
 
@@ -252,8 +270,8 @@ def main() -> None:
                 print(f"      ... and {len(untracked_test) - 3} more")
 
     if args.deep:
-        entries = parse_numstat_entries(git_diff_numstat(base, staged=False, all_files=all_files))
-        print(f"\nTop churn files ({base}...HEAD, add+del):")
+        entries = parse_numstat_entries(git_diff_numstat(fork, staged=False, all_files=all_files))
+        print(f"\nTop churn files ({fork}..HEAD, add+del; upstream {base}):")
         print_top_churn(entries, "  Non-test", args.top_files, is_test=False)
         print_top_churn(entries, "  Test", args.top_files, is_test=True)
 

@@ -86,8 +86,33 @@ def git_output(repo_root: Path, *args: str) -> str:
     return process.stdout.strip()
 
 
+def maybe_git_output(repo_root: Path, *args: str) -> str | None:
+    try:
+        return git_output(repo_root, *args)
+    except ValueError:
+        return None
+
+
 def resolve_repo_root(path: Path) -> Path:
     return Path(git_output(path, "rev-parse", "--show-toplevel"))
+
+
+def default_base_branch(repo_root: Path) -> str:
+    symbolic = maybe_git_output(repo_root, "symbolic-ref", "refs/remotes/origin/HEAD")
+    if symbolic and symbolic.startswith("refs/remotes/origin/"):
+        return symbolic.removeprefix("refs/remotes/origin/")
+    for candidate in ("origin/main", "main", "origin/master", "master"):
+        if maybe_git_output(repo_root, "rev-parse", "--verify", candidate):
+            return candidate
+    return "HEAD~1"
+
+
+def resolve_fork_point(repo_root: Path, base: str) -> str:
+    return (
+        maybe_git_output(repo_root, "merge-base", "--fork-point", base, "HEAD")
+        or maybe_git_output(repo_root, "merge-base", base, "HEAD")
+        or base
+    )
 
 
 def slugify(value: str) -> str:
@@ -266,10 +291,12 @@ def build_category_metrics(numstats: list[NumstatRow], *, runtime_bucket: str) -
 
 def collect_branch_context(repo_root: Path, base: str) -> dict[str, Any]:
     branch = git_output(repo_root, "branch", "--show-current")
-    commits = git_output(repo_root, "log", f"{base}..HEAD", "--pretty=format:%h%x09%s")
-    files = git_output(repo_root, "diff", f"{base}...HEAD", "--name-only")
-    numstat_raw = git_output(repo_root, "diff", f"{base}...HEAD", "--numstat")
-    diff_stat = git_output(repo_root, "diff", "--shortstat", f"{base}...HEAD")
+    fork = resolve_fork_point(repo_root, base)
+    compare_range = f"{fork}..HEAD"
+    commits = git_output(repo_root, "log", compare_range, "--pretty=format:%h%x09%s")
+    files = git_output(repo_root, "diff", compare_range, "--name-only")
+    numstat_raw = git_output(repo_root, "diff", compare_range, "--numstat")
+    diff_stat = git_output(repo_root, "diff", "--shortstat", compare_range)
     commit_log = [line for line in commits.splitlines() if line.strip()]
     numstats = parse_numstat(numstat_raw)
     runtime_bucket = runtime_category_from_commits(commit_log)
@@ -277,6 +304,13 @@ def collect_branch_context(repo_root: Path, base: str) -> dict[str, Any]:
     return {
         "branch": branch,
         "base": base,
+        "fork_point": fork,
+        "compare_mode": {
+            "commit_log": compare_range,
+            "files": compare_range,
+            "numstat": compare_range,
+            "diff_stat": compare_range,
+        },
         "commit_count": len(commit_log),
         "commit_log": commit_log,
         "files_changed": len([line for line in files.splitlines() if line.strip()]),
@@ -298,7 +332,8 @@ def collect_branch_context(repo_root: Path, base: str) -> dict[str, Any]:
 
 
 def collect_breaking_change_hints(repo_root: Path, base: str) -> dict[str, Any]:
-    raw = git_output(repo_root, "diff", "--name-status", f"{base}...HEAD")
+    fork = resolve_fork_point(repo_root, base)
+    raw = git_output(repo_root, "diff", "--name-status", f"{fork}..HEAD")
     deleted_files: list[str] = []
     renamed_files: list[dict[str, str]] = []
     for line in raw.splitlines():
@@ -314,6 +349,9 @@ def collect_breaking_change_hints(repo_root: Path, base: str) -> dict[str, Any]:
     return {
         "deleted_files": deleted_files,
         "renamed_files": renamed_files,
+        "base": base,
+        "fork_point": fork,
+        "compare_mode": f"{fork}..HEAD",
         "suspected_breaking_changes": bool(deleted_files or renamed_files),
         "summary": (
             f"deleted={len(deleted_files)}, renamed={len(renamed_files)}; "
@@ -428,7 +466,11 @@ def serialize_command_result(result: CommandResult) -> dict[str, Any]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run PR workflow prerequisites and emit checklist verdict JSON")
     parser.add_argument("--repo-root", type=Path, default=Path("."))
-    parser.add_argument("--base", default="origin/main")
+    parser.add_argument(
+        "--base",
+        default=None,
+        help="Upstream branch used only to resolve the fork point; defaults to origin/HEAD, then main/master.",
+    )
     parser.add_argument("--code-health-json", type=Path, default=None)
     parser.add_argument("--code-health-mode", default="summary", choices=["summary", "full"])
     parser.add_argument("--code-health-top", type=int, default=20)
@@ -450,6 +492,7 @@ def main() -> None:
     args = build_parser().parse_args()
     repo_root = resolve_repo_root(args.repo_root.resolve())
     branch_name = git_output(repo_root, "branch", "--show-current")
+    base = args.base or default_base_branch(repo_root)
     fallback_status_dir = repo_root / ".codex_tmp" / "pr-workflow" / slugify(branch_name)
     status_path = (
         args.status_json.resolve()
@@ -465,7 +508,7 @@ def main() -> None:
         script_name="pr-workflow.run",
         initial_state={
             "repo_root": str(repo_root),
-            "base": args.base,
+            "base": base,
             "branch": branch_name,
         },
     )
@@ -474,15 +517,15 @@ def main() -> None:
         tracker.set_artifact("workflow_output_json", str(args.output_json.resolve()))
     if args.pr_brief_output is not None:
         tracker.set_artifact("pr_brief_markdown", str(args.pr_brief_output.resolve()))
-    tracker.set_phase("branch-context", message=f"collecting PR workflow context for {branch_name} vs {args.base}")
-    branch_context = collect_branch_context(repo_root, args.base)
+    tracker.set_phase("branch-context", message=f"collecting PR workflow context for {branch_name} since fork point")
+    branch_context = collect_branch_context(repo_root, base)
     out_dir = args.code_health_out_dir if args.code_health_out_dir is not None else default_code_health_out_dir()
 
     if args.code_health_json is None:
         tracker.set_phase("code-health", message="running code-health prerequisite")
         code_health_result, code_health_json_path, code_health_payload = run_code_health(
             repo_root=repo_root,
-            base=args.base,
+            base=base,
             out_dir=out_dir,
             mode=args.code_health_mode,
             top=args.code_health_top,
@@ -536,7 +579,7 @@ def main() -> None:
         full_dataset_status = "not_run"
 
     tracker.set_phase("breaking-changes", message="collecting breaking-change hints")
-    breaking_changes = collect_breaking_change_hints(repo_root, args.base)
+    breaking_changes = collect_breaking_change_hints(repo_root, base)
     tracker.set_phase("checklist", message="evaluating checklist from collected results")
     checklist_payload = run_checklist_evaluator(
         code_health_json=code_health_json_path,

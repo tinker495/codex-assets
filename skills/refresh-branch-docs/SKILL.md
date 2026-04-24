@@ -50,11 +50,11 @@ If the repository keeps top-level design/plan/quality/reliability/security docs,
   - architecture shift invalidates existing doc boundaries
 
 4. Build the documentation impact set.
-Use `origin/main` as the default base to avoid stale-local-base drift.
+Use the branch fork point as the default branch-diff boundary. The upstream base is only used to resolve that fork point; omit `--base` to let the helper detect `origin/HEAD`, then `main`/`master`.
 Run:
 
 ```bash
-python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --base origin/main --format md
+python /Users/mrx-ksjung/.codex/skills/refresh-branch-docs/scripts/collect_doc_refresh_context.py --format md
 ```
 
 Use `references/doc_update_matrix.md` to validate and expand candidate docs.
