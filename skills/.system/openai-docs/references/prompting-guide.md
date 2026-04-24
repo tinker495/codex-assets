@@ -5,8 +5,8 @@ GPT-5.4, our newest mainline model, is designed to balance long-running task per
 GPT-5.4 is designed for production-grade assistants and agents that need strong multi-step reasoning, evidence-rich synthesis, and reliable performance over long contexts. It is especially effective when prompts clearly specify the output contract, tool-use expectations, and completion criteria. In practice, the biggest gains come from choosing the right reasoning effort for the task, using explicit grounding and citation rules, and giving the model a precise definition of what "done" looks like. This guide focuses on prompt patterns and migration practices that preserve those efficiency wins. For model capabilities, API parameters, and broader migration guidance, see [our latest model guide](https://developers.openai.com/api/docs/guides/latest-model).
 
 When troubleshooting cases where GPT-5.4 treats an intermediate update as the
-final answer, verify your integration preserves the assistant message `phase`
-field correctly. See [Phase parameter](#phase-parameter) for details.
+  final answer, verify your integration preserves the assistant message `phase`
+  field correctly. See [Phase parameter](#phase-parameter) for details.
 
 ## Understand GPT-5.4 behavior
 
@@ -234,7 +234,7 @@ For agents that actively take actions, add a short execution frame:
 
 ### Choose image detail explicitly for vision and computer use
 
-If your workflow depends on visual precision, specify the image `detail` level in the prompt or integration instead of relying on `auto`. Use `high` for standard high-fidelity image understanding. Use `original` for large, dense, or spatially sensitive images, especially [computer use, localization, OCR, and click-accuracy tasks](https://developers.openai.com/api/docs/guides/tools-computer-use) on `gpt-5.5` and future models. Use `low` only when speed and cost matter more than fine detail. For more details on image detail levels, see the [Images and Vision guide](https://developers.openai.com/api/docs/guides/images-vision).
+If your workflow depends on visual precision, specify the image `detail` level in the prompt or integration instead of relying on `auto`. Use `high` for standard high-fidelity image understanding. Use `original` for large, dense, or spatially sensitive images, especially [computer use, localization, OCR, and click-accuracy tasks](https://developers.openai.com/api/docs/guides/tools-computer-use) on `gpt-5.4` and future models. Use `low` only when speed and cost matter more than fine detail. For more details on image detail levels, see the [Images and Vision guide](https://developers.openai.com/api/docs/guides/images-vision).
 
 ### Lock research and citations to retrieved evidence
 
@@ -535,17 +535,17 @@ These starting points work well for many migrations:
 | Research-heavy assistants | `medium` or `high`                 | Use explicit research multi-pass and citation gating.               |
 | Long-horizon agents       | `medium` or `high`                 | Add tool persistence and completeness accounting.                   |
 
-### Small-model guidance for `gpt-5.5-mini` and `gpt-5.5-nano`
+### Small-model guidance for `gpt-5.4-mini` and `gpt-5.4-nano`
 
-`gpt-5.5-mini` and `gpt-5.5-nano` are highly steerable, but they are less likely than larger models to infer missing steps, resolve ambiguity implicitly, or package outputs the way you intended unless you specify that behavior directly. In practice, prompts for smaller models are often a bit longer and more explicit.
+`gpt-5.4-mini` and `gpt-5.4-nano` are highly steerable, but they are less likely than larger models to infer missing steps, resolve ambiguity implicitly, or package outputs the way you intended unless you specify that behavior directly. In practice, prompts for smaller models are often a bit longer and more explicit.
 
-**How `gpt-5.5-mini` differs**
+**How `gpt-5.4-mini` differs**
 
-- `gpt-5.5-mini` is more literal and makes fewer assumptions.
+- `gpt-5.4-mini` is more literal and makes fewer assumptions.
 - It is strong when the task is clearly structured, but weaker on implicit workflows and ambiguity handling.
 - By default, it may try to keep the conversation going with a follow-up question unless you suppress that behavior explicitly.
 
-**Prompting `gpt-5.5-mini`**
+**Prompting `gpt-5.4-mini`**
 
 - Put critical rules first.
 - Specify the full execution order when tool use or side effects matter.
@@ -556,12 +556,12 @@ These starting points work well for many migrations:
 - Specify packaging directly: answer length, whether to ask a follow-up question, citation style, and section order.
 - Be careful with `output nothing else`. Prefer scoped instructions such as `after the final JSON, output nothing further`.
 
-**Prompting `gpt-5.5-nano`**
+**Prompting `gpt-5.4-nano`**
 
-- Use `gpt-5.5-nano` only for narrow, well-bounded tasks.
+- Use `gpt-5.4-nano` only for narrow, well-bounded tasks.
 - Prefer closed outputs: labels, enums, short JSON, or fixed templates.
 - Avoid multi-step orchestration unless the flow is extremely constrained.
-- Route ambiguous or planning-heavy tasks to a stronger model instead of over-prompting `gpt-5.5-nano`.
+- Route ambiguous or planning-heavy tasks to a stronger model instead of over-prompting `gpt-5.4-nano`.
 
 **Good default pattern**
 
