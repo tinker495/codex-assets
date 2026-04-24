@@ -50,6 +50,7 @@ desloppify scan --path src/ --reset-subjective  # reset subjective baseline to 0
 desloppify next --count 5                  # top priorities
 desloppify show <pattern>                  # filter by file/detector/ID
 desloppify plan                            # prioritized plan
+desloppify plan cluster show <name>        # inspect a cluster; top-level "cluster" is invalid
 desloppify fix <fixer> --dry-run           # auto-fix (dry-run first!)
 desloppify move <src> <dst> --dry-run      # move + update imports
 desloppify resolve fixed|wontfix|false_positive "<pat>"   # classify finding outcome
@@ -110,6 +111,7 @@ Integrity safeguard:
 - `--lang python`, `--lang typescript`, or `--lang csharp` to force language.
 - C# defaults to `--profile objective`; use `--profile full` to include subjective review.
 - Score can temporarily drop after fixes (cascade effects are normal).
+- Cluster commands are under `plan`: use `desloppify plan cluster ...`; never run `desloppify cluster ...`.
 
 ## 6. Escalate Tool Issues Upstream
 

@@ -1,3 +1,9 @@
+2026-04-24 10:55:50 KST
+
+- Follow-up from the 2026-04-23 session review: the strongest actionable operational noise was repeated `desloppify cluster ...` misuse (`invalid choice: 'cluster'` 7 times across 7 sessions) while `desloppify plan cluster show ...` succeeded later.
+- Updated `/Users/mrx-ksjung/.codex/skills/desloppify/SKILL.md` and the active project-local `/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/.agents/skills/desloppify/SKILL.md` to explicitly route cluster inspection through `desloppify plan cluster ...` and warn that top-level `desloppify cluster ...` is invalid.
+- Validation passed for both changed skill directories with `PATH="$HOME/.local/bin:$PATH" UV_CACHE_DIR=/tmp/uv-cache-codex uv run --with pyyaml python /Users/mrx-ksjung/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill_dir>`.
+
 2026-04-16 10:43:49 KST
 
 - Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/04/15/*.jsonl` and saved the exact 19-file list at `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/yesterday-2026-04-15-files.txt`.
