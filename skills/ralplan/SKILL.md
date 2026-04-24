@@ -26,7 +26,7 @@ $ralplan --interactive "task description"
 
 ## Behavior
 
-## GPT-5.4 Guidance Alignment
+## GPT-5.5 Guidance Alignment
 
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail.
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.

@@ -1,6 +1,6 @@
 # Upgrading to GPT-5.4
 
-Use this guide when the user explicitly asks to upgrade an existing integration to GPT-5.4. Pair it with current OpenAI docs lookups. The default target string is `gpt-5.4`.
+Use this guide when the user explicitly asks to upgrade an existing integration to GPT-5.4. Pair it with current OpenAI docs lookups. The default target string is `gpt-5.5`.
 
 ## Freshness check
 
@@ -34,12 +34,12 @@ Upgrade with the narrowest safe change set:
    - `model string + light prompt rewrite`
    - `blocked without code changes`
 5. Run the no-code compatibility gate.
-   - Check whether the current integration can accept `gpt-5.4` without API-surface changes or implementation changes.
+   - Check whether the current integration can accept `gpt-5.5` without API-surface changes or implementation changes.
    - For long-running Responses or tool-heavy agents, check whether `phase` is already preserved or round-tripped when the host replays assistant items or uses preambles.
    - If compatibility depends on code changes, return `blocked`.
    - If compatibility is unclear, return `unknown` rather than improvising.
 6. Recommend the upgrade.
-   - Default replacement string: `gpt-5.4`
+   - Default replacement string: `gpt-5.5`
    - Keep the intervention small and behavior-preserving.
 7. Deliver a structured recommendation.
    - `Current model usage`
@@ -69,7 +69,7 @@ Choose this when:
 
 Default action:
 
-- replace the model string with `gpt-5.4`
+- replace the model string with `gpt-5.5`
 - keep prompts unchanged
 - validate behavior with existing evals or spot checks
 
@@ -86,7 +86,7 @@ Choose this when:
 
 Default action:
 
-- replace the model string with `gpt-5.4`
+- replace the model string with `gpt-5.5`
 - add one or two targeted prompt blocks
 - read `references/prompting-guide.md` to choose the smallest prompt changes that preserve the intended behavior and take advantage of relevant model-specific guidance
 - avoid broad prompt cleanup unrelated to the upgrade
@@ -115,7 +115,7 @@ Default action:
 
 Before recommending a no-code upgrade, check:
 
-1. Can the current host accept the `gpt-5.4` model string without changing client code or API surface?
+1. Can the current host accept the `gpt-5.5` model string without changing client code or API surface?
 2. Are the related prompts identifiable and editable?
 3. Does the host depend on behavior that likely needs API-surface changes, parameter rewrites, or tool rewiring?
 4. Would the likely fix be prompt-only, or would it need implementation changes?
@@ -166,7 +166,7 @@ If a safe GPT-5.4 upgrade requires any of those changes, mark the path as blocke
 When final GPT-5.4 guidance changes:
 
 1. Replace release-candidate assumptions with final GPT-5.4 guidance where appropriate.
-2. Re-check whether the default target string should stay `gpt-5.4` for all source families.
+2. Re-check whether the default target string should stay `gpt-5.5` for all source families.
 3. Re-check any prompt-block recommendations whose semantics may have changed.
 4. Re-check research, citation, and compatibility guidance against the final model behavior.
 5. Re-run the same upgrade scenarios and confirm the blocked-versus-viable boundaries still hold.
