@@ -1,6 +1,6 @@
 ---
 name: trace
-description: "[OMX] Show agent flow trace timeline and summary"
+description: Show agent flow trace timeline and summary
 ---
 
 # Agent Flow Trace

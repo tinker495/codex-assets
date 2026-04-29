@@ -1,6 +1,6 @@
 ---
 name: configure-notifications
-description: "[OMX] Configure OMX notifications - unified entry point for all platforms"
+description: Configure OMX notifications - unified entry point for all platforms
 triggers:
   - "configure notifications"
   - "setup notifications"
@@ -257,7 +257,6 @@ Deterministic precedence:
 ### Reply listener
 - `notifications.reply.enabled`
 - env gates: `OMX_REPLY_ENABLED=true`, and for Discord `OMX_REPLY_DISCORD_USER_IDS=...`
-- For Discord bot replies, an authorized operator can reply with exact-match `status` to a tracked OMX notification to receive a bounded read-only session summary. This is a reply-thread-scoped status probe, not a general remote control surface.
 
 ## Step 6: Disable All Notifications
 

@@ -1,13 +1,11 @@
 ---
 name: help
-description: "[OMX] Guide on using oh-my-codex plugin"
+description: Guide on using oh-my-codex plugin
 ---
 
 # How OMX Works
 
-Plain English works as best-effort guidance — OMX inspects each prompt and may add advisory routing context to steer the model toward a suitable lane. This is **advisory prompt-routing context**: it does not activate a skill or workflow by itself. Explicit keywords remain the deterministic control surface when you want exact, guaranteed routing.
-
-**Triage lanes** (when no keyword matches): complex/multi-step prompts may receive HEAVY guidance (autopilot-shaped); read-only lookups receive LIGHT/explore guidance; implementation work receives LIGHT/executor guidance; UI work receives LIGHT/designer guidance; simple conversational prompts receive no injection (PASS). To opt out per prompt, include a phrase such as `no workflow`, `just chat`, or `plain answer`.
+**You don't need to learn any commands!** OMX enhances Codex CLI with intelligent behaviors that activate automatically.
 
 ## What Happens Automatically
 

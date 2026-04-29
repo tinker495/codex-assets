@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "[OMX] Run a comprehensive code review"
+description: Run a comprehensive code review
 ---
 
 # Code Review Skill
@@ -15,55 +15,38 @@ This skill activates when:
 - After implementing a major feature
 - User wants quality assessment
 
-## GPT-5.5 Guidance Alignment
+## What It Does
+
+## GPT-5.4 Guidance Alignment
 
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail.
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.
 - If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the review is grounded.
 - Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent.
 
-Delegates to the `code-reviewer` and `architect` agents in parallel for a two-lane review:
+Delegates to the `code-reviewer` agent (THOROUGH tier) for deep analysis:
 
 1. **Identify Changes**
    - Run `git diff` to find changed files
    - Determine scope of review (specific files or entire PR)
 
-2. **Launch Parallel Review Lanes**
-   - **`code-reviewer` lane** - owns spec compliance, security, code quality, performance, and maintainability findings
-   - **`architect` lane** - owns the devil's-advocate / design-tradeoff perspective
-   - Both lanes run in parallel and produce distinct outputs before final synthesis
-
-3. **Review Categories**
+2. **Review Categories**
    - **Security** - Hardcoded secrets, injection risks, XSS, CSRF
    - **Code Quality** - Function size, complexity, nesting depth
    - **Performance** - Algorithm efficiency, N+1 queries, caching
    - **Best Practices** - Naming, documentation, error handling
    - **Maintainability** - Duplication, coupling, testability
 
-4. **Severity Rating**
+3. **Severity Rating**
    - **CRITICAL** - Security vulnerability (must fix before merge)
    - **HIGH** - Bug or major code smell (should fix before merge)
    - **MEDIUM** - Minor issue (fix when possible)
    - **LOW** - Style/suggestion (consider fixing)
 
-5. **Architectural Status Contract**
-   - **CLEAR** - No unresolved architectural blocker was found
-   - **WATCH** - Non-blocking design/tradeoff concern that must appear in the final synthesis
-   - **BLOCK** - Unresolved design concern that prevents a merge-ready verdict
-
-6. **Specific Recommendations**
+4. **Specific Recommendations**
    - File:line locations for each issue
    - Concrete fix suggestions
    - Code examples where applicable
-
-7. **Final Synthesis**
-   - Combine the `code-reviewer` recommendation and the architect status into one final verdict
-   - Deterministic merge gating rules:
-     - If architect status is **BLOCK**, final recommendation is **REQUEST CHANGES**
-     - Else if `code-reviewer` recommendation is **REQUEST CHANGES**, final recommendation is **REQUEST CHANGES**
-     - Else if architect status is **WATCH**, final recommendation is **COMMENT**
-     - Else final recommendation follows the `code-reviewer` lane
-   - The final report must make architect blockers impossible to miss
 
 ## Agent Delegation
 
@@ -74,8 +57,6 @@ delegate(
   prompt="CODE REVIEW TASK
 
 Review code changes for quality, security, and maintainability.
-
-This is the code/spec/security lane. Do not absorb architectural ownership.
 
 Scope: [git diff or specific files]
 
@@ -93,29 +74,6 @@ Output: Code review report with:
 - Fix recommendations
 - Approval recommendation (APPROVE / REQUEST CHANGES / COMMENT)"
 )
-
-delegate(
-  role="architect",
-  tier="THOROUGH",
-  prompt="ARCHITECTURE / DEVIL'S-ADVOCATE REVIEW TASK
-
-Review the same code changes from the architecture/tradeoff perspective.
-
-Scope: [git diff or specific files]
-
-Focus:
-- System boundaries and interfaces
-- Hidden coupling or long-term maintainability risks
-- Tradeoff tension the main reviewer might miss
-- Strongest counterargument against approving as-is
-
-Output:
-- Architectural Status: CLEAR / WATCH / BLOCK
-- File:line evidence for each concern
-- Concrete tradeoff or design recommendation"
-)
-
-Run both lanes in parallel, then synthesize them with the deterministic rules above.
 ```
 
 ## External Model Consultation (Preferred)
@@ -154,59 +112,45 @@ CODE REVIEW REPORT
 ==================
 
 Files Reviewed: 8
-Total Issues: 12
-Architectural Status: WATCH
+Total Issues: 15
 
 CRITICAL (0)
 -----------
 (none)
 
-HIGH (0)
+HIGH (3)
 --------
-(none)
+1. src/api/auth.ts:42
+   Issue: User input not sanitized before SQL query
+   Risk: SQL injection vulnerability
+   Fix: Use parameterized queries or ORM
+
+2. src/components/UserProfile.tsx:89
+   Issue: Password displayed in plain text in logs
+   Risk: Credential exposure
+   Fix: Remove password from log statements
+
+3. src/utils/validation.ts:15
+   Issue: Email regex allows invalid formats
+   Risk: Accepts malformed emails
+   Fix: Use proven email validation library
 
 MEDIUM (7)
 ----------
-1. src/api/auth.ts:42
-   Issue: Email normalization logic is duplicated instead of reusing the shared helper
-   Risk: Validation rules can drift between authentication paths
-   Fix: Route both paths through the shared normalization helper
-
-2. src/components/UserProfile.tsx:89
-   Issue: Derived permissions are recalculated on every render
-   Risk: Avoidable work during profile refreshes
-   Fix: Memoize the derived permissions list or compute it upstream
-
-3. src/utils/validation.ts:15
-   Issue: Form-layer and server-layer validation messages are defined separately
-   Risk: User-facing validation guidance can become inconsistent
-   Fix: Share one validation message helper across both call sites
+...
 
 LOW (5)
 -------
 ...
 
-ARCHITECTURE WATCHLIST
-----------------------
-- src/review/orchestrator.ts:88
-  Concern: Review result synthesis relies on implicit ordering rather than an explicit blocker contract
-  Status: WATCH
-  Recommendation: Define deterministic merge gating before expanding reviewers
+RECOMMENDATION: REQUEST CHANGES
 
-SYNTHESIS
----------
-- code-reviewer recommendation: COMMENT
-- architect status: WATCH
-- final recommendation: COMMENT
-
-RECOMMENDATION: COMMENT
-
-Address any WATCH concerns before treating the change as merge-ready.
+Critical security issues must be addressed before merge.
 ```
 
 ## Review Checklist
 
-The `code-reviewer` lane checks:
+The code-reviewer agent checks:
 
 ### Security
 - [ ] No hardcoded secrets (API keys, passwords, tokens)
@@ -236,21 +180,11 @@ The `code-reviewer` lane checks:
 - [ ] Tests for critical paths
 - [ ] No commented-out code
 
-## Architect Lane Checklist
-
-The `architect` lane checks:
-
-- [ ] Boundary or interface changes are explicit
-- [ ] New coupling/tradeoff risks are surfaced
-- [ ] Long-horizon maintainability concerns are evidence-backed
-- [ ] Architectural status is one of `CLEAR`, `WATCH`, or `BLOCK`
-- [ ] Any `BLOCK` concern cites the reason merge-ready status should be withheld
-
 ## Approval Criteria
 
-**APPROVE** - `code-reviewer` returns APPROVE and architect status is `CLEAR`
-**REQUEST CHANGES** - `code-reviewer` returns REQUEST CHANGES or architect status is `BLOCK`
-**COMMENT** - `code-reviewer` returns COMMENT with architect status `CLEAR`, architect status is `WATCH`, or only LOW/MEDIUM improvements remain
+**APPROVE** - No CRITICAL or HIGH issues, minor improvements only
+**REQUEST CHANGES** - CRITICAL or HIGH issues present
+**COMMENT** - Only LOW/MEDIUM issues, no blocking concerns
 
 
 ## Scenario Examples
@@ -273,7 +207,7 @@ Includes coordinated review execution across specialized agents.
 ```
 /ralph code-review then fix all issues
 ```
-On the explicit Ralph path, review findings should flow into automatic fix follow-up without another permission prompt. Plain `code-review` itself remains read-only and does **not** promise auto-fix.
+Review code, get feedback, fix until approved.
 
 **With Ultrawork:**
 ```

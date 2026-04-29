@@ -1,6 +1,6 @@
 ---
 name: team
-description: "[OMX] N coordinated agents on shared task list using tmux-based orchestration"
+description: N coordinated agents on shared task list using tmux-based orchestration
 ---
 
 # Team Skill
@@ -17,7 +17,7 @@ This skill is operationally sensitive. Treat it as an operator workflow, not a g
 
 ## What This Skill Must Do
 
-## GPT-5.5 Guidance Alignment
+## GPT-5.4 Guidance Alignment
 
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail.
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.
@@ -29,16 +29,15 @@ When user triggers `$team`, the agent must:
 1. Invoke OMX runtime directly with `omx team ...`
 2. Avoid replacing the flow with in-process `spawn_agent` fanout
 3. Verify startup and surface concrete state/pane evidence
-4. If active team mode state is missing, initialize/sync it from canonical team runtime state before proceeding
-5. Keep team state alive until workers are terminal (unless explicit abort)
-6. Handle cleanup and stale-pane recovery when needed
+4. Keep team state alive until workers are terminal (unless explicit abort)
+5. Handle cleanup and stale-pane recovery when needed
 
 If `omx team` is unavailable, stop with a hard error.
 
 ## Invocation Contract
 
 ```bash
-omx team [N:agent-type] "<task description>"
+omx team [ralph] [N:agent-type] "<task description>"
 ```
 
 Examples:
@@ -46,19 +45,26 @@ Examples:
 ```bash
 omx team 3:executor "analyze feature X and report flaws"
 omx team "debug flaky integration tests"
-omx team "ship end-to-end fix with verification"
+omx team ralph "ship end-to-end fix with verification"
 ```
 
-### Team-first launch contract
+### Why `team ralph` exists as a linked launch path
 
-`omx team ...` is now the canonical launch path for coordinated execution.
-Team mode should carry its own parallel delivery + verification lanes without
-requiring a separate linked Ralph launch up front.
+`omx team ralph ...` is not just shorthand for "run team now, decide on Ralph
+later." It creates a linked team+Ralph lifecycle from launch time while still
+using the normal `omx team` runtime startup path.
 
-- **Canonical launch:** use plain `omx team ...` / `$team ...` for coordinated workers.
-- **Verification ownership:** keep one lane focused on tests, regression coverage, and evidence before shutdown.
-- **Escalation:** start a separate `omx ralph ...` / `$ralph ...` only when a later manual follow-up still needs a persistent single-owner fix/verification loop.
-- **Deprecation:** `omx team ralph ...` has been removed. Use plain `omx team ...` for team execution or run `omx ralph ...` separately when you explicitly want a later Ralph loop.
+- **Linked lifecycle/state:** launch marks team state with `linked_ralph`,
+  creates/updates Ralph state with `linked_team`, and team terminal phases can
+  propagate into Ralph state.
+- **Cleanup/shutdown:** linked cancellation and shutdown happen in order: team
+  cleanup first, then Ralph terminalization/cleanup metadata.
+- **Operator choice:**
+  - use plain `omx team ...` when you only want coordinated workers
+  - use `omx team ralph ...` when persistent Ralph verification/cleanup is part
+    of the plan from the start
+  - use plain `team` and start Ralph later only when you want a deliberately
+    separate manual follow-up after reviewing output or changing scope
 
 ### Claude teammates (v0.6.0+)
 
@@ -109,7 +115,6 @@ Before launching `omx team`, require a grounded context snapshot:
    - unknowns/open questions
    - likely codebase touchpoints
 4. If ambiguity remains high, run `explore` first for brownfield facts, then run `$deep-interview --quick <task>` before team launch.
-5. If current correctness depends on official docs, version-aware framework guidance, best practices, or external dependency behavior, auto-delegate `researcher` as an evidence lane before or alongside worker launch instead of relying on repo-local recall alone.
 
 Do not start worker panes until this gate is satisfied; if forced to proceed quickly, state explicit scope/risk limitations in the launch report.
 
@@ -123,14 +128,14 @@ When `$team` is used as a follow-up mode from ralplan, carry forward the approve
 - state the recommended headcount and role counts
 - state the suggested reasoning level for each lane when available
 - explain why each lane exists (delivery, verification, specialist support)
-- include an explicit launch hint (`omx team N "<task>"` / `$team N "<task>"`) for the coordinated team run; mention a later separate Ralph follow-up only when genuinely needed
+- include an explicit launch hint (`omx team ralph N "<task>"` / `$team ralph N "<task>"`) when the plan expects Ralph to verify after team delivery
 - if the ideal role is unavailable, choose the closest role from the roster and say so
 
 ## Current Runtime Behavior (As Implemented)
 
 `omx team` currently performs:
 
-1. Parse args (`N`, `agent-type`, task)
+1. Parse args (`ralph`, `N`, `agent-type`, task)
 2. Sanitize team name from task text
 3. Initialize team state:
    - `.omx/state/team/<team>/config.json`
@@ -150,8 +155,6 @@ When `$team` is used as a follow-up mode from ralplan, carry forward the approve
 7. Wait for worker readiness (`capture-pane` polling)
 8. Write per-worker `inbox.md` and trigger via `tmux send-keys`
 9. Return control to leader; follow-up uses `status` / `resume` / `shutdown`
-
-If coarse active team mode state is missing while canonical team runtime state exists, restore/sync the active team mode state before relying on hook/mode-aware behavior.
 
 Important:
 
@@ -343,8 +346,6 @@ Useful runtime env vars:
   - Skip readiness wait (debug only)
 - `OMX_TEAM_AUTO_TRUST=0`
   - Disable auto-advance for trust prompt (default behavior auto-advances)
-- `OMX_TEAM_AUTO_ACCEPT_BYPASS=0`
-  - Disable Claude bypass-permissions prompt auto-accept (default behavior auto-accepts `2` + Enter)
 - `OMX_TEAM_WORKER_LAUNCH_ARGS`
   - Extra args passed to worker launch command
 - `OMX_TEAM_WORKER_CLI`
@@ -473,30 +474,48 @@ Do not claim success without file/pane evidence.
 Do not claim clean completion if shutdown occurred with `in_progress>0`.
 Use `omx sparkshell --tmux-pane ...` as an explicit opt-in operator aid for pane inspection and summaries; keep raw `tmux capture-pane` evidence available for manual intervention and proof.
 
-## Programmatic Team Orchestration
+## MCP Job Lifecycle Tools
 
-Use the `omx team ...` CLI as the supported team-launch surface. For automation, drive the same CLI flow from scripts or supervising agents rather than relying on a separate MCP runner.
+For programmatic or agent-driven team spawning (as opposed to interactive CLI use), OMX exposes four MCP tools via the `team-server`:
 
-### Supported current surfaces
+| Tool | Description |
+|------|-------------|
+| `omx_run_team_start` | Spawn tmux CLI workers in the background; returns a `jobId` immediately |
+| `omx_run_team_status` | Non-blocking status check for a running job |
+| `omx_run_team_wait` | Block until the job completes, with automatic idle-pane nudging |
+| `omx_run_team_cleanup` | Kill worker tmux panes for a job (early stop only) |
 
-- **`omx team ...` CLI** — Primary method for interactive or automated team orchestration. Use this when you want direct tmux-pane visibility or a scriptable launch path.
-- **Team state files** — Inspect `.omx/state/team/<team>/` when you need status, task, or mailbox evidence after launch.
+### CLI vs MCP Tools
 
-### Cleanup distinction
+- **`omx team ...` CLI** — Primary method for interactive team orchestration. Use this when you are operating inside a live tmux session and want direct pane visibility.
+- **`omx_run_team_*` MCP tools** — For programmatic or agent-driven team spawning (analogous to OMC's `omc_run_team_*` tools). Use these when an agent needs to launch workers, poll status, and collect results without manual intervention.
 
-Two cleanup paths exist and must not be confused:
+### Naming Distinction
+
+Two cleanup tools exist and must not be confused:
 
 - `team_cleanup` (**state-server**): Deletes team state **files** on disk (`.omx/state/team/<team>/`). Use after a team run is fully complete.
-- tmux/session cleanup: Use the documented `omx team` shutdown / cleanup flow when you need to stop worker panes or clean up an interrupted run.
+- `omx_run_team_cleanup` (**team-server**): Kills tmux worker **panes** for a job. Use only when stopping workers early; otherwise `omx_run_team_wait` handles natural termination.
 
-### Automation example
+### Basic Usage Example
 
 ```
-1. omx team 1:executor "fix bugs"
-2. omx team status <team-name>
-3. omx team shutdown <team-name>
-4. Clean up the finished team state for <team-name>
+1. omx_run_team_start({
+     teamName: "fix-bugs",
+     agentTypes: ["codex"],
+     tasks: [{ subject: "Fix bug", description: "..." }],
+     cwd: "/path/to/project"
+   })
+   → Returns { jobId: "omx-abc123" }
+
+2. omx_run_team_wait({ job_id: "omx-abc123", timeout_ms: 300000 })
+   → Blocks until done, auto-nudges idle panes
+
+3. omx_run_team_cleanup({ job_id: "omx-abc123" })
+   → Only needed if stopping workers early
 ```
+
+`omx_run_team_status` can be called between steps 1 and 2 for a non-blocking poll if you need to interleave other work while workers run.
 
 ## Limitations
 

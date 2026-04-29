@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: "[OMX] Run a comprehensive security review on code"
+description: Run a comprehensive security review on code
 ---
 
 # Security Review Skill
@@ -19,7 +19,7 @@ This skill activates when:
 
 ## What It Does
 
-## GPT-5.5 Guidance Alignment
+## GPT-5.4 Guidance Alignment
 
 - Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail.
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.

@@ -1,6 +1,6 @@
 ---
 name: "hud"
-description: "[OMX] Show or configure the OMX HUD (two-layer statusline)"
+description: "Show or configure the OMX HUD (two-layer statusline)"
 role: "display"
 scope: ".omx/**"
 ---

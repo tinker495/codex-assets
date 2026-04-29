@@ -1,6 +1,6 @@
 ---
 name: ai-slop-cleaner
-description: "[OMX] Run an anti-slop cleanup/refactor/deslop workflow"
+description: Run an anti-slop cleanup/refactor/deslop workflow
 ---
 
 # AI Slop Cleaner Skill
@@ -15,18 +15,12 @@ Use this skill when:
 - Follow-up implementation left duplicate code, dead code, weak boundaries, missing tests, or unnecessary wrapper layers
 - You need a disciplined cleanup workflow without broad rewrites
 
-## GPT-5.5 Guidance Alignment
+## GPT-5.4 Guidance Alignment
 
 - Keep outputs concise and evidence-dense unless risk or the user requests more detail.
 - Treat newer user instructions as local workflow updates without discarding earlier non-conflicting constraints.
 - Keep using inspection, tests, diagnostics, and verification until the cleanup is grounded.
 - Proceed automatically through clear, reversible cleanup steps; ask only when a choice materially changes scope or behavior.
-
-## Scoped File Lists and Ralph Workflow
-
-- This skill can accept a **file list scope** instead of a whole feature area.
-- When the caller provides a changed-files list (for example, Ralph session-owned edits), keep the cleanup strictly bounded to those files.
-- In the **Ralph workflow**, the mandatory deslop pass should run this skill on Ralph's changed files only, in standard mode unless the caller explicitly requests otherwise.
 
 ## Procedure
 
@@ -38,7 +32,6 @@ Use this skill when:
 2. **Create a cleanup plan before code**
    - List the specific smells to remove
    - Bound the pass to the requested files/scope
-   - If a file list scope is provided, keep the pass restricted to that changed-files list
    - Order fixes from safest/highest-signal to riskiest
    - Do not start coding until the cleanup plan is explicit
 

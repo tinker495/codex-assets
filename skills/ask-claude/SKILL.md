@@ -1,6 +1,6 @@
 ---
 name: ask-claude
-description: "[OMX] Ask Claude via local CLI and capture a reusable artifact"
+description: Ask Claude via local CLI and capture a reusable artifact
 ---
 
 # Ask Claude (Local CLI)

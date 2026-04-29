@@ -1,6 +1,6 @@
 ---
 name: ask-gemini
-description: "[OMX] Ask Gemini via local CLI and capture a reusable artifact"
+description: Ask Gemini via local CLI and capture a reusable artifact
 ---
 
 # Ask Gemini (Local CLI)
