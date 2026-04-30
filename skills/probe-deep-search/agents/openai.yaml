@@ -1,4 +1,4 @@
 interface:
   display_name: "Probe Deep Search"
-  short_description: "Probe-first deep codebase search and symbol tracing"
-  default_prompt: "Use $probe-deep-search to investigate this codebase with probe-first structural search."
+  short_description: "Probe-first codebase search and symbol tracing"
+  default_prompt: "Use $probe-deep-search to run a read-only probe-first investigation and return evidence."
