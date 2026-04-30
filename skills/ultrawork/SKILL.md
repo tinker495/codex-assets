@@ -38,7 +38,7 @@ Sequential task execution wastes time when tasks are independent. Ultrawork keep
 - Auto-delegate `researcher` when official docs, version-aware framework guidance, best practices, or external dependency behavior materially affect task correctness; treat it as an evidence lane, not a replacement primary workflow.
 - Use `run_in_background: true` for operations over ~30 seconds (installs, builds, tests).
 - Run quick commands (git status, file reads, simple checks) in the foreground.
-- Apply the shared workflow guidance pattern: concise, evidence-dense progress and completion reporting (including speculative/blocked lanes), local overrides for the active workflow branch, and continuation of clear safe execution branches instead of restarting or re-asking.
+- Apply the shared workflow guidance pattern: outcome-first framing, concise visible updates for speculative/blocked lanes, local overrides for the active workflow branch, evidence-backed validation, explicit stop rules, and continuation of clear safe execution branches instead of restarting or re-asking.
 - If the user says `continue`, continue the active workflow branch rather than restarting discovery or re-asking settled questions.
 </Execution_Policy>
 

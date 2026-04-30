@@ -19,12 +19,12 @@ This skill activates when:
 
 ## What It Does
 
-## GPT-5.4 Guidance Alignment
+## GPT-5.5 Guidance Alignment
 
-- Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail.
+- Default to outcome-first progress and completion reporting: state the target result, evidence, validation status, and stop condition before adding process detail.
 - Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.
-- If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the security review is grounded.
-- Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent.
+- If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the security review is grounded; stop once enough evidence exists.
+- Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, credentialed, external-production, or preference-dependent.
 
 Delegates to the `security-reviewer` agent (THOROUGH tier) for deep security analysis:
 
