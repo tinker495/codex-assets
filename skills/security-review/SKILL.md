@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Run a comprehensive security review on code
+description: "[OMX] Run a comprehensive security review on code"
 ---
 
 # Security Review Skill

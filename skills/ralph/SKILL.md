@@ -1,6 +1,6 @@
 ---
 name: ralph
-description: Self-referential loop until task completion with architect verification
+description: "[OMX] Self-referential loop until task completion with architect verification"
 ---
 
 [RALPH + ULTRAWORK - ITERATION {{ITERATION}}/{{MAX}}]
@@ -35,10 +35,7 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - Always pass the `model` parameter explicitly when delegating to agents
 - Read `docs/shared/agent-tiers.md` before first delegation to select correct agent tiers
 - Deliver the full implementation: no scope reduction, no partial completion, no deleting tests to make them pass
-- Default to concise, evidence-dense progress and completion reporting unless the user or risk level requires more detail
-- Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints
-- If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the execution loop is grounded
-- Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, or preference-dependent
+- Apply the shared workflow guidance pattern: concise, evidence-dense progress and completion reporting, local overrides for the active workflow branch, persistent inspection/verification while the execution loop depends on it, and automatic continuation for safe reversible steps. Ask only for material, destructive, or preference-dependent branches.
 </Execution_Policy>
 
 <Steps>
@@ -67,7 +64,7 @@ Complex tasks often fail silently: partial implementations get declared "done", 
    - Require structured JSON output: `score`, `verdict`, `category_match`, `differences[]`, `suggestions[]`, `reasoning`.
    - Persist verdict to `.omx/state/{scope}/ralph-progress.json` including numeric + qualitative feedback.
    - Default pass threshold: `score >= 90`.
-   - **URL-based cloning tasks**: When the task description contains a target URL (e.g., "clone https://example.com"), invoke `$web-clone` instead of `$visual-verdict`. The web-clone skill handles the full extraction → generation → verification pipeline and uses `$visual-verdict` internally for visual scoring.
+   - **URL-based visual cloning tasks**: When the task description contains a target URL (e.g., "clone https://example.com"), route the work through `$visual-ralph`. `$web-clone` is hard-deprecated; Visual Ralph owns the migrated live-URL visual implementation use case and uses `$visual-verdict` for measured visual scoring.
 6. **Verify completion with fresh evidence**:
    a. Identify what command proves the task is complete
    b. Run verification (test, build, lint)
@@ -78,6 +75,15 @@ Complex tasks often fail silently: partial implementations get declared "done", 
    - Standard changes: STANDARD tier (architect role)
    - >20 files or security/architectural changes: THOROUGH tier (architect role)
    - Ralph floor: always at least STANDARD, even for small changes
+7.5 **Mandatory Deslop Pass**:
+   - After Step 7 passes, run `oh-my-codex:ai-slop-cleaner` on **all files changed during the Ralph session**.
+   - Scope the cleaner to **changed files only**; do not widen the pass beyond Ralph-owned edits.
+   - Run the cleaner in **standard mode** (not `--review`).
+   - If the prompt contains `--no-deslop`, skip Step 7.5 entirely and proceed with the most recent successful verification evidence.
+7.6 **Regression Re-verification**:
+   - After the deslop pass, re-run all tests/build/lint and read the output to confirm they still pass.
+   - If post-deslop regression fails, roll back cleaner changes or fix and retry. Then rerun Step 7.5 and Step 7.6 until the regression is green.
+   - Do not proceed to completion until post-deslop regression is green (unless `--no-deslop` explicitly skipped the deslop pass).
 8. **On approval**: Run `/cancel` to cleanly exit and clean up all state files
 9. **On rejection**: Fix the issues raised, then re-verify at the same tier
 </Steps>
@@ -89,6 +95,7 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 - If ToolSearch finds no MCP tools or Codex is unavailable, proceed with architect agent verification alone -- never block on external tools
 - Use `state_write` / `state_read` for ralph mode state persistence between iterations
 - Persist context snapshot path in Ralph mode state so later phases and agents share the same grounding context
+- If an `omx_state` MCP tool call reports that its stdio transport is unavailable/closed, do **not** retry the same MCP call. Retry once through the supported CLI parity surface with the same payload, preserving `workingDirectory` and `session_id`: `omx state write --input '<json>' --json`, `omx state read --input '<json>' --json`, or `omx state clear --input '<json>' --json`. If the CLI path also fails, continue with `.omx/context` / `.omx/plans` file-backed artifacts and report the state persistence blocker.
 </Tool_Usage>
 
 ## State Management
@@ -170,6 +177,8 @@ Why bad: These are independent tasks that should run in parallel, not sequential
 - [ ] Fresh build output shows success
 - [ ] lsp_diagnostics shows 0 errors on affected files
 - [ ] Architect verification passed (STANDARD tier minimum)
+- [ ] ai-slop-cleaner pass completed on changed files (or --no-deslop specified)
+- [ ] Post-deslop regression tests pass
 - [ ] `/cancel` run for clean state cleanup
 </Final_Checklist>
 
@@ -180,6 +189,15 @@ When the user provides the `--prd` flag, initialize a Product Requirements Docum
 
 ### Detecting PRD Mode
 Check if `{{PROMPT}}` contains `--prd` or `--PRD`.
+
+Prompt-side `$ralph` workflow activation is lighter-weight than `omx ralph --prd ...`.
+It seeds Ralph workflow state and guidance, but it does not implicitly launch the
+CLI entrypoint or apply the PRD startup gate. Treat `omx ralph --prd ...` as the
+explicit PRD-gated path.
+
+### Detecting `--no-deslop`
+Check if `{{PROMPT}}` contains `--no-deslop`.
+If `--no-deslop` is present, skip the deslop pass entirely after Step 7 and continue using the latest successful pre-deslop verification evidence.
 
 ### Visual Reference Flags (Optional)
 Ralph execution supports visual reference flags for screenshot tasks:
@@ -227,6 +245,8 @@ User input: `--prd build a todo app with React and TypeScript`
 Workflow: Detect flag, extract task, create `.omx/plans/prd-{slug}.md`, create `.omx/state/{scope}/ralph-progress.json`, begin ralph loop.
 
 ### Legacy compatibility
+- During the compatibility window, Ralph `--prd` startup still validates machine-readable story state from `.omx/prd.json`.
+- `.omx/plans/prd-{slug}.md` remains the canonical storage/documentation artifact, but it is not yet the startup validation source.
 - If `.omx/prd.json` exists and canonical PRD is absent, migrate one-way into `.omx/plans/prd-{slug}.md`.
 - If `.omx/progress.txt` exists and canonical progress ledger is absent, import one-way into `.omx/state/{scope}/ralph-progress.json`.
 - Keep legacy files unchanged for one release cycle.
