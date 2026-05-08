@@ -53,7 +53,7 @@ All workflow scripts emit progress to `stderr` and support `--status-json`; poll
 ## Failure handling
 
 - If code-health fails, preserve the failing step, command, return code, and excerpts; do not collapse it into a vague failure.
-- If coverage-backed pytest looks flaky, rerun the exact reported standard-test command at most once and record the override with `evaluate_pr_checklist.py --standard-test-override passed --standard-test-override-detail ...` only if it passes.
+- If coverage-backed pytest looks flaky, extract the failed pytest node id(s) from the failure output/status artifacts and rerun only those failed tests at most once. If node ids are unavailable, rerun the narrowest failed file or directly implicated test slice; do not rerun the whole standard-test command just to check flakiness. Record the override with `evaluate_pr_checklist.py --standard-test-override passed --standard-test-override-detail ...` only if the targeted rerun passes. Use a full standard-test rerun only when failure evidence is truncated or infrastructure-level and no failed node/file can be identified.
 - If `gh` authentication or permission fails, stop at that boundary and report the exact command/output.
 - Use non-interactive GitHub env for `gh`: `GH_FORCE_TTY=0 GIT_TERMINAL_PROMPT=0 GH_PAGER=cat`.
 - If `gh pr create` cannot infer the PR from the current branch, inspect open PRs for the head branch and continue with explicit base/head evidence.

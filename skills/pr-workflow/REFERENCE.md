@@ -69,7 +69,7 @@ Required statuses:
 
 Standard test item:
 - `code_health.standard_test_status=passed` satisfies it.
-- `standard_test_status=failed` fails it unless an exact rerun passes and is recorded as a manual override.
+- `standard_test_status=failed` fails it unless a targeted rerun of the failed pytest node id(s) or narrowest failed test file/slice passes and is recorded as a manual override.
 - `standard_test_status=not_run` blocks it until a replacement test command is run.
 
 Nonpassing publish:
