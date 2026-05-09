@@ -1,6 +1,6 @@
 ---
 name: wiki
-description: "[OMX] Persistent markdown project wiki stored under .omx/wiki with keyword search and lifecycle capture"
+description: "[OMX] Persistent markdown project wiki stored under repository omx_wiki with keyword search and lifecycle capture"
 triggers: ["wiki add", "wiki lint", "wiki query", "wiki read", "wiki delete"]
 ---
 
@@ -42,9 +42,9 @@ wiki_refresh()
 `architecture`, `decision`, `pattern`, `debugging`, `environment`, `session-log`, `reference`, `convention`
 
 ## Storage
-- Pages: `.omx/wiki/*.md`
-- Index: `.omx/wiki/index.md`
-- Log: `.omx/wiki/log.md`
+- Pages: `omx_wiki/*.md`
+- Index: `omx_wiki/index.md`
+- Log: `omx_wiki/log.md`
 
 ## Cross-References
 Use `[[page-name]]` wiki-link syntax to create cross-references between pages.
@@ -54,4 +54,4 @@ At session end, discoveries can be captured as `session-log-*` pages. Configure 
 
 ## Hard Constraints
 - No vector embeddings — query uses keyword + tag matching only
-- Wiki files remain local project state under `.omx/wiki/`
+- Wiki files are repository project knowledge under `omx_wiki/`; legacy `.omx/wiki/` is read-only compatibility input when no canonical wiki exists
