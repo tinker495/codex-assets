@@ -81,16 +81,16 @@ Sequential task execution wastes time when tasks are independent. Ultrawork keep
 
 ## State Management
 
-Use `omx_state` MCP tools for ultrawork lifecycle state.
+Use the CLI-first state surface (`omx state ... --json`) for ultrawork lifecycle state. If explicit MCP compatibility tools are already available, equivalent `omx_state` calls are optional compatibility, not the default.
 
 - **On start**:
-  `state_write({mode: "ultrawork", active: true, reinforcement_count: 1, started_at: "<now>"})`
+  `omx state write --input '{"mode":"ultrawork","active":true,"reinforcement_count":1,"started_at":"<now>"}' --json`
 - **On each reinforcement/loop step**:
-  `state_write({mode: "ultrawork", reinforcement_count: <current>})`
+  `omx state write --input '{"mode":"ultrawork","reinforcement_count":<current>}' --json`
 - **On completion**:
-  `state_write({mode: "ultrawork", active: false})`
+  `omx state write --input '{"mode":"ultrawork","active":false}' --json`
 - **On cancellation/cleanup**:
-  run `$cancel` (which should call `state_clear(mode="ultrawork")`)
+  run `$cancel` (which should call `omx state clear --input '{"mode":"ultrawork"}' --json`)
 
 <Examples>
 <Good>
@@ -105,7 +105,7 @@ Direct-tool lane:
 - update `skills/ultrawork/SKILL.md`
 
 Background evidence lane:
-- delegate(role="test-engineer", tier="STANDARD", task="Map which hook tests cover ultrawork activation messaging", model="...")
+- use /prompts:test-engineer for this scoped task
 ```
 Why good: Context is grounded first, acceptance criteria are explicit, and the direct-tool lane runs alongside a bounded evidence lane.
 </Good>
@@ -122,8 +122,8 @@ Why good: Shared-file work stays local; independent evidence work fans out.
 <Bad>
 Parallelizing before the task is grounded:
 ```
-delegate(role="executor", tier="STANDARD", task="Implement whatever seems necessary", model="...")
-delegate(role="test-engineer", tier="STANDARD", task="Figure out how to test it later", model="...")
+use /prompts:executor for this scoped task
+use /prompts:test-engineer for this scoped task
 ```
 Why bad: No context snapshot, no pass/fail target, and delegation starts before the work is shaped.
 </Bad>

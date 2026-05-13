@@ -137,22 +137,19 @@ Plans are saved to `.omx/plans/`. Drafts go to `.omx/drafts/`.
 </Steps>
 
 <Tool_Usage>
-- Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools
-- Use the surface-appropriate structured question path for preference questions (scope, priority, timeline, risk tolerance): attached-tmux OMX runtime uses `omx question`; outside tmux uses native structured input when available. Use plain text only as a last fallback for unsupported surfaces or highly specific free-form values.
-- `omx question` success JSON uses `answers[]` as the primary contract. For single-question planning prompts, read `answers[0].answer`; treat top-level `answer` as legacy compatibility fallback only.
-- Batch `questions[]` may be used for non-interview grouped preference or approval prompts when one submitted form is clearer than multiple interruptions; interview mode still asks one question per round.
+- Use `AskUserQuestion` for preference questions (scope, priority, timeline, risk tolerance) -- provides clickable UI
+- Use plain text for questions needing specific values (port numbers, names, follow-up clarifications)
 - Use the `explore` agent (LOW tier, bounded quick pass) to gather codebase facts before asking the user
 - Use `ask_codex` with `agent_role: "planner"` for planning validation on large-scope plans
 - Use `ask_codex` with `agent_role: "analyst"` for requirements analysis
 - Use `ask_codex` with `agent_role: "critic"` for plan review in consensus and review modes
-- If ToolSearch finds no MCP tools or Codex is unavailable, fall back to equivalent OMX prompt agents -- never block on external tools
+- If optional MCP compatibility tools or Codex consultation are unavailable, fall back to equivalent OMX prompt/native agents -- never block on external tools
 - **CRITICAL — Consensus mode agent calls MUST be sequential, never parallel.** Always await the Architect result before issuing the Critic call.
 - In consensus mode, default to RALPLAN-DR short mode; enable deliberate mode on `--deliberate` or explicit high-risk signals (auth/security, migrations, destructive changes, production incidents, compliance/PII, public API breakage)
 - In consensus mode with `--interactive`: use `AskUserQuestion` / the structured question UI for the user feedback step (step 2) and the final approval step (step 7) -- never ask for approval in plain text when a structured surface is available. Without `--interactive`, auto-proceed through planning steps without pausing. Output the final plan without execution.
 - In consensus mode with `--interactive`, on user approval **MUST** invoke the selected follow-up lane from step 9 (`$ralph`, `$team`, `$ultragoal`, `$autoresearch-goal`, or `$performance-goal`) -- never implement directly in the planning agent
 - In consensus mode, execution follow-up handoff **MUST** include an explicit available-agent-types roster plus concrete staffing / role-allocation guidance grounded in that roster, suggested reasoning levels by lane, product-facing goal-mode follow-up suggestions (`$ultragoal` by default, `$autoresearch-goal` for research projects, `$performance-goal` for optimization/performance projects), explicit `omx team` / `$team` launch hints, and a team verification path
 </Tool_Usage>
-
 
 ## Scenario Examples
 

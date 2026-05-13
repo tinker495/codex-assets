@@ -34,14 +34,47 @@ Loop until `omx ultragoal status` reports all goals complete:
 4. If no active Codex goal exists, call `create_goal` with the printed payload. In aggregate mode, if the same aggregate Codex objective is already active, continue the current OMX story without creating a new Codex goal.
 5. Complete the current OMX story only.
 6. Run a completion audit against the story objective and real artifacts/tests.
-7. In aggregate mode, do **not** call `update_goal` for intermediate stories; checkpoint with a fresh `get_goal` snapshot whose aggregate objective is still `active`. On the final story only, call `update_goal({status: "complete"})`, then call `get_goal` again for a fresh `complete` snapshot.
-8. Checkpoint the durable ledger with that snapshot:
-   `omx ultragoal checkpoint --goal-id <id> --status complete --evidence "<evidence>" --codex-goal-json <get_goal-json-or-path>`
+7. In aggregate mode, do **not** call `update_goal` for intermediate stories; checkpoint with a fresh `get_goal` snapshot whose aggregate objective is still `active`. On the final story only, first run the mandatory final cleanup/review gate below; call `update_goal({status: "complete"})` only after that gate is clean, then call `get_goal` again for a fresh `complete` snapshot.
+8. Checkpoint the durable ledger with that snapshot. Intermediate aggregate checkpoints use only `--codex-goal-json`; final clean checkpoints also require `--quality-gate-json`:
+   `omx ultragoal checkpoint --goal-id <id> --status complete --evidence "<evidence>" --codex-goal-json <get_goal-json-or-path> [--quality-gate-json <quality-gate-json-or-path>]`
 9. If blocked or failed, checkpoint failure:
    `omx ultragoal checkpoint --goal-id <id> --status failed --evidence "<blocker/evidence>"`
 10. For legacy per-story completed-goal blockers, preserve the non-terminal blocker with:
    `omx ultragoal checkpoint --goal-id <id> --status blocked --evidence "<completed legacy Codex goal blocks create_goal in this thread>" --codex-goal-json <get_goal-json-or-path>`
 11. Resume failed goals with `omx ultragoal complete-goals --retry-failed`.
+
+
+## Mandatory final cleanup and review gate
+
+The final ultragoal story is not complete until the active agent has run the final quality gate:
+
+1. Run targeted verification for the story.
+2. Run `ai-slop-cleaner` on changed files only; if there are no relevant edits, the cleaner still runs and records a passed/no-op report.
+3. Rerun verification after the cleaner pass.
+4. Run `$code-review`. Clean means `codeReview.recommendation: "APPROVE"` and `codeReview.architectStatus: "CLEAR"`; `COMMENT`, `WATCH`, `REQUEST CHANGES`, and `BLOCK` are non-clean.
+5. If review is non-clean, do **not** call `update_goal`. Record durable blocker work instead:
+
+   ```sh
+   omx ultragoal record-review-blockers --goal-id <id> --title "Resolve final code-review blockers" --objective "<blocker-resolution objective>" --evidence "<review findings>" --codex-goal-json <active-get-goal-json-or-path>
+   ```
+
+   This marks the current story `review_blocked`, appends a pending blocker-resolution story, keeps the Codex goal active, and lets `omx ultragoal complete-goals` start the blocker next. In legacy per-story mode, the blocker may need a fresh/available Codex goal context because the old per-story Codex goal remains active/incomplete.
+
+6. If review is clean, call `update_goal({status: "complete"})`, call `get_goal`, and checkpoint with a structured final gate:
+
+   ```sh
+   omx ultragoal checkpoint --goal-id <id> --status complete --evidence "<tests/files/review evidence>" --codex-goal-json <fresh-complete-get-goal-json-or-path> --quality-gate-json <quality-gate-json-or-path>
+   ```
+
+`--quality-gate-json` must include:
+
+```json
+{
+  "aiSlopCleaner": { "status": "passed", "evidence": "cleaner report" },
+  "verification": { "status": "passed", "commands": ["npm test"], "evidence": "post-cleaner verification" },
+  "codeReview": { "recommendation": "APPROVE", "architectStatus": "CLEAR", "evidence": "final review synthesis" }
+}
+```
 
 ## Constraints
 
