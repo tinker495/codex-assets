@@ -1,3 +1,13 @@
+2026-05-15 10:43:14 KST
+
+- Fixed yesterday scope to `/Users/mrx-ksjung/.codex/sessions/2026/05/14/*.jsonl` and saved the exact 34-file list at `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/yesterday-2026-05-14-files.txt`.
+- Ran `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scripts/scan_noise.py` and `python3 -B /Users/mrx-ksjung/.codex/automations/daily-automation-review/scripts/manual_review.py` with the same repeated `--file` arguments. Saved outputs to `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/scan-noise-2026-05-14.json` and `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/manual-review-2026-05-14.json`.
+- Canonical manual review showed `files_scanned=34`, `sessions_with_records=33`, `top_operational` led by `other failure` (15/9), `write_stdin failed: stdin is closed` (7/5), `discovery/path probe failure` (6/5), and `zsh: no matches found` (3/2). Scanner high signals were only `No such file or directory` and `write_stdin failed: stdin is closed`; scanner skill attribution remained advisory.
+- Repo-specific findings stayed repo-local: `omx_wiki`, `src/AGENTS.md`, `src/stowage/planner/spp/rotation.py`, and several planner paths are currently missing in `/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization`, while `src/stowage/planner/pipeline` exists instead of `src/stowage/planner/pipeline.py`.
+- Changed `/Users/mrx-ksjung/.codex/automations/automatically-create-new-skills/automation.toml` and `/Users/mrx-ksjung/.codex/automations/daily-automation-review/automation.toml` from `cwds = ["~"]` to `cwds = ["~/.codex"]`, resolving the path-sensitive cwd regression that prior runs had repeatedly identified.
+- Validation: both changed TOMLs passed `python3 -c 'import tomllib, pathlib; ...'` parsing, and current `tomllib` load confirms both `cwds` values are `["~/.codex"]`.
+- No skill edits were made. Candidates `plan`, `ralph`, `ralplan`, and `team` came only from advisory scanner attribution or generic operational failures without a same-session `~/.codex/skills/.../SKILL.md` load plus actionable repeated command/output evidence. `skill_path_drift` remains explicit evidence to monitor, especially npm/plugin and `.agents`/`.codex` mappings, but it does not justify claiming a `$CODEX_HOME` skill edit fixes non-`$CODEX_HOME` runtime paths.
+
 2026-04-24 10:55:50 KST
 
 - Follow-up from the 2026-04-23 session review: the strongest actionable operational noise was repeated `desloppify cluster ...` misuse (`invalid choice: 'cluster'` 7 times across 7 sessions) while `desloppify plan cluster show ...` succeeded later.

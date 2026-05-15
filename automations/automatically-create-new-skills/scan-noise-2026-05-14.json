@@ -1,0 +1,169 @@
+{
+  "window_seconds": 86400,
+  "generated_at": "2026-05-15T01:41:33Z",
+  "files_scanned": 34,
+  "signals": {
+    "No such file or directory": {
+      "count": 31,
+      "sessions": 14
+    },
+    "write_stdin failed: stdin is closed": {
+      "count": 7,
+      "sessions": 5
+    }
+  },
+  "skills": {
+    "plan": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "ralph": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    },
+    "ralplan": {
+      "count": 1,
+      "sessions": 1,
+      "signals": {
+        "write_stdin failed: stdin is closed": {
+          "count": 1,
+          "sessions": 1
+        }
+      }
+    },
+    "team": {
+      "count": 4,
+      "sessions": 1,
+      "signals": {
+        "No such file or directory": {
+          "count": 1,
+          "sessions": 1
+        },
+        "write_stdin failed: stdin is closed": {
+          "count": 3,
+          "sessions": 1
+        }
+      }
+    }
+  },
+  "high_signals": [
+    "No such file or directory",
+    "write_stdin failed: stdin is closed"
+  ],
+  "high_noise_skills": {
+    "before_recently_touched": [
+      "plan",
+      "ralph",
+      "ralplan",
+      "team"
+    ],
+    "after_recently_touched": [
+      "plan",
+      "ralph",
+      "ralplan",
+      "team"
+    ]
+  },
+  "recently_touched": {
+    "used_24h": [
+      "ai-slop-cleaner",
+      "autoresearch-goal",
+      "brooks-audit",
+      "code-review",
+      "deep-interview",
+      "open-work-state",
+      "performance-goal",
+      "pipeline",
+      "plan",
+      "ralph",
+      "ralplan",
+      "team",
+      "ultragoal"
+    ],
+    "modified_7d": [
+      "ai-slop-cleaner",
+      "analyze",
+      "autopilot",
+      "branch-context-merge",
+      "code-logic-compressibility-analyst",
+      "code-review",
+      "deep-interview",
+      "design",
+      "doctor",
+      "gh-fix-review-comments",
+      "hatch-pet",
+      "imagegen",
+      "omx-setup",
+      "open-work-state",
+      "openai-docs",
+      "pipeline",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "reviewable-commit-split",
+      "skill",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultragoal",
+      "ultraqa",
+      "ultrawork",
+      "visual-ralph",
+      "wiki"
+    ],
+    "union": [
+      "ai-slop-cleaner",
+      "analyze",
+      "autopilot",
+      "autoresearch-goal",
+      "branch-context-merge",
+      "brooks-audit",
+      "code-logic-compressibility-analyst",
+      "code-review",
+      "deep-interview",
+      "design",
+      "doctor",
+      "gh-fix-review-comments",
+      "hatch-pet",
+      "imagegen",
+      "omx-setup",
+      "open-work-state",
+      "openai-docs",
+      "performance-goal",
+      "pipeline",
+      "plan",
+      "plugin-creator",
+      "pr-workflow",
+      "ralph",
+      "ralplan",
+      "reviewable-commit-split",
+      "skill",
+      "skill-creator",
+      "skill-installer",
+      "team",
+      "ultragoal",
+      "ultraqa",
+      "ultrawork",
+      "visual-ralph",
+      "wiki"
+    ]
+  }
+}

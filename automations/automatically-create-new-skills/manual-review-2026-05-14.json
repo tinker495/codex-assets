@@ -1,0 +1,255 @@
+{
+  "files_scanned": 34,
+  "sessions_with_records": 33,
+  "top_operational": [
+    {
+      "label": "other failure",
+      "count": 15,
+      "sessions": 9
+    },
+    {
+      "label": "write_stdin failed: stdin is closed",
+      "count": 7,
+      "sessions": 5
+    },
+    {
+      "label": "discovery/path probe failure",
+      "count": 6,
+      "sessions": 5
+    },
+    {
+      "label": "zsh: no matches found",
+      "count": 3,
+      "sessions": 2
+    }
+  ],
+  "top_repo_specific": [
+    {
+      "label": "No such file or directory::No such file or directory",
+      "count": 11,
+      "sessions": 7
+    },
+    {
+      "label": "No such file or directory::omx_wiki",
+      "count": 4,
+      "sessions": 4
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/spp/rotation.py",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "No such file or directory::src/AGENTS.md",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "label": "No such file or directory::.omx/state/sessions/019e2590-85d5-7380-b6f2-a0012d54ae9a/ralplan-state.json",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/models/master_plan/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/pipeline.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/domain/rotation_history/rotation_step_data.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "label": "No such file or directory::src/stowage/planner/evaluator/spp/plan_diff.py",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_paths": [
+    {
+      "path": "No such file or directory",
+      "count": 11,
+      "sessions": 7
+    },
+    {
+      "path": "omx_wiki",
+      "count": 4,
+      "sessions": 4
+    },
+    {
+      "path": "src/stowage/planner/spp/rotation.py",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "path": "src/AGENTS.md",
+      "count": 2,
+      "sessions": 2
+    },
+    {
+      "path": ".omx/state/sessions/019e2590-85d5-7380-b6f2-a0012d54ae9a/ralplan-state.json",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/models/master_plan/AGENTS.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/pipeline.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/domain/rotation_history/rotation_step_data.py",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "path": "src/stowage/planner/evaluator/spp/plan_diff.py",
+      "count": 1,
+      "sessions": 1
+    }
+  ],
+  "top_missing_modules": [],
+  "discovery_failures": [
+    {
+      "session": "rollout-2026-05-14T17-19-47-019e2592-0894-7fd0-a03f-ee7cadc4a5e3.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g 'omx_wiki/**'",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-05-14T17-42-17-019e25a6-a20b-7250-aba1-d95ea17ef5c4.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g \"requirements*\"",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-05-14T17-42-17-019e25a6-a20b-7250-aba1-d95ea17ef5c4.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g \"*wiki*\"",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-05-14T18-05-01-019e25bb-6fbd-7df2-8632-706ce456217a.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g 'omx_wiki/**'",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-05-14T19-44-28-019e2616-7db2-7563-a340-c7294dde4326.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g 'omx_wiki/**'",
+      "exit_code": 1,
+      "body": ""
+    },
+    {
+      "session": "rollout-2026-05-14T20-04-56-019e2629-3b2b-7ac2-8e87-3e44e2568700.jsonl",
+      "probe_type": "rg --files -g",
+      "cmd": "rg --files -g \"omx_wiki/**\"",
+      "exit_code": 1,
+      "body": ""
+    }
+  ],
+  "partial_success_probes": [
+    {
+      "session": "rollout-2026-05-14T10-22-27-019e2413-f337-7b20-af34-1e9464d64857.jsonl",
+      "probe_type": "suppressed-read-only",
+      "cmd": "rg -n \"^def (main|run_|build_|orchestrator|build_pipeline|run_\\w+)|^__all__ =|class [A-Za-z_]+\" src/stowage/__main__.py src/stowage/planner/src_stowage_planner_not_real 2>/dev/null",
+      "exit_code": 2,
+      "body": "src/stowage/__main__.py:4:def main() -> None:"
+    },
+    {
+      "session": "rollout-2026-05-14T10-22-27-019e2413-f337-7b20-af34-1e9464d64857.jsonl",
+      "probe_type": "suppressed-read-only",
+      "cmd": "ls && ls omx_wiki 2>/dev/null && ls .omx 2>/dev/null && rg --files docs | head -n 30",
+      "exit_code": 1,
+      "body": "AGENTS.md\nCLAUDE.md\nCONTEXT.md\nMakefile\nREADME.md\ncoverage.json\ncoverage.xml\ndata\ndocs\ngraphify-out\nnotebooks\npreprocessed_data\npyproject.toml\nreport\nscripts\nskills-lock.json\nsrc\ntests\nuv.lock"
+    },
+    {
+      "session": "rollout-2026-05-14T18-19-44-019e25c8-e7da-7842-bfbe-1832b7aee496.jsonl",
+      "probe_type": "suppressed-read-only",
+      "cmd": "find /Users/mrx-ksjung/.omx-runs/run-20260514081805-3b32/.omx/state -maxdepth 4 -type f -name '*ralplan*' -o -name '*state*.json' 2>/dev/null | sort | xargs -I{} sh -c 'echo --- {}; cat \"{}\"; echo'",
+      "exit_code": 1,
+      "body": "--- /Users/mrx-ksjung/.omx-runs/run-20260514081805-3b32/.omx/state/native-stop-state.json\n{\n  \"sessions\": {\n    \"019e25c8-e7da-7842-bfbe-1832b7aee496\": {\n      \"last_signature\": \"skill-stop|019e25c8-e7da-7842-bfbe-1832b7aee496|no-thread|019e25c8-e840-7ca1-ac83-bb1373599ff8|/Users/mrx-ksjung/.codex/s"
+    }
+  ],
+  "skill_path_drift": [
+    {
+      "mapping": "/Users/mrx-ksjung/.nvm/versions/node/v20.20.1/lib/node_modules/oh-my-codex/skills/configure-notifications/SKILL.md => /Users/mrx-ksjung/.codex/skills/configure-notifications/SKILL.md",
+      "count": 20,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.nvm/versions/node/v20.20.1/lib/node_modules/oh-my-codex/skills/hud/SKILL.md => /Users/mrx-ksjung/.codex/skills/hud/SKILL.md",
+      "count": 7,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/skills/open-work-state/SKILL.md => /Users/mrx-ksjung/.codex/skills/open-work-state/SKILL.md",
+      "count": 6,
+      "sessions": 2
+    },
+    {
+      "mapping": "/.codex/.tmp/plugins/plugins/notion/skills/notion-knowledge-capture/SKILL.md => /Users/mrx-ksjung/.codex/skills/notion-knowledge-capture/SKILL.md",
+      "count": 5,
+      "sessions": 1
+    },
+    {
+      "mapping": "/skills/to-goal/SKILL.md => /Users/mrx-ksjung/.codex/skills/to-goal/SKILL.md",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "mapping": "/skills/full-code-review-chunking/SKILL.md => /Users/mrx-ksjung/.codex/skills/full-code-review-chunking/SKILL.md",
+      "count": 3,
+      "sessions": 3
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/ultrapilot/SKILL.md => /Users/mrx-ksjung/.codex/skills/ultrapilot/SKILL.md",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/team/SKILL.md => /Users/mrx-ksjung/.codex/skills/team/SKILL.md",
+      "count": 3,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/grill-me/SKILL.md => /Users/mrx-ksjung/.codex/skills/grill-me/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.agents/skills/to-prd/SKILL.md => /Users/mrx-ksjung/.codex/skills/to-prd/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/.nvm/versions/node/v20.20.1/lib/node_modules/oh-my-codex/skills/autopilot/SKILL.md => /Users/mrx-ksjung/.codex/skills/autopilot/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization/.codex/skills/to-goal/SKILL.md => /Users/mrx-ksjung/.codex/skills/to-goal/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    },
+    {
+      "mapping": "/.codex/.tmp/plugins/plugins/hugging-face/skills/gradio/SKILL.md => /Users/mrx-ksjung/.codex/skills/gradio/SKILL.md",
+      "count": 1,
+      "sessions": 1
+    }
+  ]
+}
