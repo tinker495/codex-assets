@@ -1,0 +1,13 @@
+version = 1
+id = "weekly-engineering-summary"
+kind = "cron"
+name = "Weekly engineering summary"
+prompt = "이번 주 PR, 롤아웃, 인시던트, 리뷰를 종합해 주간 업데이트로 정리해줘. 근거 규칙: - 이벤트를 지어내지 마. 데이터가 없으면 짧게 그렇게 말해줘. - 가능하면 구체적인 참조(PR #, 인시던트 ID, 롤아웃 노트, 파일 경로)를 우선해."
+status = "ACTIVE"
+rrule = "RRULE:FREQ=WEEKLY;BYHOUR=16;BYMINUTE=0;BYDAY=FR"
+model = "gpt-5.4"
+reasoning_effort = "medium"
+execution_environment = "local"
+cwds = ["/Users/mrx-ksjung/project/snk2501o-sinokor-placement-optimization"]
+created_at = 1779069322080
+updated_at = 1779069322080
