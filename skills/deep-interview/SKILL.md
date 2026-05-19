@@ -56,6 +56,7 @@ If no flag is provided, use **Standard**.
 - Reduce user effort: ask only the highest-leverage unresolved question, and never ask the user for codebase facts that can be discovered directly
 - For brownfield work, prefer evidence-backed confirmation questions such as "I found X in Y. Should this change follow that pattern?"
 - Route facts before judgment in the Ouroboros style: before presenting a user-facing interview round, classify whether the needed information is a discoverable fact, a fact needing confirmation, or a human decision. The interview is with the human for judgment, not for facts the agent can inspect.
+- When unresolved ambiguity depends on current external best practices, official/upstream guidance, standards, or version-aware behavior, use `$best-practice-research` as the bounded evidence wrapper before crystallizing requirements or handing off to planning/execution.
 - Use these transcript/spec labels only; never use them as `omx question` `source` values, and never replace the runtime `source: "deep-interview"` contract for user-facing deep-interview questions:
   - `[from-code][auto-confirmed]` — exact, high-confidence codebase facts from manifests/configs or direct source evidence, with no prescription attached.
   - `[from-code]` — codebase findings that are useful but inferred, pattern-based, or low/medium confidence and therefore need a confirmation-style user-facing round before being treated as settled.
