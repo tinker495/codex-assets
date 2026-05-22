@@ -16,7 +16,7 @@ Ultrawork is a parallel execution engine for high-throughput task completion. It
 
 <Do_Not_Use_When>
 - Task requires guaranteed completion with persistence, architect verification, or deslop/reverification -- use `ralph` instead (Ralph includes ultrawork)
-- Task requires a full autonomous pipeline -- use `autopilot` instead (autopilot includes Ralph which includes ultrawork)
+- Task requires a full autonomous pipeline -- use `autopilot` instead (autopilot defaults to Ultragoal, with Team/parallel execution used only when needed)
 - There is only one sequential task with no parallelism opportunity -- execute directly or delegate to a single `executor`
 - The request is still in plan-consensus mode -- keep planning artifacts in `ralplan` until execution is explicitly authorized
 - User needs session persistence for resume -- use `ralph`, which adds persistence on top of ultrawork
