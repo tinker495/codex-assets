@@ -20,7 +20,7 @@ $ralplan "task description"
 
 ## Ontology-heavy review
 
-For requirements semantics, taxonomy, prompt/spec design, policy distinctions, or category-risk architecture, Scholastic may be cited as an available advisory ontology reviewer/persona. Its findings can inform the plan or follow-up evidence when explicitly used, but `$ralplan` itself remains the Planner → Architect → Critic consensus workflow and the durable gate remains Architect→Critic only.
+For requirements semantics, taxonomy, prompt/spec design, policy distinctions, or category-risk architecture, subagent `Scholastic` may be cited as an available advisory ontology reviewer/persona. Its findings can inform the plan or follow-up evidence when explicitly used, but `$ralplan` itself remains the Planner → Architect → Critic consensus workflow and the durable gate remains Architect→Critic only.
 
 ## Usage with interactive mode
 
@@ -49,8 +49,8 @@ The consensus workflow:
    - If only one viable option remains, explicit invalidation rationale for alternatives
    - Deliberate mode only: pre-mortem (3 scenarios) + expanded test plan (unit/integration/e2e/observability)
 2. **User feedback** *(--interactive only)*: If `--interactive` is set, use the structured question UI (`omx question` in attached tmux; native structured input outside tmux when available) to present the draft plan **plus the Principles / Drivers / Options summary** before review (Proceed to review / Request changes / Skip review). Otherwise, automatically proceed to review.
-3. **Architect** reviews for architectural soundness and must provide the strongest steelman antithesis, at least one real tradeoff tension, and (when possible) synthesis — **await completion before step 4**. In deliberate mode, Architect should explicitly flag principle violations.
-4. **Critic** evaluates against quality criteria — run only after step 3 completes. Critic must enforce principle-option consistency, fair alternatives, risk mitigation clarity, testable acceptance criteria, and concrete verification steps. In deliberate mode, Critic must reject missing/weak pre-mortem or expanded test plan.
+3. **Architect** reviews for architectural soundness and must provide the strongest steelman antithesis, at least one real tradeoff tension, and (when possible) synthesis — **await completion before step 4**. Launch this as a subsequent `Architect` subagent (`agent_type: "architect"`) and pass the full task statement, context snapshot, PRD/test-spec paths, and relevant prior findings; do not use a default subagent with only a short improvised reviewer prompt. In deliberate mode, Architect should explicitly flag principle violations.
+4. **Critic** evaluates against quality criteria — run only after step 3 completes. Launch this as a subsequent `Critic` subagent (`agent_type: "critic"`) with the full task statement, context snapshot, PRD/test-spec paths, and the completed Architect review; do not ask the Architect subagent to perform the Critic gate and do not substitute a default subagent fantasy prompt for the packaged Critic role. Critic must enforce principle-option consistency, fair alternatives, risk mitigation clarity, testable acceptance criteria, and concrete verification steps. In deliberate mode, Critic must reject missing/weak pre-mortem or expanded test plan.
 5. **Re-review loop** (max 5 iterations): Any non-`APPROVE` Critic verdict (`ITERATE` or `REJECT`) MUST run the same full closed loop:
    a. Collect Architect and Critic feedback
    b. Revise the plan with Planner
@@ -62,7 +62,19 @@ The consensus workflow:
 7. *(--interactive only)* User chooses: Approve (`$ultragoal` durable goal execution, `$team`, explicit `$ralph` fallback, or a specialized goal-mode follow-up), Request changes, or Reject
 8. *(--interactive only)* On approval: invoke `$ultragoal` for default durable sequential execution, `$team` for parallel team execution, the selected specialized goal-mode follow-up (`$autoresearch-goal` or `$performance-goal`), or `$ralph` only when the user explicitly selects that fallback with the approved plan and matching success/evaluator context -- never implement directly. Preserve the explicit available-agent-types roster, reasoning-by-lane guidance, role/staffing allocation guidance, launch hints, and verification-path guidance from the approved plan for Ultragoal/team paths and any explicit Ralph fallback.
 
-> **Important:** Steps 3 and 4 MUST run sequentially. Do NOT issue both agent calls in the same parallel batch. Always await the Architect result before invoking Critic.
+> **Important:** Steps 3 and 4 MUST run sequentially as role-specific subagents. Do NOT issue both agent calls in the same parallel batch. Always await the subsequent `Architect` result before invoking the subsequent `Critic`; only a completed, role-specific `Critic` approval can satisfy the durable gate.
+
+## Planning/Execution Boundary
+
+`$ralplan` is a planning mode. While ralplan is active and no explicit execution handoff is active, implementation-focused write tools are out of scope. Ralplan may inspect the repository and may write only planning artifacts such as `.omx/context/`, `.omx/plans/`, `.omx/specs/`, and required `.omx/state/` records.
+
+The canonical flow is:
+
+```
+$ralplan -> durable consensus artifact -> explicit execution lane -> $ultragoal | $team | $ralph
+```
+
+Before any execution lane begins, ralplan must emit terminal planning state (complete, paused, failed, or waiting for input) and the durable handoff record below. Do not continue from consensus planning into direct code edits in the same ralplan session.
 
 ## Durable Consensus Handoff Contract
 
@@ -102,7 +114,7 @@ Before consensus planning or execution handoff, ensure a grounded context snapsh
    - constraints
    - unknowns/open questions
    - likely codebase touchpoints
-4. If ambiguity remains high, gather brownfield facts first. When session guidance enables `USE_OMX_EXPLORE_CMD`, prefer `omx explore` for simple read-only repository lookups with narrow, concrete prompts; otherwise use the richer normal explore path. Then run `$deep-interview --quick <task>` before continuing.
+4. If ambiguity remains high, gather brownfield facts first. `omx explore` is deprecated; use normal repository inspection tools/subagents for simple read-only repository lookups and `omx sparkshell` only for explicit shell-native read-only evidence. Then run `$deep-interview --quick <task>` before continuing.
 5. If the plan depends on official docs, version-aware framework guidance, best practices, or external dependency behavior, use `$best-practice-research` as the bounded evidence wrapper and auto-delegate `researcher` for the official/upstream lookup before finalizing the planning handoff so execution does not start from repo-local recall alone.
 6. If a prior `$autoresearch` or `$autoresearch-goal` run exists, treat its approved artifact as evidence for the plan. Do not include Autoresearch as a final architecture or runtime component unless the user explicitly requested ongoing research automation; otherwise synthesize the evidence into the `$ralplan` ADR, risks, and verification steps.
 
