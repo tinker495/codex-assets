@@ -1,16 +1,6 @@
 ---
 name: brooks-audit
-description: >
-  Architecture audit that maps module dependencies, checks layering integrity, and
-  flags structural decay across a codebase, drawing on twelve classic engineering books.
-  Triggers when: user asks to audit architecture, review folder/module structure,
-  check for circular imports, understand how the codebase is organized, or asks
-  "does this follow clean architecture?", "why does everything depend on everything?",
-  "are our layers correct?", "where should this code live?".
-  Also triggers for onboarding requests: "explain this codebase to a new developer"
-  or "give me a codebase tour" (use onboarding mode).
-  Do NOT trigger for: PR-level code review (use brooks-review) or line-level refactoring
-  questions — this skill analyzes structural/module-level concerns, not individual functions.
+description: "Audit codebase architecture: module dependencies, layering, circular imports, ownership, and structural decay."
 ---
 
 # Brooks-Lint — Architecture Audit

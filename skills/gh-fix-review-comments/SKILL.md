@@ -1,6 +1,6 @@
 ---
 name: gh-fix-review-comments
-description: "Runs the full GitHub PR review-fix closure loop, starting with complete branch/PR context reconstruction before touching review comments. Use when the user asks to fix PR review comments end to end, especially requests mentioning review feedback, requested changes, current branch context, commit/push, reply, resolve, or Korean phrases like '리뷰 코멘트 반영', '브랜치 맥락', '답글', '리솔브'."
+description: "End-to-end GitHub PR review-comment fix loop: fetch context, patch, validate, commit/push, reply, resolve."
 ---
 
 # GH Fix Review Comments

@@ -1,6 +1,6 @@
 ---
 name: refresh-branch-docs
-description: Execute branch-scoped, end-to-end documentation refresh after code changes. Use when users ask to comprehensively rewrite/update docs and AGENTS based on current branch diff, onboarding context, repo-local docs as SSOT, and code evidence, including refreshes to design/plan/quality docs that preserve agent legibility. Prefer this for broad behavior/narrative synchronization; use docs-codebase-alignment-audit for narrow integrity audit/fix tasks.
+description: "Refresh branch-scoped docs and AGENTS from current diff, code evidence, and repo SSOT conventions."
 ---
 
 # Refresh Branch Docs

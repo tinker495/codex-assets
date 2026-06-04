@@ -1,16 +1,6 @@
 ---
 name: brooks-debt
-description: >
-  Tech debt assessment that identifies, classifies, and prioritizes maintainability
-  problems — helping teams build a refactoring roadmap — drawing on twelve classic
-  engineering books.
-  Triggers when: user asks about tech debt, refactoring priorities, what to clean up
-  first, or asks "why is this so hard to change?", "where's the most painful part?",
-  "what should we fix first?", "how do I justify refactoring to management?",
-  "why is our velocity dropping?".
-  Do NOT trigger for: server health checks, HTTP /health endpoints, Kubernetes probes,
-  database health, or application uptime — "health" in those contexts is infrastructure,
-  not code quality. Also not for single-function refactoring questions.
+description: "Assess tech debt and rank refactoring priorities, change pain, maintainability risks, and cleanup roadmap."
 ---
 
 # Brooks-Lint — Tech Debt Assessment

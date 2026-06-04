@@ -1,6 +1,6 @@
 ---
 name: complexity-loc-balancer
-description: Orchestrate complexity reduction work while keeping non-test code growth at or below zero. Use when the user asks to lower radon/xenon risk without increasing runtime LOC, or when complexity-only refactors start adding helper bloat and need strict balancing gates.
+description: "Reduce radon/xenon complexity while keeping non-test runtime LOC growth at or below zero."
 ---
 
 # Complexity LOC Balancer

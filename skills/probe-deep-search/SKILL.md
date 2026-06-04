@@ -1,6 +1,6 @@
 ---
 name: probe-deep-search
-description: Probe-first, CLI-only deep codebase investigation using local `probe` commands directly. Use when Codex or a delegated subagent needs to understand an unfamiliar repository, trace cross-file behavior, locate implementations before editing, audit architecture, investigate bugs, or perform deep search where `probe search`, `probe symbols`, `probe query`, `probe extract`, and `probe lsp` should be prioritized over plain-text tools such as `rg` or `grep`.
+description: "Use local probe CLI first for deep codebase search, symbol tracing, architecture audit, or bug investigation."
 ---
 
 # Probe Deep Search

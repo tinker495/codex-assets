@@ -1,6 +1,6 @@
 ---
 name: spec-diff
-description: Use when _TOBE.md and _ASIS.md both exist for a module and you need to identify drift between spec and code. Triggered by "스펙이랑 코드가 얼마나 다른지 비교해", "drift 확인", "스펙 drift", or when preparing refactoring scope decisions after reverse-doc completion.
+description: "Compare paired _TOBE.md and _ASIS.md docs to identify code/spec drift and refactor scope."
 ---
 
 # Spec Diff: Tobe vs As-Is Drift 리포트

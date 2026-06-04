@@ -1,6 +1,6 @@
 ---
 name: branch-onboarding-brief
-description: Analyze current git branch changes from the branch fork point (resolved from origin/HEAD or a specified upstream base), run an onboarding context phase, and produce a well-formatted branch briefing that directly supports the current user request or parent-skill workflow. Use when asked to compare branches, summarize branch diffs, inspect branch-scoped changes, prepare onboarding context, or provide prerequisite branch context for another skill.
+description: "Summarize current branch diff from fork point with intent, scope, risks, and context for follow-on work."
 ---
 
 # Branch Onboarding Brief

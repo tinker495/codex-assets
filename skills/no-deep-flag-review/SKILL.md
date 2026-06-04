@@ -1,6 +1,6 @@
 ---
 name: no-deep-flag-review
-description: "Review code for architecture violations where UI/presentation/execution mode flags (string, boolean, enum) are passed deep into domain, aggregator, or renderer internals. Use when performing PR review, architecture review, or refactoring guidance for the 'No Deep Flag Passing & Strategy Injection' principle, especially when repeated mode-based branching appears below system entry points."
+description: "Review deep UI/mode flag passing into domain or renderer internals; suggest strategy/boundary fixes."
 ---
 
 # No Deep Flag Review

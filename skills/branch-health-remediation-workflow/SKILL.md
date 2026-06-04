@@ -1,6 +1,6 @@
 ---
 name: branch-health-remediation-workflow
-description: Chain branch onboarding, code-health, and non-test code analysis, then produce a remediation plan that reduces inefficiency and fragmentation while meeting branch goals. Use when asked to link branch-onboarding-brief, code-health, and targeted localization into one workflow or to propose non-test remediation steps for the current branch.
+description: "Chain branch onboarding, code-health, and non-test analysis into a branch-scoped remediation plan."
 ---
 
 # Branch Health Remediation Workflow

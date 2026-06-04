@@ -1,17 +1,6 @@
 ---
 name: brooks-sweep
-description: >
-  Full-sweep mode: runs a unified analysis across all quality dimensions — code decay,
-  architecture, tech debt, and test quality — then applies fixes directly to the
-  codebase. Safe changes are auto-applied; risky changes are confirmed before
-  execution. Drawing on twelve classic engineering books.
-  Triggers when: user wants to "fix everything", "sweep the codebase", "auto-fix all
-  issues", "run all checks and fix them", "clean up the whole project", or asks for
-  a single command that both diagnoses and remediates quality problems.
-  Do NOT trigger for: read-only audits or health reports where the user only wants
-  findings without code changes; single-dimension reviews (use the focused skill
-  instead: brooks-review / brooks-audit / brooks-debt / brooks-test); server health
-  checks, HTTP /health endpoints, Kubernetes probes, or application uptime.
+description: "Diagnose and apply broad code-quality fixes across review, architecture, debt, and tests; ask before risky edits."
 ---
 
 # Brooks-Lint — Full Sweep & Auto-Fix

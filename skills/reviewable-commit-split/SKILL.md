@@ -1,6 +1,6 @@
 ---
 name: reviewable-commit-split
-description: Splits one large dirty Git working state into reviewable semantic local commits without rewriting existing branch history. Use when the user asks to split current working tree changes, 워킹 스테이트 분할커밋, 리뷰 가능한 커밋, semantic commit grouping, or staged/unstaged changes into a clean commit stack.
+description: "Split a large dirty working tree into reviewable semantic local commits without rewriting existing history."
 ---
 
 # Reviewable Commit Split

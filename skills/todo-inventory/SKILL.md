@@ -1,8 +1,6 @@
 ---
 name: todo-inventory
-description: Inventory code TODO markers and summarize newly added TODOs in the current git diff. Use when asked to list TODOs left in a repo, audit deferred follow-up work, check whether this session added new TODOs, or prepare wrap-up and handoff notes with explicit TODO status.
-metadata:
-  short-description: Inventory remaining and newly added TODOs
+description: "Inventory TODO markers and newly added TODOs in the current diff for handoff or cleanup."
 ---
 
 # Todo Inventory

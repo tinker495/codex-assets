@@ -1,6 +1,6 @@
 ---
 name: non-test-bloat-reduction
-description: "Run a per-commit non-test reduction workflow that clusters intent-equivalent implementations, detects abstraction failure and fragmentation, and executes deletion-first refactors (including justified medium/high-risk structural merges) until net non-test reduction reaches at least 200 lines (target 200-300+) or concept-preserving candidates are exhausted. Use when repeated requests aim to shrink runtime code while excluding tests and script/CLI glue by default."
+description: "Deletion-first non-test runtime code reduction; cluster equivalent logic and merge fragments without changing behavior."
 ---
 
 # Non-Test Bloat Reduction

@@ -1,6 +1,6 @@
 ---
 name: code-logic-compressibility-analyst
-description: Analyzes code logic as observable behavior traces, predicate inventories, path cubes, and pure-region minimization candidates to reduce accidental decision complexity without rewriting code. Use when the user asks for code logic compression, boolean/control-flow minimization, branch merge candidates, predicate redundancy analysis, Quine-McCluskey or Karnaugh-map style reasoning, or safe refactor opportunities without behavior changes.
+description: "Analyze predicates, paths, and pure regions to find behavior-preserving logic compression opportunities."
 ---
 
 # Code Logic Compressibility Analyst

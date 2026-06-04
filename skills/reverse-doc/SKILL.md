@@ -1,6 +1,6 @@
 ---
 name: reverse-doc
-description: Use when documenting actual code behavior before refactoring, investigating vibe-coded or agent-written modules, creating As-Is baselines for spec drift detection, or responding to "역문서화", "이 코드가 뭘 하는지 문서화해", "현재 코드 상태 정리" requests.
+description: "Document current code behavior as an As-Is baseline before refactor, spec drift checks, or cleanup."
 ---
 
 # Reverse Documentation: 코드 → As-Is 문서 생성

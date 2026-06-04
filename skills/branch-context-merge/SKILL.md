@@ -1,6 +1,6 @@
 ---
 name: branch-context-merge
-description: Merge origin/main into the current branch while preserving branch-specific codebase context, intent, and architectural ownership decisions. Use when the user asks to merge/sync main into a feature branch, resolve conflicts without losing branch context, keep branch semantics during merge, or says Korean phrases like "브랜치 맥락 유지", "현재 브랜치에 origin/main 머지", or "컨플릭트 해소".
+description: "Merge origin/main into current branch while preserving branch intent, context, and ownership decisions."
 ---
 
 # Branch Context Merge

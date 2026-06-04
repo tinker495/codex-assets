@@ -1,7 +1,6 @@
 ---
 name: graphify
-description: any input (code, docs, papers, images) → knowledge graph → clustered communities → HTML + JSON + audit report
-trigger: /graphify
+description: "Convert code/docs/papers/images into a knowledge graph, clustered HTML report, JSON, and audit output."
 ---
 
 # /graphify

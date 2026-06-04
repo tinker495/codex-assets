@@ -1,6 +1,6 @@
 ---
 name: code-health
-description: "Run and summarize repository code health checks (duplication, dead code, complexity, maintainability, coverage hotspots, diff summary) using internalized skill scripts (no Makefile dependency). Also use for xenon/radon complexity-fail triage and remediation localization."
+description: "Run repo code-health checks: duplication, dead code, complexity, maintainability, coverage hotspots, diff summary."
 ---
 
 # Code Health

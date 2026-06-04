@@ -1,6 +1,6 @@
 ---
 name: open-work-state
-description: Reconstructs the current GitHub work state by reading every open issue and every open pull request for the active repository, including bodies, comments, reviews, checks, labels, assignees, and links. Use when the user asks to understand current project status, read all open issues/PRs, get a work-state briefing, resume from GitHub state, or Korean phrases like "현재 열린 이슈와 PR", "현재 작업 상태 숙지", "open issue/PR 전부 읽기".
+description: "Read all open GitHub issues and PRs for the active repo to reconstruct current project/work state."
 ---
 
 # Open Work State

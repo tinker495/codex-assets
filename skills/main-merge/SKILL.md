@@ -1,6 +1,6 @@
 ---
 name: main-merge
-description: "Merge the latest main branch into the current working branch through a strict sequence: branch onboarding, safe merge, deterministic conflict resolution, and branch-grounded documentation refresh. Use when asked to sync with main, resolve merge conflicts, or complete post-merge doc updates before continuing feature work."
+description: "Sync latest main into current branch with onboarding, safe merge, conflict resolution, and doc refresh."
 ---
 
 # Main Merge

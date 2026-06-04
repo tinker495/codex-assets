@@ -1,6 +1,6 @@
 ---
 name: resume
-description: Inspect the current git working tree and OMX session artifacts as an internal preflight, then immediately continue the user’s attached task with the right in-flight commit context. Use when a user activates `$resume` and pastes the real task they want to continue on top of staged work, an unfinished local commit, or the latest local branch state in a fresh session. Also use for resume-and-do flows such as continuing implementation, fixing a bug on the current worktree, resuming a refactor, or reconstructing current state before executing the next task.
+description: "Preflight current git/OMX state, then continue the user's attached in-flight task on the right branch context."
 ---
 
 # Resume

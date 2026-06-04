@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: Prepares and publishes GitHub pull requests from local branch evidence, including branch-base validation, Korean PR brief generation, checklist gating, and approval-gated push/create. Use when the user asks for $pr-workflow, PR 올리기, PR 준비, PR 브리핑, stacked PR, gh pr create/edit, or branch-to-PR delivery.
+description: "Prepare and publish GitHub PRs from branch evidence with Korean brief, checklist gates, and approval-gated push/create."
 ---
 
 # PR Workflow

@@ -1,6 +1,6 @@
 ---
 name: docs-codebase-alignment-audit
-description: Run deterministic docs integrity audits and minimal repairs for repository Markdown docs. Use when users ask to check/fix broken links, stale paths, missing make targets, AGENTS chain references, docs-check/CI guardrails, or map-first/SSOT/progressive-disclosure and agent-legibility conformance. Prefer this for audit-and-fix passes, not full branch-wide narrative refresh.
+description: "Audit and minimally repair Markdown docs for broken links, stale paths, make targets, and SSOT rules."
 ---
 
 # Docs Codebase Alignment Audit

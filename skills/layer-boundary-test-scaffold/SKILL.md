@@ -1,6 +1,6 @@
 ---
 name: layer-boundary-test-scaffold
-description: Scaffold or extend AST-based architecture boundary tests from AGENTS.md rules (import boundaries, layer dependencies, runtime-only UI constraints). Use when converting textual architecture constraints into pytest-enforced checks.
+description: "Create or extend pytest AST boundary tests from AGENTS import, layer, and runtime constraints."
 ---
 
 # Layer Boundary Test Scaffold

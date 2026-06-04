@@ -1,6 +1,6 @@
 ---
 name: branch-archive-rechunk-rebase
-description: "Rebuild the current branch history through a fixed git workflow: onboard the branch, archive the full pre-rewrite state to a legacy branch, regroup the total branch diff into exactly N logical commits centered on the branch's real semantic changes rather than the old commit boundaries, and rebase the rewritten branch onto origin/main when it is not already directly based on main. Use when asked to clean up a noisy feature branch, reorganize fragmented semantic changes into N commits, archive legacy history before rewriting, or restack current work onto main without losing recoverability."
+description: "Rewrite current branch into N semantic commits with a legacy backup branch and optional rebase onto origin/main."
 ---
 
 # Branch Archive Rechunk Rebase
