@@ -1,8 +1,9 @@
-2026-06-26 16:02:27 KST
+# Weekly engineering summary automation memory
 
-- Weekly summary range used: 2026-06-19 through 2026-06-26 KST.
-- Evidence gathered from `git log --first-parent`, `gh pr list`, `gh pr view`, and GitHub GraphQL PR/issue queries.
-- Confirmed 15 merged PRs in range: #351, #352, #353, #355, #356, #360, #361, #365, #366, #367, #368, #369, #370, #371, #372.
-- No explicit rollout notes found in repo/GitHub searches for rollout/release artifacts during this range.
-- No incident/outage/sev/postmortem/rollback/hotfix GitHub issues found during this range.
-- Review pattern: all merged PRs showed `APPROVED`; approver counts in range were `kh-mo` 11 and `tinker495` 4. Bot comments from `gemini-code-assist` and `chatgpt-codex-connector` were common.
+- Last refreshed: 2026-07-03
+- Window used this run: 2026-06-26T07:00:45Z .. 2026-07-03 current run
+- Evidence pattern: `gh pr list --state merged`, `gh issue list --search "incident OR outage OR sev OR postmortem OR rollback OR hotfix"`, and local rollout summaries under `/Users/mrx-ksjung/.codex/memories/rollout_summaries/`.
+- Result snapshot: 27 merged PRs in window (#373, #374, #375, #376, #379, #378, #377, #381, #380, #385, #386, #384, #399, #400, #401, #402, #403, #406, #407, #413, #404, #420, #428, #427, #429, #430, #431).
+- Incident evidence: none found in GitHub issue search for `incident OR outage OR sev OR postmortem OR rollback OR hotfix`.
+- Key rollout/review anchors: PR #378 publish, PR #380 review-fix-publish, PR #384 review-thread closure/unresolved=0 with final CI poll not captured, issue #387 safe cleanup pass, OMX ultragoal state cleanup.
+- Current run time: ~7 minutes.
