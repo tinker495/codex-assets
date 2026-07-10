@@ -27,6 +27,16 @@ ROW_FRAME_COUNTS = {
 IMAGE_SUFFIXES = {".png", ".webp", ".jpg", ".jpeg"}
 
 
+def parse_states(raw: str) -> list[str]:
+    if raw.strip().lower() == "all":
+        return list(ROW_FRAME_COUNTS)
+    states = [item.strip() for item in raw.split(",") if item.strip()]
+    unknown = sorted(set(states) - set(ROW_FRAME_COUNTS))
+    if unknown:
+        raise SystemExit(f"unknown state(s): {', '.join(unknown)}")
+    return states
+
+
 def alpha_nonzero_count(image: Image.Image) -> int:
     alpha = image if image.mode == "L" else image.getchannel("A")
     return sum(alpha.histogram()[1:])
@@ -127,9 +137,14 @@ def inspect_state(
         row_errors.append(f"expected {expected_count} frame files for {state}, found {len(files)}")
 
     if args.require_components and method and method != "components":
-        row_errors.append(
-            f"{state} used extraction method {method}; regenerate the row or inspect slot slicing"
-        )
+        if method == "stable-slots" and args.allow_stable_slots:
+            row_warnings.append(
+                f"{state} used extraction method stable-slots; confirm motion playback remains stable and unclipped"
+            )
+        else:
+            row_errors.append(
+                f"{state} used extraction method {method}; regenerate the row or inspect slot slicing"
+            )
     elif method and method != "components":
         row_warnings.append(
             f"{state} used extraction method {method}; component extraction is preferred"
@@ -204,6 +219,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--frames-root", required=True)
     parser.add_argument("--json-out", required=True)
+    parser.add_argument("--states", default="all")
     parser.add_argument("--min-used-pixels", type=int, default=400)
     parser.add_argument("--edge-margin", type=int, default=2)
     parser.add_argument("--edge-pixel-threshold", type=int, default=24)
@@ -216,20 +232,28 @@ def main() -> None:
         action="store_true",
         help="Fail rows that fell back to equal-slot extraction.",
     )
+    parser.add_argument(
+        "--allow-stable-slots",
+        action="store_true",
+        help="Permit explicitly chosen stable-slots extraction while still warning for visual review.",
+    )
     args = parser.parse_args()
 
     frames_root = Path(args.frames_root).expanduser().resolve()
     manifest_rows = load_manifest(frames_root)
     chroma_key = load_chroma_key(frames_root)
+    states = parse_states(args.states)
     rows = [
         inspect_state(frames_root, state, count, manifest_rows, chroma_key, args)
         for state, count in ROW_FRAME_COUNTS.items()
+        if state in states
     ]
     errors = [error for row in rows for error in row["errors"]]
     warnings = [warning for row in rows for warning in row["warnings"]]
     result = {
         "ok": not errors,
         "frames_root": str(frames_root),
+        "states": states,
         "errors": errors,
         "warnings": warnings,
         "rows": rows,

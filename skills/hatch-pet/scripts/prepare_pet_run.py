@@ -11,48 +11,71 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
-ATLAS = {"columns": 8, "rows": 9, "cell_width": 192, "cell_height": 208}
+ATLAS = {"columns": 8, "rows": 11, "cell_width": 192, "cell_height": 208}
 ATLAS["width"] = ATLAS["columns"] * ATLAS["cell_width"]
 ATLAS["height"] = ATLAS["rows"] * ATLAS["cell_height"]
 
 ROWS = [
-    ("idle", 0, 6, "neutral breathing/blinking loop"),
-    ("running-right", 1, 8, "rightward locomotion loop"),
-    ("running-left", 2, 8, "leftward locomotion loop"),
-    ("waving", 3, 4, "greeting gesture with raised wave and return"),
-    ("jumping", 4, 5, "anticipation, lift, peak, descent, settle"),
-    ("failed", 5, 8, "sad, failed, or deflated reaction"),
-    ("waiting", 6, 6, "patient waiting loop with small motion"),
-    ("running", 7, 6, "active working/in-progress loop"),
-    ("review", 8, 6, "focused inspecting or review loop"),
+    ("idle", 0, 6, "calm resting, breathing, and blinking loop"),
+    ("running-right", 1, 8, "rightward drag movement loop"),
+    ("running-left", 2, 8, "leftward drag movement loop"),
+    ("waving", 3, 4, "greeting or attention gesture"),
+    ("jumping", 4, 5, "hover or playful jump"),
+    ("failed", 5, 8, "blocked, failed, or cancelled reaction"),
+    ("waiting", 6, 6, "waiting for approval, help, or user input"),
+    ("running", 7, 6, "active task work or processing"),
+    ("review", 8, 6, "ready or completed output review"),
 ]
 
-TRANSPARENCY_ARTIFACT_RULES = [
-    "Prefer pose, expression, and silhouette changes over decorative effects.",
-    "Effects are allowed only when they are state-relevant, opaque, hard-edged, pixel-style, fully inside the same frame slot, and physically touching or overlapping the pet silhouette.",
-    "Allowed attached effects can include a tear touching the face, a small smoke puff touching the pet or prop, or tiny stars overlapping the pet during a failed/dizzy reaction.",
-    "Do not draw detached effects: floating stars, loose sparkles, floating punctuation, floating icons, falling tear drops, separated smoke clouds, loose dust, disconnected outline bits, or stray pixels.",
-    "Do not draw wave marks, motion arcs, speed lines, action streaks, afterimages, blur, smears, halos, glows, auras, floor patches, cast shadows, contact shadows, drop shadows, oval floor shadows, landing marks, or impact bursts.",
-    "Do not include text, labels, frame numbers, visible grids, guide marks, speech bubbles, thought bubbles, UI panels, code snippets, scenery, checkerboard transparency, white backgrounds, or black backgrounds.",
-    "Do not use the chroma-key color or chroma-key-adjacent colors in the pet, prop, effects, highlights, shadows, or outlines.",
-    "Reject any pose that is cropped, overlaps another pose, crosses into a neighboring frame slot, or creates a separate disconnected component that is not attached to the pet.",
+LOOK_ROWS = [
+    (
+        "look-row-9",
+        9,
+        ["000", "022.5", "045", "067.5", "090", "112.5", "135", "157.5"],
+        "clockwise look directions from up through down-right",
+    ),
+    (
+        "look-row-10",
+        10,
+        ["180", "202.5", "225", "247.5", "270", "292.5", "315", "337.5"],
+        "clockwise look directions from down through up-left",
+    ),
 ]
+
+LOOK_CARDINALS = [
+    ("000", "up"),
+    ("090", "right"),
+    ("180", "down"),
+    ("270", "left"),
+]
+
+STATE_PROMPTS = {
+    "idle": "Calm low-distraction resting loop: subtle breathing, tiny blink, slight head/body bob, and only quiet persona-preserving motion.",
+    "running-right": "Dragging-right loop: show directional movement to the right through body and limb poses only.",
+    "running-left": "Dragging-left loop: show directional movement to the left through body and limb poses only.",
+    "waving": "Greeting loop: paw or limb down, raised, tilted, and returning in a friendly attention gesture.",
+    "jumping": "Hover jump loop: anticipation, lift, airborne peak, descent, and settle through body height.",
+    "failed": "Blocked/failed loop: slumped or deflated reaction with sad or closed eyes.",
+    "waiting": "Needs-input loop: expectant asking pose for approval, help, or user input.",
+    "running": "Working loop: focused active-task processing, thinking, typing, scanning, or effortful concentration; not literal foot-running, jogging, sprinting, treadmill motion, raised knees, long steps, pumping arms, or directional travel.",
+    "review": "Ready-review loop: focused inspection of completed output with lean, blink, narrowed eyes, head tilt, or paw pose.",
+}
 
 STATE_REQUIREMENTS = {
     "idle": [
         "CRITICAL: idle is the low-distraction baseline state and the first frame is also used as the reduced-motion static pet.",
         "Use only subtle idle motion: gentle breathing, a tiny blink, a slight head or body bob, a very small material sway, or another quiet motion that fits the pet persona.",
         "Keep the pet essentially in the same pose, facing direction, silhouette, markings, palette, and prop state across all 6 frames.",
+        "Idle variation must stay calm but still read as animation; do not repeat effectively identical copies across the loop.",
         "Do not show waving, walking, running, jumping, talking, working, reviewing, emotional reactions, large gestures, item interactions, or new props.",
         "Feet, base, body, or object anchor should remain planted or nearly planted.",
         "The first and last frames should be very close visually so the loop feels calm and does not pop.",
     ],
     "waving": [
-        "Show the greeting through paw pose only: paw down, paw raised, paw tilted, paw returning.",
-        "Do not draw wave marks, motion arcs, lines, sparkles, symbols, or floating effects around the paw.",
+        "Show the greeting through paw, hand, wing, or limb pose only.",
+        "Do not draw wave marks, motion arcs, lines, sparkles, symbols, or floating effects around the gesture.",
     ],
     "jumping": [
         "Show the jump through pose and vertical body position only: anticipation, lift, airborne peak, descent, settle.",
@@ -64,34 +87,86 @@ STATE_REQUIREMENTS = {
         "Tears, small smoke puffs, or tiny stars are allowed only if attached to or overlapping the pet silhouette and kept inside the same frame slot.",
         "Do not draw red X marks, floating symbols, detached stars, separated smoke clouds, falling tear drops, dust, or other loose effects.",
     ],
+    "waiting": [
+        "Show that Codex needs approval, help, or user input through an expectant asking pose.",
+        "Keep the motion patient and readable, without turning it into ordinary idle or review.",
+    ],
+    "running": [
+        "Show the pet actively working or processing, as if running a task: focused posture, busy hands or paws, purposeful bobbing, thinking motion, tool or prop motion only if already part of the pet identity, or other non-locomotion activity.",
+        "Do not show literal foot-running, jogging, sprinting, treadmill motion, raised knees, long steps, pumping arms, directional travel, speed lines, dust clouds, floor shadows, motion trails, or detached motion effects.",
+    ],
     "review": [
-        "Show review through lean, blink, narrowed eyes, head tilt, or paw position.",
+        "Show review through lean, blink, narrowed eyes, head tilt, or paw/hand position.",
         "Do not add magnifying glasses, papers, code, UI, punctuation, symbols, or other new props unless they already exist in the base pet identity.",
     ],
     "running-right": [
-        "Show locomotion through body, limb, and prop movement only.",
+        "Show directional drag movement to the right through body, limb, and prop movement only.",
+        "The row must unmistakably face and travel right.",
+        "The movement cadence must alternate visibly across the 8 frames instead of repeating one nearly static stride.",
         "Do not draw speed lines, dust clouds, floor shadows, motion trails, or detached motion effects.",
     ],
     "running-left": [
-        "Show locomotion through body, limb, and prop movement only.",
+        "Show directional drag movement to the left through body, limb, and prop movement only.",
+        "The row must unmistakably face and travel left.",
+        "The movement cadence must alternate visibly across the 8 frames instead of repeating one nearly static stride.",
         "Do not draw speed lines, dust clouds, floor shadows, motion trails, or detached motion effects.",
-    ],
-    "running": [
-        "Show the pet actively working or processing, as if running a task: focused posture, busy hands or paws, purposeful bobbing, thinking motion, tool/prop motion only if already part of the pet identity, or other non-locomotion activity.",
-        "Do not show literal foot-running, jogging, sprinting, treadmill motion, raised knees, long steps, pumping arms, directional travel, speed lines, dust clouds, floor shadows, motion trails, or detached motion effects.",
     ],
 }
 
-DIGITAL_PET_STYLE = (
-    "Codex digital pet sprite style: pixel-art-adjacent low-resolution mascot sprite, "
-    "compact chibi proportions, chunky whole-body silhouette, thick dark 1-2 px outline, "
-    "visible stepped/pixel edges, limited palette, flat cel shading with at most one "
-    "small highlight and one shadow step, simple readable face, tiny limbs, and no "
-    "detail that disappears at 192x208. Avoid polished illustration, painterly "
-    "rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, "
-    "soft gradients, realistic fur or material texture, anti-aliased high-detail "
-    "edges, and complex tiny accessories."
+NON_DERIVABLE_STATES = {
+    "waving",
+    "jumping",
+    "failed",
+    "waiting",
+    "running",
+    "review",
+}
+
+PET_SAFE_STYLE = (
+    "Pet-safe sprite: compact full-body mascot, readable in a 192x208 cell, "
+    "clear silhouette, simple face, stable palette/materials, and crisp edges "
+    "for chroma-key extraction."
 )
+
+STYLE_PRESETS = {
+    "auto": (
+        "Infer the most appropriate pet-safe style from the user request and "
+        "reference images, then keep that exact style consistent across every row."
+    ),
+    "pixel": (
+        "Pixel-art-adjacent digital mascot with a chunky silhouette, simple dark "
+        "outline, limited palette, flat cel shading, and visible stepped edges."
+    ),
+    "plush": (
+        "Soft plush toy mascot with rounded stitched forms, fuzzy fabric feel, "
+        "simple sewn details, and readable toy-like proportions."
+    ),
+    "clay": (
+        "Handmade clay or polymer-clay mascot with rounded sculpted forms, soft "
+        "material texture, simple features, and clean readable edges."
+    ),
+    "sticker": (
+        "Polished sticker mascot with bold clean shapes, crisp outline, flat "
+        "colors, and minimal highlight detail."
+    ),
+    "flat-vector": (
+        "Flat vector-style mascot with simple geometric forms, crisp color areas, "
+        "clean outline, and minimal shading."
+    ),
+    "3d-toy": (
+        "Stylized 3D toy mascot with smooth rounded forms, simple materials, "
+        "clear silhouette, and no photoreal complexity."
+    ),
+    "painterly": (
+        "Painterly mascot with simplified brush texture, readable forms, stable "
+        "palette, and enough edge clarity for clean extraction."
+    ),
+    "brand-inspired": (
+        "Brand-inspired mascot using approved public or user-provided brand cues "
+        "such as colors, mascot themes, and vibe while avoiding readable text or "
+        "logo copying unless explicitly approved."
+    ),
+}
 
 CHROMA_KEY_CANDIDATES = [
     ("magenta", "#FF00FF"),
@@ -104,6 +179,7 @@ CHROMA_KEY_CANDIDATES = [
 
 DEFAULT_PET_NAME = "Sprout"
 CANONICAL_BASE_PATH = "references/canonical-base.png"
+BRAND_DISCOVERY_PATH = "references/brand-discovery.md"
 LAYOUT_GUIDE_DIR = "references/layout-guides"
 LAYOUT_GUIDE_SAFE_MARGIN_X = 18
 LAYOUT_GUIDE_SAFE_MARGIN_Y = 16
@@ -162,7 +238,7 @@ def infer_name(args: argparse.Namespace, reference_paths: list[Path]) -> str:
         if display:
             return display
 
-    for raw_value in [args.pet_notes, args.description]:
+    for raw_value in [args.pet_notes, args.description, args.brand_name]:
         words = concept_words(raw_value)
         if words:
             return words[0].capitalize()
@@ -188,10 +264,12 @@ def infer_description(args: argparse.Namespace, reference_paths: list[Path]) -> 
     if args.description.strip():
         return sentence(args.description)
     if args.pet_notes.strip():
-        return sentence(f"A compact Codex digital pet: {args.pet_notes}")
+        return sentence(f"A compact Codex pet: {args.pet_notes}")
+    if args.brand_name.strip():
+        return sentence(f"A compact Codex pet inspired by {args.brand_name}")
     if reference_paths:
-        return "A compact Codex digital pet based on the provided reference image."
-    return "A compact original Codex digital pet ready for animation."
+        return "A compact Codex pet based on the provided reference image."
+    return "A compact original Codex pet ready for animation."
 
 
 def infer_pet_notes(args: argparse.Namespace, reference_paths: list[Path]) -> str:
@@ -199,9 +277,11 @@ def infer_pet_notes(args: argparse.Namespace, reference_paths: list[Path]) -> st
         return args.pet_notes.strip()
     if args.description.strip():
         return args.description.strip().rstrip(".")
+    if args.brand_name.strip():
+        return f"a compact mascot inspired by {args.brand_name.strip()}"
     if reference_paths:
         return "the pet shown in the reference image(s)"
-    return "a compact original Codex digital pet"
+    return "a compact original Codex pet"
 
 
 def default_output_dir(pet_id: str) -> Path:
@@ -303,10 +383,18 @@ def create_layout_guide(path: Path, state: str, frames: int) -> dict[str, object
 
 def create_layout_guides(run_dir: Path) -> list[dict[str, object]]:
     guide_dir = run_dir / LAYOUT_GUIDE_DIR
-    return [
+    standard_guides = [
         create_layout_guide(guide_dir / f"{state}.png", state, frames)
         for state, _row, frames, _purpose in ROWS
     ]
+    look_guides = [
+        create_layout_guide(guide_dir / f"{state}.png", state, len(directions))
+        for state, _row, directions, _purpose in LOOK_ROWS
+    ]
+    cardinal_guide = create_layout_guide(
+        guide_dir / "look-cardinals.png", "look-cardinals", len(LOOK_CARDINALS)
+    )
+    return [*standard_guides, *look_guides, cardinal_guide]
 
 
 def parse_hex_color(value: str) -> tuple[int, int, int]:
@@ -337,9 +425,7 @@ def sampled_reference_pixels(paths: list[Path]) -> list[tuple[int, int, int]]:
                 pixels.append((red, green, blue))
 
     non_background = [
-        pixel
-        for pixel in pixels
-        if not (pixel[0] > 244 and pixel[1] > 244 and pixel[2] > 244)
+        pixel for pixel in pixels if not (pixel[0] > 244 and pixel[1] > 244 and pixel[2] > 244)
     ]
     return non_background or pixels
 
@@ -386,93 +472,297 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text.rstrip() + "\n", encoding="utf-8")
 
 
-def resolved_style_notes(raw_style_notes: str) -> str:
+def resolved_style_contract(style_preset: str, raw_style_notes: str) -> str:
+    style_preset = style_preset.strip().lower()
+    if style_preset not in STYLE_PRESETS:
+        allowed = ", ".join(sorted(STYLE_PRESETS))
+        raise SystemExit(f"invalid style preset: {style_preset}; expected one of: {allowed}")
     raw_style_notes = raw_style_notes.strip()
+    preset_contract = STYLE_PRESETS[style_preset]
     if not raw_style_notes:
-        return DIGITAL_PET_STYLE
-    return f"{DIGITAL_PET_STYLE} Additional user style notes: {raw_style_notes}."
+        return f"{PET_SAFE_STYLE} Style `{style_preset}`: {preset_contract}"
+    return (
+        f"{PET_SAFE_STYLE} Style `{style_preset}`: {preset_contract} "
+        f"User style notes: {raw_style_notes}."
+    )
+
+
+def compact(value: str) -> str:
+    return " ".join(value.strip().split())
+
+
+def brand_inspiration_line(args: argparse.Namespace) -> str:
+    brand_name = compact(args.brand_name)
+    brand_brief = compact(args.brand_brief)
+    if not brand_name and not brand_brief:
+        return ""
+
+    prefix = f"{brand_name}: " if brand_name else ""
+    if brand_brief:
+        return (
+            f"{prefix}{brand_brief} Use only broad mascot-safe cues; do not copy "
+            "readable logos, marks, UI screenshots, or text."
+        )
+    return (
+        f"{prefix}Use only broad mascot-safe brand cues. Do not copy readable "
+        "logos, marks, UI screenshots, or text."
+    )
 
 
 def base_pet_prompt(args: argparse.Namespace) -> str:
     pet_notes = args.pet_notes or "the pet shown in the reference image(s)"
-    style_notes = resolved_style_notes(args.style_notes)
+    style_contract = resolved_style_contract(args.style_preset, args.style_notes)
+    brand_line = brand_inspiration_line(args)
+    brand_block = f"\nBrand inspiration: {brand_line}\n" if brand_line else "\n"
     chroma_key = args.chroma_key["hex"]
     chroma_name = args.chroma_key["name"]
-    return f"""Create a single clean reference sprite for a Codex app digital pet named {args.display_name}.
+    return f"""Create one clean full-body reference sprite for Codex pet {args.display_name}.
 
-Pet: {pet_notes}.
-Style contract: {style_notes}
-
-Use this prompt as an authoritative sprite-production spec. Do not expand it into a polished illustration, painterly character image, anime key art, 3D render, vector mascot, glossy app icon, realistic animal portrait, or marketing artwork.
-
-Output one centered full-body pet sprite pose only, on a perfectly flat pure {chroma_name} {chroma_key} chroma-key background. The pet must be fully visible, readable as a tiny digital pet, and suitable for animation into a 192x208 sprite cell. Do not include scenery, text, labels, borders, checkerboard transparency, detached effects, shadows, glows, or extra props not present in the reference unless explicitly requested. Do not use {chroma_key}, pure {chroma_name}, or colors close to that chroma key in the pet, prop, highlights, or effects."""
+Pet identity: {pet_notes}.
+Style: {style_contract}
+{brand_block}
+Place a single centered pose on a perfectly flat pure {chroma_name} {chroma_key} chroma-key background. Keep the full pet visible, compact, readable at 192x208, and easy to animate. Preserve approved reference identity cues. No scenery, text, borders, checkerboard transparency, shadows, glows, detached effects, or extra props. Keep {chroma_key} and close colors out of the pet, props, highlights, and effects."""
 
 
-def row_prompt(
+def row_prompt(args: argparse.Namespace, state: str, row: int, frames: int, purpose: str) -> str:
+    pet_notes = args.pet_notes or "the same pet from the approved base reference"
+    style_contract = resolved_style_contract(args.style_preset, args.style_notes)
+    chroma_key = args.chroma_key["hex"]
+    chroma_name = args.chroma_key["name"]
+    state_prompt = STATE_PROMPTS[state]
+    state_requirements = "\n".join(f"- {line}" for line in STATE_REQUIREMENTS[state])
+    return f"""Create one horizontal animation strip for Codex pet `{args.pet_id}`, state `{state}`.
+
+Use the attached canonical base for identity. Use the attached layout guide only for slot count, spacing, centering, and padding; do not draw the guide.
+
+Output exactly {frames} full-body frames in one left-to-right row on flat pure {chroma_name} {chroma_key}. Treat the row as {frames} invisible equal-width slots: one centered complete pose per slot, evenly spaced, with no overlap, clipping, empty slots, labels, or borders.
+
+Identity: same pet in every frame: {pet_notes}. Preserve silhouette, face, proportions, markings, palette, material, style, and props.
+Style: {style_contract}
+Animation continuity: keep apparent pet scale and baseline stable within the row unless the state itself intentionally changes vertical position, such as `jumping`. Move the pose within the slot instead of redrawing the pet larger or smaller frame to frame.
+
+State action: {state_prompt}
+
+State requirements:
+{state_requirements}
+
+Clean extraction: crisp opaque edges, safe padding, no scenery, text, guide marks, checkerboard, shadows, glows, motion blur, speed lines, dust, detached effects, stray pixels, or chroma-key colors inside the pet."""
+
+
+def retry_row_prompt(
     args: argparse.Namespace, state: str, row: int, frames: int, purpose: str
 ) -> str:
-    pet_notes = args.pet_notes or "the same pet from the approved base reference"
-    style_notes = resolved_style_notes(args.style_notes)
+    pet_notes = args.pet_notes or "the canonical base pet"
     chroma_key = args.chroma_key["hex"]
     chroma_name = args.chroma_key["name"]
-    state_requirements = STATE_REQUIREMENTS.get(state, [])
-    state_requirement_text = ""
-    if state_requirements:
-        state_requirement_text = "\n\nState-specific requirements:\n" + "\n".join(
-            f"- {requirement}" for requirement in state_requirements
+    state_prompt = STATE_PROMPTS[state]
+    state_requirements = "\n".join(f"- {line}" for line in STATE_REQUIREMENTS[state])
+    return f"""Create Codex pet row `{state}` for `{args.pet_id}`: exactly {frames} full-body frames in one horizontal strip on flat pure {chroma_name} {chroma_key}.
+
+Use the attached canonical base for identity and the layout guide only for spacing. Same pet in every frame: {pet_notes}. Preserve silhouette, face, palette, material, proportions, markings, and props.
+
+Keep apparent pet scale and baseline stable within the row unless the state itself intentionally changes vertical position, such as `jumping`.
+
+Action: {state_prompt}
+
+State requirements:
+{state_requirements}
+
+One centered complete pose per invisible slot. No text, boxes, guide marks, scenery, shadows, glows, motion blur, speed lines, dust, detached effects, stray pixels, or {chroma_key} colors in the pet."""
+
+
+def look_row_boundary_contract(row: int) -> str:
+    if row == 9:
+        return (
+            "ROW-BOUNDARY LOCK: 157.5 must be one even 22.5-degree step before 180. "
+            "Match the approved 180 pose's body size, baseline, planted anchor, "
+            "expression, and construction. Preserve the overall right-hand arc, but "
+            "do not distort pupils, nose, or body geometry merely to exaggerate the subtle horizontal component."
         )
-    transparency_artifact_text = "\n".join(
-        f"- {requirement}" for requirement in TRANSPARENCY_ARTIFACT_RULES
+    return (
+        "ROW-BOUNDARY LOCK: 180 must continue directly from row 9's 157.5, matching "
+        "its body size, baseline, planted anchor, expression, and construction. "
+        "337.5 must be one even 22.5-degree step before 000: nearly up-facing while "
+        "remaining on the overall left-hand arc. Do not distort pupils, nose, or body "
+        "geometry merely to exaggerate the subtle horizontal component."
     )
-    return f"""Create a single horizontal sprite strip for the Codex app digital pet `{args.pet_id}` in the state `{state}`.
 
-Use the attached reference image(s) for pet identity and the attached base pet image as the canonical design. Use the attached layout guide image only for frame count, slot spacing, centering, and safe padding. Simplify any high-resolution reference details into the Codex digital pet sprite style. Do not simply copy the still reference pose. Generate distinct animation poses that create a readable cycle.
 
-Identity lock:
-- Do not redesign the pet. Only change pose/action for the `{state}` animation.
-- Preserve the exact head shape, ear/horn/limb shape, face design, markings, palette, outline weight, body proportions, prop design, and overall silhouette from the canonical base pet.
-- Keep every frame recognizably the same individual pet, not a related variant.
-- If the pet has a prop or accessory, preserve its size, side, palette, and attachment style unless the row action requires a small pose-only adjustment.
-- Prefer a subtler animation over any change that mutates the pet identity.
+def look_row_layout_contract() -> str:
+    return """HARD LAYOUT AND CONTINUITY CONTRACT — DETERMINISTIC REGISTRATION: draw exactly eight separated pose groups in left-to-right direction order. Keep enough chroma-only space between neighboring poses that each complete pose can be detected without cutting through foreground. Approximate the guide's equal spacing, but do not distort a pose merely to hit an exact source-canvas coordinate; deterministic assembly will crop the eight ordered groups, then apply one shared scale and baseline.
 
-Output exactly {frames} separate animation frames arranged left-to-right in one single row. Each frame must show the same pet: {pet_notes}.
+Use the same body height, head size, baseline, and planted-body position across the generated family. Never overlap neighboring poses, merge two poses into one connected group, crop foreground at the outer canvas edge, or resize one pose independently.
 
-Style contract: {style_notes}
+Keep the feet, base, or lower torso planted at the same coordinates across all eight frames. Express direction through the eyes, face, head, upper body, and physically appropriate prop movement, not by moving, rotating, or rescaling the entire sprite."""
 
-Use this prompt as an authoritative sprite-production spec. Do not expand it into a polished illustration, painterly character image, anime key art, 3D render, vector mascot, glossy app icon, realistic animal portrait, or marketing artwork.
 
-Animation action: {purpose}.
-{state_requirement_text}
+def look_row_screen_coordinate_contract(row: int) -> str:
+    if row == 9:
+        return (
+            "SCREEN-COORDINATE LOCK: screen-right means the viewer's right image edge, "
+            "never the character's own right. The row should travel naturally through "
+            "the right half of the loop. Near-vertical 022.5 and 157.5 may have subtle "
+            "horizontal cues; prioritize a coherent arc over exact pupil or nose placement."
+        )
+    return (
+        "SCREEN-COORDINATE LOCK: screen-left means the viewer's left image edge, never "
+        "the character's own left. The row should travel naturally through the left half "
+        "of the loop. Near-vertical 202.5 and 337.5 may have subtle horizontal cues; "
+        "prioritize a coherent arc over exact pupil or nose placement."
+    )
 
-Transparency and artifact rules:
-{transparency_artifact_text}
 
-Layout requirements:
-- Exactly {frames} full-body frames, left to right, in one horizontal row.
-- The attached layout guide shows the {frames} frame boxes and inner safe area for this row. Follow its slot count, spacing, centering, and padding.
-- Do not reproduce the layout guide itself: no visible boxes, guide lines, center marks, labels, guide colors, or guide background may appear in the output.
-- Treat the image as {frames} equal-width invisible frame slots. Fill every slot: each requested slot must contain exactly one complete full-body pose.
-- Spread the {frames} poses evenly across the whole image width. Do not leave any requested slot blank or create large empty gaps between poses.
-- Center one complete pose in each slot. No pose may cross into the neighboring slot.
-- Use a perfectly flat pure {chroma_name} {chroma_key} chroma-key background across the whole image.
-- Do not draw visible grid lines, borders, labels, numbers, text, watermarks, or checkerboard transparency.
-- Do not include scenery or a background environment.
-- Keep the rendering sprite-like: chunky silhouette, dark pixel-style outline, limited palette, flat shading, minimal tiny detail.
-- Do not use {chroma_key}, pure {chroma_name}, or colors close to that chroma key in the pet, props, highlights, shadows, motion marks, dust, landing marks, or effects.
-- Do not draw shadows, glows, smears, dust, or landing marks using darker/lighter versions of the chroma-key color.
-- Keep every frame self-contained with safe padding. No pet body part should be clipped by the frame slot.
-- Avoid motion blur. Use clear pose changes readable at 192x208.
-- Preserve the same silhouette, face, proportions, palette, material, and props across every frame."""
+def look_row_axis_contract(row: int) -> str:
+    if row == 9:
+        slots = [
+            "1. `000`: vertical UP; no horizontal requirement.",
+            "2. `022.5`: horizontal SCREEN-RIGHT and vertical UP.",
+            "3. `045`: horizontal SCREEN-RIGHT and vertical UP.",
+            "4. `067.5`: horizontal SCREEN-RIGHT and vertical UP.",
+            "5. `090`: horizontal SCREEN-RIGHT; no vertical requirement.",
+            "6. `112.5`: horizontal SCREEN-RIGHT and vertical DOWN.",
+            "7. `135`: horizontal SCREEN-RIGHT and vertical DOWN.",
+            "8. `157.5`: horizontal SCREEN-RIGHT and vertical DOWN.",
+        ]
+    else:
+        slots = [
+            "1. `180`: vertical DOWN; no horizontal requirement.",
+            "2. `202.5`: horizontal SCREEN-LEFT and vertical DOWN.",
+            "3. `225`: horizontal SCREEN-LEFT and vertical DOWN.",
+            "4. `247.5`: horizontal SCREEN-LEFT and vertical DOWN.",
+            "5. `270`: horizontal SCREEN-LEFT; no vertical requirement.",
+            "6. `292.5`: horizontal SCREEN-LEFT and vertical UP.",
+            "7. `315`: horizontal SCREEN-LEFT and vertical UP.",
+            "8. `337.5`: horizontal SCREEN-LEFT and vertical UP.",
+        ]
+    return """DIRECTION TARGETS — use these to shape the coherent row, not as pixel-level landmark gates:
+
+{slots}
+
+Cardinals must be unmistakable. Intermediate poses should broadly occupy the intended quadrant and advance naturally through the ordered loop. Minor pupil, nose, eyelid, or aiming-feature deviations are acceptable when the overall direction, continuity, identity, and motion remain coherent. Do not deform the character merely to make every intermediate axis independently obvious.""".format(
+        slots="\n".join(slots)
+    )
+
+
+def look_row_pre_return_check(row: int) -> str:
+    boundary_check = (
+        "157.5 does not flow evenly into 180"
+        if row == 9
+        else "180 does not continue from 157.5 or 337.5 does not flow evenly into 000"
+    )
+    return f"""PRE-RETURN CHECK: reject this result if it does not contain eight separated pose groups in the required order; neighboring poses overlap; foreground is cropped at the outer canvas edge; any frame changes sprite scale, body or head size, baseline, or planted-body position; the row visibly reverses into the wrong half of the loop; or {boundary_check}. Minor intermediate pupil or nose deviations are not rejection reasons. Exact cell cropping, resizing, and recentering happen deterministically after generation."""
+
+
+def look_row_prompt(
+    args: argparse.Namespace,
+    row: int,
+    directions: list[str],
+) -> str:
+    direction_list = ", ".join(directions)
+    chroma_key = args.chroma_key["hex"]
+    chroma_name = args.chroma_key["name"]
+    reference_instruction = (
+        "The approved cardinal strip is authoritative for the up, screen-right, down, "
+        "and screen-left pose families. Interpolate the intermediate directions as "
+        "even 22.5-degree steps between those anchors."
+        if row == 9
+        else "The approved cardinal strip and completed coherent row 9 are authoritative. "
+        "Use the cardinals for direction meaning and row 9 for cross-row identity, scale, "
+        "registration, and continuity."
+    )
+    return f"""Create one horizontal look-direction strip for Codex pet `{args.pet_id}`, atlas row {row}.
+
+Use the attached canonical base, completed standard contact sheet, layout guide, and approved four-cardinal strip for identity, scale, registration, spacing, direction semantics, and cross-row continuity. Read `qa/look-mechanics.md` and follow its pet-specific movement and eye/prop mechanics. {reference_instruction}
+
+COHERENT SYNTHESIS LOCK: produce one unified eight-pose row. Do not paste, tile, or independently restyle individual cells. Every final cell must be drawn together with the same face construction, body proportions, line/render quality, lighting, materials, scale, baseline, and registration.
+
+Output exactly 8 complete full-body frames in this exact left-to-right order: {direction_list}. Degrees are clockwise: 000 is up, 090 right, 180 down, and 270 left. Neutral/front is not part of this row.
+
+{look_row_axis_contract(row)}
+
+{look_row_screen_coordinate_contract(row)}
+
+{look_row_layout_contract()}
+
+Place one centered pose in each invisible equal-width slot on flat pure {chroma_name} {chroma_key}. Change only the natural parts needed to express gaze: eyes, eyelids, head, face, neck, upper body, appendages, and constrained prop follow-through. Keep identity, silhouette, materials, palette, markings, and props consistent.
+
+{look_row_boundary_contract(row)}
+
+{look_row_pre_return_check(row)}
+
+Do not rotate, skew, or tilt the whole sprite to fake gaze. Do not add replacement/googly eyes, labels, degree text, arrows, clocks, grids, shadows, glows, scenery, detached effects, or chroma-key colors inside the pet."""
+
+
+def retry_look_row_prompt(
+    args: argparse.Namespace,
+    row: int,
+    directions: list[str],
+) -> str:
+    direction_list = ", ".join(directions)
+    chroma_key = args.chroma_key["hex"]
+    chroma_name = args.chroma_key["name"]
+    return f"""Create Codex v2 pet look row {row} for `{args.pet_id}` as exactly 8 full-body frames in this order: {direction_list}.
+
+Use the canonical base, standard contact sheet, layout guide, approved four-cardinal strip, and `qa/look-mechanics.md`. Draw the complete eight-pose row as one coherent animation family, interpolating even 22.5-degree steps between the cardinal pose families. Keep the same pet identity, face construction, materials, palette, markings, and props. Each direction must read correctly at pet size and join continuously at the 000 and 180 boundaries.
+
+{look_row_axis_contract(row)}
+
+{look_row_layout_contract()}
+
+{look_row_boundary_contract(row)}
+
+{look_row_pre_return_check(row)}
+
+Use a flat pure {chroma_name} {chroma_key} background. One complete unclipped pose per invisible slot. No whole-sprite rotation, replacement eyes, labels, guide marks, shadows, glows, scenery, detached effects, or {chroma_key} colors in the pet."""
+
+
+def look_cardinal_prompt(args: argparse.Namespace) -> str:
+    chroma_key = args.chroma_key["hex"]
+    chroma_name = args.chroma_key["name"]
+    return f"""Create one horizontal four-cardinal anchor strip for Codex pet `{args.pet_id}`.
+
+Use the attached canonical base, completed standard contact sheet, and layout guide for exact identity, style, scale, baseline, face construction, materials, palette, markings, props, and spacing. Read `qa/look-mechanics.md` and use the pet's natural gaze mechanism.
+
+Output exactly four centered complete full-body poses in this exact left-to-right order: `000 up`, `090 screen-right`, `180 down`, `270 screen-left`. Screen-left and screen-right always mean the viewer's image edges, never the character's own left or right.
+
+For `000`, keep the face broadly frontal and point the eyes and natural head mechanism toward the TOP edge. For `090`, put the nose tip, pupils, face surface, or natural aiming feature on the screen-right side of the head center. For `180`, keep the face broadly frontal and point toward the BOTTOM edge. For `270`, apply the inverse screen-left landmark rule. Every cardinal must be unmistakable without labels.
+
+Place one pose in each invisible equal-width slot on a flat pure {chroma_name} {chroma_key} background with generous padding. Keep scale, feet/base, lower body, and registration consistent across all four slots.
+
+Do not rotate, skew, or tilt the whole sprite to fake gaze. Do not add replacement eyes, labels, degree text, arrows, boxes, guide marks, shadows, scenery, detached effects, or chroma-key colors inside the pet."""
+
+
+def look_cardinal_repair_prompt(
+    args: argparse.Namespace,
+    label: str,
+    expected_direction: str,
+) -> str:
+    chroma_key = args.chroma_key["hex"]
+    chroma_name = args.chroma_key["name"]
+    screen_rule = {
+        "000": "Keep the face broadly frontal and point the eyes and natural head mechanism toward the TOP edge.",
+        "090": "Put the nose tip, pupils, face surface, or natural aiming feature on the screen-right side of the head center.",
+        "180": "Keep the face broadly frontal and point the eyes and natural head mechanism toward the BOTTOM edge.",
+        "270": "Put the nose tip, pupils, face surface, or natural aiming feature on the screen-left side of the head center.",
+    }[label]
+    return f"""Repair one cardinal anchor for Codex pet `{args.pet_id}`: `{label}` means looking {expected_direction}.
+
+Use the canonical base, completed standard contact sheet, approved cardinal-strip cells, and `qa/look-mechanics.md` for identity, scale, registration, and pet-specific gaze mechanics. {screen_rule} Screen coordinates are viewer-relative.
+
+Output one centered complete full-body pose on a flat pure {chroma_name} {chroma_key} background with generous padding. Keep the feet/base and lower body registered to the approved anchors. The requested cardinal must be unmistakable at final 192x208 display size.
+
+Do not rotate, skew, or tilt the whole sprite to fake gaze. Do not add replacement eyes, labels, arrows, guide marks, shadows, scenery, detached effects, or chroma-key colors inside the pet."""
 
 
 def make_jobs(
-    run_dir: Path, copied_refs: list[dict[str, object]]
+    run_dir: Path,
+    copied_refs: list[dict[str, object]],
 ) -> list[dict[str, object]]:
     reference_inputs = [
         {"path": rel(Path(str(ref["copied_path"])), run_dir), "role": "pet reference"}
         for ref in copied_refs
     ]
-    identity_reference_paths = [CANONICAL_BASE_PATH, "decoded/base.png"]
+    identity_reference_paths = [CANONICAL_BASE_PATH]
     jobs: list[dict[str, object]] = [
         {
             "id": "base",
@@ -485,13 +775,15 @@ def make_jobs(
             "generation_skill": "$imagegen",
             "requires_grounded_generation": bool(reference_inputs),
             "allow_prompt_only_generation": not reference_inputs,
-            "recording_owner": "parent",
         }
     ]
     for state, _row, frames, _purpose in ROWS:
         depends_on = ["base"]
         extra_inputs: list[dict[str, str]] = []
-        mirror_policy: dict[str, object] = {}
+        derivation_policy: dict[str, object] = {
+            "may_derive": False,
+            "reason": "state requires its own generated animation semantics",
+        }
         if state == "running-left":
             depends_on.append("running-right")
             extra_inputs.append(
@@ -500,18 +792,22 @@ def make_jobs(
                     "role": "rightward gait reference for leftward row decision",
                 }
             )
-            mirror_policy = {
+            derivation_policy = {
+                "may_derive": True,
                 "may_derive_from": "running-right",
-                "derivation": "horizontal-mirror",
+                "derivation": "framewise-horizontal-mirror-preserving-order",
                 "requires_explicit_approval": True,
                 "fallback_generation_skill": "$imagegen",
             }
+        elif state not in NON_DERIVABLE_STATES:
+            derivation_policy["reason"] = "no deterministic derivation is configured for this state"
         jobs.append(
             {
                 "id": state,
                 "kind": "row-strip",
                 "status": "pending",
                 "prompt_file": f"prompts/rows/{state}.md",
+                "retry_prompt_file": f"prompts/row-retries/{state}.md",
                 "input_images": [
                     *reference_inputs,
                     {
@@ -522,7 +818,6 @@ def make_jobs(
                         "path": CANONICAL_BASE_PATH,
                         "role": "canonical identity reference",
                     },
-                    {"path": "decoded/base.png", "role": "approved base pet"},
                     *extra_inputs,
                 ],
                 "output_path": f"decoded/{state}.png",
@@ -532,8 +827,111 @@ def make_jobs(
                 "allow_prompt_only_generation": False,
                 "identity_reference_paths": identity_reference_paths,
                 "parallelizable_after": depends_on,
-                "mirror_policy": mirror_policy,
-                "recording_owner": "parent",
+                "derivation_policy": derivation_policy,
+                "mirror_policy": derivation_policy if state == "running-left" else {},
+            }
+        )
+    standard_job_ids = [state for state, _row, _frames, _purpose in ROWS]
+    jobs.append(
+        {
+            "id": "look-cardinals",
+            "kind": "look-cardinal-strip",
+            "status": "pending",
+            "prompt_file": "prompts/look-cardinals.md",
+            "repair_prompt_files": {
+                label: f"prompts/look-anchor-repairs/{label}.md"
+                for label, _direction in LOOK_CARDINALS
+            },
+            "input_images": [
+                *reference_inputs,
+                {
+                    "path": f"{LAYOUT_GUIDE_DIR}/look-cardinals.png",
+                    "role": "layout guide for four cardinal slots; use for spacing only, do not copy guide lines",
+                },
+                {
+                    "path": CANONICAL_BASE_PATH,
+                    "role": "canonical identity reference",
+                },
+                {
+                    "path": "qa/contact-sheet.png",
+                    "role": "approved standard-row identity, scale, and baseline reference",
+                },
+            ],
+            "output_path": "decoded/look-cardinals.png",
+            "extracted_output_paths": [
+                f"decoded/look-anchors/{label}.png" for label, _direction in LOOK_CARDINALS
+            ],
+            "approved_strip_path": "decoded/look-anchors-approved.png",
+            "depends_on": standard_job_ids,
+            "generation_skill": "$imagegen",
+            "requires_grounded_generation": True,
+            "allow_prompt_only_generation": False,
+            "identity_reference_paths": identity_reference_paths,
+            "look_mechanics_file": "qa/look-mechanics.md",
+            "directions": [label for label, _direction in LOOK_CARDINALS],
+            "packaging_eligible": False,
+            "parallelizable_after": standard_job_ids,
+            "derivation_policy": {
+                "may_derive": False,
+                "reason": "cardinal directions require grounded pet-specific generation",
+            },
+        }
+    )
+    for state, row, directions, _purpose in LOOK_ROWS:
+        depends_on = ["look-cardinals"] if row == 9 else ["look-cardinals", "look-row-9"]
+        continuity_inputs = (
+            []
+            if row == 9
+            else [
+                {
+                    "path": "decoded/look-row-9.png",
+                    "role": "completed first half of the clockwise look loop for row 10 continuity",
+                }
+            ]
+        )
+        jobs.append(
+            {
+                "id": state,
+                "kind": "look-row-strip",
+                "status": "pending",
+                "prompt_file": f"prompts/rows/{state}.md",
+                "retry_prompt_file": f"prompts/row-retries/{state}.md",
+                "input_images": [
+                    *reference_inputs,
+                    {
+                        "path": f"{LAYOUT_GUIDE_DIR}/{state}.png",
+                        "role": "layout guide for 8 direction slots; use for spacing only, do not copy guide lines",
+                    },
+                    {
+                        "path": CANONICAL_BASE_PATH,
+                        "role": "canonical identity reference",
+                    },
+                    {
+                        "path": "qa/contact-sheet.png",
+                        "role": "approved standard-row identity, scale, and baseline reference",
+                    },
+                    {
+                        "path": "decoded/look-anchors-approved.png",
+                        "role": "approved cardinal reference strip in order 000 up, 090 screen-right, 180 down, 270 screen-left; interpolate intermediate directions evenly",
+                    },
+                    *continuity_inputs,
+                ],
+                "output_path": f"decoded/{state}.png",
+                "depends_on": depends_on,
+                "generation_skill": "$imagegen",
+                "requires_grounded_generation": True,
+                "allow_prompt_only_generation": False,
+                "identity_reference_paths": identity_reference_paths,
+                "look_mechanics_file": "qa/look-mechanics.md",
+                "directions": directions,
+                "parallelizable_after": depends_on,
+                "derivation_policy": {
+                    "may_derive": False,
+                    "reason": "look directions require grounded pet-specific generation",
+                },
+                "coherent_synthesis_required": True,
+                "individual_cell_packaging_allowed": False,
+                "packaging_eligible": True,
             }
         )
     return jobs
@@ -560,6 +958,33 @@ def main() -> None:
     parser.add_argument("--reference", action="append", default=[])
     parser.add_argument("--output-dir", default="")
     parser.add_argument("--pet-notes", default="")
+    parser.add_argument(
+        "--brand-name",
+        default="",
+        help="Brand, company, or product name used for broad mascot inspiration.",
+    )
+    parser.add_argument(
+        "--brand-brief",
+        default="",
+        help="Compact researched brand cue sentence for the base pet only.",
+    )
+    parser.add_argument(
+        "--brand-source",
+        action="append",
+        default=[],
+        help="Source URL used to produce the brand brief. May be passed multiple times.",
+    )
+    parser.add_argument(
+        "--brand-discovery-file",
+        default="",
+        help="Optional markdown discovery brief to copy into the run for review.",
+    )
+    parser.add_argument(
+        "--style-preset",
+        default="auto",
+        choices=sorted(STYLE_PRESETS),
+        help="Pet-safe style preset to use across the base and all animation rows.",
+    )
     parser.add_argument("--style-notes", default="")
     parser.add_argument(
         "--chroma-key",
@@ -569,15 +994,23 @@ def main() -> None:
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
-    raw_reference_paths = [
-        Path(raw_path).expanduser().resolve() for raw_path in args.reference
-    ]
+    raw_reference_paths = [Path(raw_path).expanduser().resolve() for raw_path in args.reference]
+    raw_brand_discovery_path = (
+        Path(args.brand_discovery_file).expanduser().resolve()
+        if args.brand_discovery_file.strip()
+        else None
+    )
 
     args.display_name = infer_name(args, raw_reference_paths)
     args.pet_name = (args.pet_name or args.display_name).strip()
     args.description = infer_description(args, raw_reference_paths)
     args.pet_notes = infer_pet_notes(args, raw_reference_paths)
     args.pet_id = slugify(args.pet_id or args.pet_name or args.display_name)
+    args.style_preset = args.style_preset.strip().lower()
+    args.style_contract = resolved_style_contract(args.style_preset, args.style_notes)
+    args.brand_name = compact(args.brand_name)
+    args.brand_brief = compact(args.brand_brief)
+    args.brand_source = [compact(source) for source in args.brand_source if compact(source)]
     if not args.pet_id:
         raise SystemExit("pet id must contain at least one letter or digit")
 
@@ -587,18 +1020,20 @@ def main() -> None:
         else default_output_dir(args.pet_id).resolve()
     )
     if run_dir.exists() and any(run_dir.iterdir()) and not args.force:
-        raise SystemExit(
-            f"{run_dir} already exists and is not empty; pass --force to reuse it"
-        )
+        raise SystemExit(f"{run_dir} already exists and is not empty; pass --force to reuse it")
     run_dir.mkdir(parents=True, exist_ok=True)
 
     ref_dir = run_dir / "references"
     prompt_dir = run_dir / "prompts"
     row_prompt_dir = prompt_dir / "rows"
+    row_retry_prompt_dir = prompt_dir / "row-retries"
+    look_anchor_repair_prompt_dir = prompt_dir / "look-anchor-repairs"
     for directory in [
         ref_dir,
         prompt_dir,
         row_prompt_dir,
+        row_retry_prompt_dir,
+        look_anchor_repair_prompt_dir,
         run_dir / "decoded",
         run_dir / "qa",
     ]:
@@ -618,6 +1053,14 @@ def main() -> None:
         copied_refs.append(meta)
         copied_ref_paths.append(copied)
 
+    brand_discovery_path = ""
+    if raw_brand_discovery_path is not None:
+        if not raw_brand_discovery_path.is_file():
+            raise SystemExit(f"brand discovery file not found: {raw_brand_discovery_path}")
+        copied_discovery = run_dir / BRAND_DISCOVERY_PATH
+        shutil.copy2(raw_brand_discovery_path, copied_discovery)
+        brand_discovery_path = rel(copied_discovery, run_dir)
+
     args.chroma_key = choose_chroma_key(copied_ref_paths, args.chroma_key)
     layout_guides = create_layout_guides(run_dir)
 
@@ -626,22 +1069,39 @@ def main() -> None:
         "display_name": args.display_name,
         "description": args.description,
         "created_at": datetime.now(timezone.utc).isoformat(),
+        "sprite_version_number": 2,
         "atlas": ATLAS,
         "rows": [
             {"state": state, "row": row, "frames": frames, "purpose": purpose}
             for state, row, frames, purpose in ROWS
+        ]
+        + [
+            {
+                "state": state,
+                "row": row,
+                "frames": len(directions),
+                "directions": directions,
+                "purpose": purpose,
+            }
+            for state, row, directions, purpose in LOOK_ROWS
         ],
         "layout_guides": [
-            {**guide, "path": rel(Path(str(guide["path"])), run_dir)}
-            for guide in layout_guides
+            {**guide, "path": rel(Path(str(guide["path"])), run_dir)} for guide in layout_guides
         ],
         "references": copied_refs,
         "chroma_key": args.chroma_key,
         "pet_notes": args.pet_notes,
+        "style_preset": args.style_preset,
         "style_notes": args.style_notes,
-        "house_style": DIGITAL_PET_STYLE,
+        "style_contract": args.style_contract,
+        "brand_name": args.brand_name,
+        "brand_brief": args.brand_brief,
+        "brand_sources": args.brand_source,
+        "pet_safe_style": PET_SAFE_STYLE,
         "primary_generation_skill": "$imagegen",
     }
+    if brand_discovery_path:
+        request["brand_discovery_path"] = brand_discovery_path
     (run_dir / "pet_request.json").write_text(
         json.dumps(request, indent=2) + "\n", encoding="utf-8"
     )
@@ -652,7 +1112,25 @@ def main() -> None:
             row_prompt_dir / f"{state}.md",
             row_prompt(args, state, row, frames, purpose),
         )
-
+        write_text(
+            row_retry_prompt_dir / f"{state}.md",
+            retry_row_prompt(args, state, row, frames, purpose),
+        )
+    for state, row, directions, _purpose in LOOK_ROWS:
+        write_text(
+            row_prompt_dir / f"{state}.md",
+            look_row_prompt(args, row, directions),
+        )
+        write_text(
+            row_retry_prompt_dir / f"{state}.md",
+            retry_look_row_prompt(args, row, directions),
+        )
+    write_text(prompt_dir / "look-cardinals.md", look_cardinal_prompt(args))
+    for label, expected_direction in LOOK_CARDINALS:
+        write_text(
+            look_anchor_repair_prompt_dir / f"{label}.md",
+            look_cardinal_repair_prompt(args, label, expected_direction),
+        )
     jobs = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -660,9 +1138,7 @@ def main() -> None:
         "primary_generation_skill": "$imagegen",
         "jobs": make_jobs(run_dir, copied_refs),
     }
-    (run_dir / "imagegen-jobs.json").write_text(
-        json.dumps(jobs, indent=2) + "\n", encoding="utf-8"
-    )
+    (run_dir / "imagegen-jobs.json").write_text(json.dumps(jobs, indent=2) + "\n", encoding="utf-8")
 
     print(
         json.dumps(

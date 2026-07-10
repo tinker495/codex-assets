@@ -23,8 +23,23 @@ ROW_NAMES = [
     "waiting",
     "running",
     "review",
+    "look 000-157.5",
+    "look 180-337.5",
 ]
-USED_COUNTS = [6, 8, 8, 4, 5, 8, 6, 6, 6]
+USED_COUNTS = [6, 8, 8, 4, 5, 8, 6, 6, 6, 8, 8]
+EXTENDED_NEUTRAL_LOOK_FRAME = (0, 6)
+
+
+def is_used_cell(rows: int, row: int, column: int) -> bool:
+    return column < USED_COUNTS[row] or (
+        rows == 11 and (row, column) == EXTENDED_NEUTRAL_LOOK_FRAME
+    )
+
+
+def frame_count_label(rows: int, row: int) -> str:
+    if rows == 11 and row == EXTENDED_NEUTRAL_LOOK_FRAME[0]:
+        return "6 + neutral"
+    return f"{USED_COUNTS[row]} frames"
 
 
 def checker(size: tuple[int, int], square: int = 16) -> Image.Image:
@@ -46,22 +61,25 @@ def main() -> None:
 
     with Image.open(Path(args.atlas).expanduser().resolve()) as opened:
         atlas = opened.convert("RGBA")
+    rows = atlas.height // CELL_HEIGHT
+    if atlas.width != COLUMNS * CELL_WIDTH or rows not in {9, 11}:
+        raise SystemExit(f"atlas must be 1536x1872 or 1536x2288; got {atlas.width}x{atlas.height}")
 
     cell_w = max(1, round(CELL_WIDTH * args.scale))
     cell_h = max(1, round(CELL_HEIGHT * args.scale))
     width = COLUMNS * cell_w
-    height = ROWS * (cell_h + LABEL_HEIGHT)
+    height = rows * (cell_h + LABEL_HEIGHT)
     sheet = Image.new("RGB", (width, height), "#f7f7f7")
     draw = ImageDraw.Draw(sheet)
     font = ImageFont.load_default()
 
-    for row in range(ROWS):
+    for row in range(rows):
         y = row * (cell_h + LABEL_HEIGHT)
         draw.rectangle((0, y, width, y + LABEL_HEIGHT - 1), fill="#111111")
         draw.text((6, y + 5), f"row {row}: {ROW_NAMES[row]}", fill="#ffffff", font=font)
         draw.text(
             (width - 92, y + 5),
-            f"{USED_COUNTS[row]} frames",
+            frame_count_label(rows, row),
             fill="#ffffff",
             font=font,
         )
@@ -79,7 +97,7 @@ def main() -> None:
             bg.paste(crop, (0, 0), crop)
             x = column * cell_w
             sheet.paste(bg, (x, y + LABEL_HEIGHT))
-            outline = "#18a058" if column < USED_COUNTS[row] else "#cc3344"
+            outline = "#18a058" if is_used_cell(rows, row, column) else "#cc3344"
             draw.rectangle(
                 (x, y + LABEL_HEIGHT, x + cell_w - 1, y + LABEL_HEIGHT + cell_h - 1),
                 outline=outline,

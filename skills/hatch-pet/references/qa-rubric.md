@@ -1,61 +1,42 @@
-# QA Rubric
+# V2 Pet QA Rubric
 
-Do not accept an atlas until all checks pass.
+Do not package a pet until every section passes.
 
-## Geometry
+## Geometry And Package
 
-- Exact `1536x1872` dimensions.
-- 8 columns x 9 rows.
-- Each frame fits inside its `192x208` cell.
-- Unused cells are transparent.
+- Final atlas is exactly `1536x2288`, 8 columns x 11 rows, with `192x208` cells.
+- `pet.json` contains `spriteVersionNumber: 2` and points to the packaged spritesheet.
+- Used cells are non-empty; unused standard-row cells are transparent.
+- Fully transparent pixels have zero RGB residue.
+- The 8x9 intermediate atlas is never packaged.
 - `qa/review.json` has no errors.
-- `frames/frames-manifest.json` records component extraction for production rows, unless slot extraction was intentionally accepted after visual inspection.
+- Standard rows use component extraction unless `stable-slots` was deliberately approved after playback review.
+- Coherent look rows recover their ordered pose groups and pass near-edge clipping checks after shared-scale registration into final cells.
 
-## Character Consistency
+## Character And Style
 
-- Same silhouette and proportions across every row.
-- Same face and expression language.
-- Same material, palette, lighting, and prop design.
-- No frame introduces a new unintended character or object.
+- Silhouette, proportions, face, expression language, material, palette, lighting, markings, and props remain the same across all 11 rows.
+- The pet reads clearly inside a `192x208` cell in the chosen style.
+- No frame introduces an unintended character, object, logo, text, scene, or effect.
 
-## Sprite Style
+## Standard Animation
 
-- Art reads as a Codex digital pet sprite, not a polished illustration or glossy app icon.
-- Silhouette is compact and chunky enough to read inside a `192x208` cell.
-- Outlines are dark and simple, with visible stepped/pixel-style edges.
-- Palette is limited, with flat cel shading and minimal highlights or shadow steps.
-- No painterly texture, realistic fur/material detail, soft gradients, high-detail antialiasing, or tiny accessories that disappear at pet size.
+- Rows `0-8` contain the exact required frame counts and recognizable state semantics.
+- Loops do not pop, reverse cadence, face the wrong direction, or remain effectively static.
+- The first idle frame works as a reduced-motion still.
+- `waiting`, `running`, `review`, and `failed` remain visually distinct.
 
-## Animation Completeness
+## Look Directions
 
-- Each row uses the exact expected number of frames.
-- The first and last frames can loop without an obvious pop.
-- Directional rows read as the intended direction.
-- State-specific actions are recognizable at pet size.
-- Poses are generated animation variants, not repeated copies of the same source image.
-
-## App Fitness
-
-- First idle frame works as a static reduced-motion pet.
-- The `idle` row should be calm and low-distraction; reject it if it reads as waving, walking, running, jumping, talking, working, reviewing, reacting dramatically, changing props, or making large pose/silhouette changes.
-- No important detail is too small to read.
-- No frame is clipped by the cell.
-- Failed/review/waiting states are distinct from ordinary idle.
-- Contact sheets must show whole sprite poses inside cells, not cropped tiles from a larger reference image.
-- Contact sheets must not be accepted if every used frame is just the reference image with small geometric transforms.
-- Used cells must not have white or opaque rectangular backgrounds unless the pet intentionally fills the whole cell and the user accepts that tradeoff.
-- The chroma key must be visually absent from the character. If extraction removes character regions, choose a different key and regenerate the affected base/rows.
-- Contact sheets must not show edge slivers or partial neighboring sprites inside cells.
-- Contact sheets must not show darker/lighter versions of the chroma key as shadows, dust, smears, glows, landing marks, or motion effects. These are background extraction failures and should trigger row repair.
-- If `qa/review.json` reports edge pixels, sparse frames, size outliers, or slot-extraction fallback, inspect the row visually and repair it when the issue is visible.
-- If `qa/review.json` reports chroma-adjacent non-transparent pixels, repair the row unless those pixels are an intentional character color and the selected key was manually accepted.
+- All 16 directions are present in fixed clockwise order and visibly distinct from neutral/rest.
+- Cardinal directions read unmistakably as up, right, down, and left; diagonals and intermediates read in the correct quadrant.
+- `qa/look-directions.png` includes full-body and zoomed head/upper-body views.
+- `qa/direction-semantics.json` records `pass`, `expected`, `observed`, and `reason` for every direction.
+- `qa/look-continuity.json` has no unexplained holes, center jumps, area jumps, or local difference outliers.
+- Eyes, eyelids, head, body, appendages, and props follow the pet-specific look mechanics plan.
+- No whole-sprite rotation, replacement/googly eyes, visual clipping, seam bands, or transparent interior holes.
+- A repaired direction is approved by an independent visual QA worker or explicit user inspection, not the repairing parent alone.
 
 ## Repair Policy
 
-Repair the smallest failing scope first:
-
-1. Single bad frame.
-2. One row.
-3. Full atlas regeneration only when identity or layout is broadly broken.
-
-The normal production path should queue targeted repair jobs for failing rows. Manual repair should preserve the same run directory and regenerate only the affected row prompt/image unless the base character is wrong.
+Repair the smallest packaging-eligible scope: one standard row or one complete coherent look row. Never mix an individually generated repair cell into a new pet's final look row. Re-run assembly, deterministic validation, direction QA, continuity measurement, and semantic review after every relevant repair.
