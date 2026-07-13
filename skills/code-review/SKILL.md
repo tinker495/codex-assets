@@ -1,292 +1,89 @@
 ---
 name: code-review
-description: "[OMX] Run a comprehensive code review"
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
 ---
 
-# Code Review Skill
-
-Conduct a thorough code review for quality, security, and maintainability with severity-rated feedback.
-
-## When to Use
-
-This skill activates when:
-- User requests "review this code", "code review"
-- Before merging a pull request
-- After implementing a major feature
-- User wants quality assessment
-
-## GPT-5.5 Guidance Alignment
-
-- Default to outcome-first progress and completion reporting: state the target result, evidence, validation status, and stop condition before adding process detail.
-- Treat newer user task updates as local overrides for the active workflow branch while preserving earlier non-conflicting constraints.
-- If correctness depends on additional inspection, retrieval, execution, or verification, keep using the relevant tools until the review is grounded; stop once enough evidence exists.
-- Continue through clear, low-risk, reversible next steps automatically; ask only when the next step is materially branching, destructive, credentialed, external-production, or preference-dependent.
-
-Delegates to the `code-reviewer` and `architect` agents in parallel for a two-lane review:
-
-1. **Identify Changes**
-   - Run `git diff` to find changed files
-   - Determine scope of review (specific files or entire PR)
-
-2. **Launch Parallel Review Lanes**
-   - **`code-reviewer` lane** - owns spec compliance, security, code quality, performance, and maintainability findings
-   - **`architect` lane** - owns the devil's-advocate / design-tradeoff perspective
-   - Both lanes run in parallel on a clean context with explicit scope and artifacts, and produce distinct outputs before final synthesis
-   - If either lane cannot be launched or does not return evidence, report `independent review unavailable`; do **not** substitute the current/authoring lane, and do **not** approve or mark the review merge-ready.
-
-3. **Review Categories**
-   - **Security** - Hardcoded secrets, injection risks, XSS, CSRF
-   - **Code Quality** - Function size, complexity, nesting depth
-   - **Performance** - Algorithm efficiency, N+1 queries, caching
-   - **Best Practices** - Naming, documentation, error handling
-   - **Maintainability** - Duplication, coupling, testability
-
-4. **Severity Rating**
-   - **CRITICAL** - Security vulnerability (must fix before merge)
-   - **HIGH** - Bug or major code smell (should fix before merge)
-   - **MEDIUM** - Minor issue (fix when possible)
-   - **LOW** - Style/suggestion (consider fixing)
-
-5. **Architectural Status Contract**
-   - **CLEAR** - No unresolved architectural blocker was found
-   - **WATCH** - Non-blocking design/tradeoff concern that must appear in the final synthesis
-   - **BLOCK** - Unresolved design concern that prevents a merge-ready verdict
-
-6. **Specific Recommendations**
-   - File:line locations for each issue
-   - Concrete fix suggestions
-   - Code examples where applicable
-
-7. **Final Synthesis**
-   - Combine the `code-reviewer` recommendation and the architect status into one final verdict
-   - Approval requires explicit evidence from both independent lanes; missing or failed delegation is a blocking unavailable-review state, not an approval fallback
-   - Deterministic merge gating rules:
-     - If architect status is **BLOCK**, final recommendation is **REQUEST CHANGES**
-     - Else if `code-reviewer` recommendation is **REQUEST CHANGES**, final recommendation is **REQUEST CHANGES**
-     - Else if architect status is **WATCH**, final recommendation is **COMMENT**
-     - Else final recommendation follows the `code-reviewer` lane
-   - The final report must make architect blockers impossible to miss
-
-## Agent Delegation
-
-Do not self-review as a fallback. If the `code-reviewer` or `architect` agent path is missing, unavailable, skipped, or fails, emit a clear unavailable-review result and block approval until the independent lane evidence exists.
-
-```
-task(
-  agent_type="code-reviewer",
-  reasoning_effort="xhigh",
-  prompt="CODE REVIEW TASK
-
-Review code changes for quality, security, and maintainability.
-
-This is the code/spec/security lane. Do not absorb architectural ownership.
-
-Scope: [git diff or specific files]
-
-Review Checklist:
-- Security vulnerabilities (OWASP Top 10)
-- Code quality (complexity, duplication)
-- Performance issues (N+1, inefficient algorithms)
-- Best practices (naming, documentation, error handling)
-- Maintainability (coupling, testability)
-
-Output: Code review report with:
-- Files reviewed count
-- Issues by severity (CRITICAL, HIGH, MEDIUM, LOW)
-- Specific file:line locations
-- Fix recommendations
-- Approval recommendation (APPROVE / REQUEST CHANGES / COMMENT)"
-)
-
-task(
-  agent_type="architect",
-  reasoning_effort="xhigh",
-  prompt="ARCHITECTURE / DEVIL'S-ADVOCATE REVIEW TASK
-
-Review the same code changes from the architecture/tradeoff perspective.
-
-Scope: [git diff or specific files]
-
-Focus:
-- System boundaries and interfaces
-- Hidden coupling or long-term maintainability risks
-- Tradeoff tension the main reviewer might miss
-- Strongest counterargument against approving as-is
-
-Output:
-- Architectural Status: CLEAR / WATCH / BLOCK
-- File:line evidence for each concern
-- Concrete tradeoff or design recommendation"
-)
-
-Run both lanes in parallel, then synthesize them with the deterministic rules above.
-```
-
-## External Model Consultation (Preferred)
-
-The code-reviewer agent SHOULD consult Codex for cross-validation.
-
-### Protocol
-1. **Form your OWN review FIRST** - Complete the review independently
-2. **Consult for validation** - Cross-check findings with Codex
-3. **Critically evaluate** - Never blindly adopt external findings
-4. **Graceful optional consultation fallback** - Never block because optional external consultation tools are unavailable; this does not waive the required independent `code-reviewer` and `architect` lanes
-
-### When to Consult
-- Security-sensitive code changes
-- Complex architectural patterns
-- Unfamiliar codebases or languages
-- High-stakes production code
-
-### When to Skip
-- Simple refactoring
-- Well-understood patterns
-- Time-critical reviews
-- Small, isolated changes
-
-### Tool Usage
-Prefer native `code-reviewer` agent consultation or CLI-backed `ask_codex` surfaces when available. Optional MCP compatibility ask tools may be used only when already enabled. If optional external consultation tools are unavailable, continue with the required independent `code-reviewer` and `architect` lanes; do not replace those lanes with self-review.
-
-**Note:** Codex calls can take up to 1 hour. Consider the review timeline before consulting.
-
-## Output Format
-
-```
-CODE REVIEW REPORT
-==================
-
-Files Reviewed: 8
-Total Issues: 12
-Architectural Status: WATCH
-
-CRITICAL (0)
------------
-(none)
+Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
-HIGH (0)
---------
-(none)
+- **Standards** — does the code conform to this repo's documented coding standards?
+- **Spec** — does the code faithfully implement the originating issue / PRD / spec?
 
-MEDIUM (7)
-----------
-1. src/api/auth.ts:42
-   Issue: Email normalization logic is duplicated instead of reusing the shared helper
-   Risk: Validation rules can drift between authentication paths
-   Fix: Route both paths through the shared normalization helper
+Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-2. src/components/UserProfile.tsx:89
-   Issue: Derived permissions are recalculated on every render
-   Risk: Avoidable work during profile refreshes
-   Fix: Memoize the derived permissions list or compute it upstream
+The issue tracker should have been provided to you — run `/setup-matt-pocock-skills` if `docs/agents/issue-tracker.md` is missing.
 
-3. src/utils/validation.ts:15
-   Issue: Form-layer and server-layer validation messages are defined separately
-   Risk: User-facing validation guidance can become inconsistent
-   Fix: Share one validation message helper across both call sites
+## Process
 
-LOW (5)
--------
-...
+### 1. Pin the fixed point
 
-ARCHITECTURE WATCHLIST
-----------------------
-- src/review/orchestrator.ts:88
-  Concern: Review result synthesis relies on implicit ordering rather than an explicit blocker contract
-  Status: WATCH
-  Recommendation: Define deterministic merge gating before expanding reviewers
-
-SYNTHESIS
----------
-- code-reviewer recommendation: COMMENT
-- architect status: WATCH
-- final recommendation: COMMENT
-
-RECOMMENDATION: COMMENT
-
-Address any WATCH concerns before treating the change as merge-ready.
-```
-
-## Review Checklist
-
-The `code-reviewer` lane checks:
-
-### Security
-- [ ] No hardcoded secrets (API keys, passwords, tokens)
-- [ ] All user inputs sanitized
-- [ ] SQL/NoSQL injection prevention
-- [ ] XSS prevention (escaped outputs)
-- [ ] CSRF protection on state-changing operations
-- [ ] Authentication/authorization properly enforced
-
-### Code Quality
-- [ ] Functions < 50 lines (guideline)
-- [ ] Cyclomatic complexity < 10
-- [ ] No deeply nested code (> 4 levels)
-- [ ] No duplicate logic (DRY principle)
-- [ ] Clear, descriptive naming
-
-### Performance
-- [ ] No N+1 query patterns
-- [ ] Appropriate caching where applicable
-- [ ] Efficient algorithms (avoid O(n²) when O(n) possible)
-- [ ] No unnecessary re-renders (React/Vue)
-
-### Best Practices
-- [ ] Error handling present and appropriate
-- [ ] Logging at appropriate levels
-- [ ] Documentation for public APIs
-- [ ] Tests for critical paths
-- [ ] No commented-out code
-
-## Architect Lane Checklist
-
-The `architect` lane checks:
-
-- [ ] Boundary or interface changes are explicit
-- [ ] New coupling/tradeoff risks are surfaced
-- [ ] Long-horizon maintainability concerns are evidence-backed
-- [ ] Architectural status is one of `CLEAR`, `WATCH`, or `BLOCK`
-- [ ] Any `BLOCK` concern cites the reason merge-ready status should be withheld
-
-## Approval Criteria
-
-**APPROVE** - `code-reviewer` returns APPROVE, architect status is `CLEAR`, and both independent lanes returned evidence
-**REQUEST CHANGES** - `code-reviewer` returns REQUEST CHANGES, architect status is `BLOCK`, or required independent review delegation is unavailable/skipped/failed
-**COMMENT** - `code-reviewer` returns COMMENT with architect status `CLEAR`, architect status is `WATCH`, or only LOW/MEDIUM improvements remain
-
-
-## Scenario Examples
-
-**Good:** The user says `continue` after the workflow already has a clear next step. Continue the current branch of work instead of restarting or re-asking the same question.
-
-**Good:** The user changes only the output shape or downstream delivery step (for example `make a PR`). Preserve earlier non-conflicting workflow constraints and apply the update locally.
-
-**Bad:** The user says `continue`, and the workflow restarts discovery or stops before the missing verification/evidence is gathered.
-
-## Use with Other Skills
-
-**With Team:**
-```
-/team "review recent auth changes and report findings"
-```
-Includes coordinated review execution across specialized agents.
-
-**With Ralph:**
-```
-/ralph code-review then fix all issues
-```
-On the explicit Ralph path, review findings should flow into automatic fix follow-up without another permission prompt. Plain `code-review` itself remains read-only and does **not** promise auto-fix.
-
-**With Ultrawork:**
-```
-/ultrawork review all files in src/
-```
-Parallel code review across multiple files.
-
-## Best Practices
-
-- **Review early** - Catch issues before they compound
-- **Review often** - Small, frequent reviews better than huge ones
-- **Address CRITICAL/HIGH first** - Fix security and bugs immediately
-- **Consider context** - Some "issues" may be intentional trade-offs
-- **Learn from reviews** - Use feedback to improve coding practices
+Whatever the user said is the fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. If they didn't specify one, ask for it.
+
+Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+
+Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here — not inside two parallel sub-agents.
+
+### 2. Identify the spec source
+
+Look for the originating spec, in this order:
+
+1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.) — fetch via the workflow in `docs/agents/issue-tracker.md`.
+2. A path the user passed as an argument.
+3. A PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
+4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
+
+### 3. Identify the standards sources
+
+Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+
+On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
+
+- **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
+- **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation — and, like any standard here, skip anything tooling already enforces.
+
+Each smell reads *what it is* → *how to fix*; match it against the diff:
+
+- **Mysterious Name** — a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no honest name comes, the design's murky.
+- **Duplicated Code** — the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.
+- **Feature Envy** — a method that reaches into another object's data more than its own. → move the method onto the data it envies.
+- **Data Clumps** — the same few fields or params keep travelling together (a type wanting to be born). → bundle them into one type, pass that.
+- **Primitive Obsession** — a primitive or string standing in for a domain concept that deserves its own type. → give the concept its own small type.
+- **Repeated Switches** — the same `switch`/`if`-cascade on the same type recurs across the change. → replace with polymorphism, or one map both sites share.
+- **Shotgun Surgery** — one logical change forces scattered edits across many files in the diff. → gather what changes together into one module.
+- **Divergent Change** — one file or module is edited for several unrelated reasons. → split so each module changes for one reason.
+- **Speculative Generality** — abstraction, parameters, or hooks added for needs the spec doesn't have. → delete it; inline back until a real need shows.
+- **Message Chains** — long `a.b().c().d()` navigation the caller shouldn't depend on. → hide the walk behind one method on the first object.
+- **Middle Man** — a class or function that mostly just delegates onward. → cut it, call the real target direct.
+- **Refused Bequest** — a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
+
+### 4. Spawn both sub-agents in parallel
+
+Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
+
+**Standards sub-agent prompt** — include:
+
+- The full diff command and commit list.
+- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the sub-agent has no other access to it.
+- The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+
+**Spec sub-agent prompt** — include:
+
+- The diff command and commit list.
+- The path or fetched contents of the spec.
+- The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
+
+If the spec is missing, skip the Spec sub-agent and note this in the final report.
+
+### 5. Aggregate
+
+Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
+
+End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
+
+## Why two axes
+
+A change can pass one axis and fail the other:
+
+- Code that follows every standard but implements the wrong thing → **Standards pass, Spec fail.**
+- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
+
+Reporting them separately stops one axis from masking the other.
