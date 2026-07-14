@@ -25,10 +25,21 @@ Complete this gate before building the review-comment work queue.
 2. Reconstruct the branch intent and actual scope.
    - Prefer repo tooling when present, e.g. `collect_branch_info.py --base <base> --format json`.
    - Otherwise collect `git log --oneline <base>..HEAD`, `git diff --stat <base>...HEAD`, and the changed-file list.
-   - Read PR title/body, relevant docs, AGENTS.md files for touched paths, and representative changed code before judging comments.
+   - Read commits chronologically and inspect PR title/body, linked issues including follow-ups, relevant docs, AGENTS.md files, tests, and representative changed code before judging comments.
 3. Capture a short context brief for yourself before editing.
    - Include: intended behavior, changed subsystems, semantic boundaries, verification expectations, and known risk areas.
-   - If the comment appears to contradict branch intent, inspect deeper before deciding whether it is valid.
+   - If the comment appears to contradict branch intent, apply the preservation gate below before deciding whether it is valid.
+
+## Branch Intent Preservation Gate
+
+Apply this gate before deleting, reverting, weakening, or replacing branch behavior, tests, or contract text.
+
+- Treat a later intentional branch commit backed by code and regression tests as branch intent. Do not silently override it with an older issue, PR body, or baseline spec.
+- Treat disagreement between older contract text and current branch behavior as contract drift to reconcile, not automatic authorization to roll back the branch.
+- Limit each review comment to the defect it actually identifies. Valid adjacent findings do not authorize unrelated behavior removal.
+- Preserve current behavior while fixing the review defect when both can coexist. If they cannot, report the exact evidence conflict and require explicit user or reviewer direction before rollback.
+- Never make a rollback green by deleting, reversing, or weakening its only regression test. Any authorized behavior removal must include replacement coverage for the newly intended contract.
+- Record every authorized behavior removal in the context brief with its explicit source: user direction, review comment, or newer accepted contract.
 
 ## Review-Fix Workflow
 
@@ -45,6 +56,7 @@ Complete this gate before building the review-comment work queue.
    - For invalid, duplicate, already-satisfied, or out-of-scope comments, prepare a concise evidence-backed rationale reply.
 4. Patch valid comments narrowly.
    - Make the smallest change that preserves the branch intent while addressing the review point.
+   - Run the Branch Intent Preservation Gate before any behavior or regression-test removal.
    - Do not add unrelated TODOs, compatibility shims, broad cleanup, or new dependencies.
    - If comments conflict, fix the safe shared contract or mark the conflict as `blocked` with evidence.
 5. Verify before any “fixed” reply.
@@ -86,6 +98,7 @@ Never claim branch context, a fix, a push, or resolution that has not actually b
 ## Handoff Checklist
 
 - Branch/PR context reconstructed and summarized.
+- Behavior removals are absent or explicitly authorized and recorded with their source.
 - Target PR identified.
 - Unresolved thread queue classified against branch intent.
 - Valid comments patched or rationale-only replies prepared.
