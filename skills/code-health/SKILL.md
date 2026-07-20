@@ -1,6 +1,6 @@
 ---
 name: code-health
-description: "Run repo code-health checks: duplication, dead code, complexity, maintainability, coverage hotspots, diff summary."
+description: "Run or interpret repository code-health checks, branch-scoped health analysis, complexity/LOC gates, duplication, dead code, maintainability, coverage hotspots, and deletion-first remediation planning."
 ---
 
 # Code Health
@@ -9,8 +9,17 @@ description: "Run repo code-health checks: duplication, dead code, complexity, m
 Run the repo's code-health pipeline and deliver a concise, actionable report that highlights risks and cleanup opportunities.
 Always split diff reporting into non-test vs test. Minimize non-test diff; do not constrain test diff.
 
+Default to read-only diagnosis. Apply remediation only when the user explicitly asks to change or clean code; route broad cleanup execution to `ultraclean`.
+
+## Modes
+
+- **summary**: normal pipeline and ranked findings.
+- **full**: deeper repository-wide metrics.
+- **branch**: `branch-onboarding-brief` plus fork-point health and non-test hotspot localization.
+- **remediation**: branch analysis plus an intent-cluster plan and balanced complexity/LOC acceptance gates; edits still require an implementation request.
+
 ## Workflow
-1. Confirm repo root (the script expects to run from the repository root).
+1. Select the smallest mode that satisfies the request and confirm the repository root.
 2. Ensure tools exist in the environment: `pytest`, `coverage`, `vulture`, `radon`, `xenon`, and `jscpd` (via `npx` or global install). Use `uv` if available.
 3. Run pipeline (preferred, branch fork-point baseline):
    - `test -f /Users/mrx-ksjung/.codex/skills/code-health/scripts/run_code_health.py || rg --files /Users/mrx-ksjung/.codex/skills/code-health -g 'run_code_health.py'`
@@ -25,15 +34,27 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
    - Before using `--out-dir`, verify writability: `test -w /tmp` or `test -d "$CODEX_HOME/shared/code-health"`.
    - If neither is writable, fallback to a repo-root temp dir (for example, `<repo_root>/.codex_tmp/code-health`) and report the fallback.
    - If the pipeline fails, capture the failing substep/command plus the relevant stdout/stderr. Distinguish `pytest` failure from later reporting failure so downstream consumers can decide whether the standard test item passed even when `code-health` overall failed.
-4. If the request is complexity-fix oriented (`xenon FAIL`, `radon C+`), run:
+4. In branch or remediation mode, run `branch-onboarding-brief` first and reuse its fork point, changed-file set, churn, and branch-intent evidence. Localize only surfaced non-test hotspots with repository-native search, Probe when installed, then `rg -n` for exact anchors.
+5. If the request is complexity-fix oriented (`xenon FAIL`, `radon C+`), run:
    - `uv run radon cc src -s -n C`
    - `uv run xenon --max-absolute B --max-modules A --max-average A src` (or repo-provided thresholds)
-5. On complexity fail, apply two-phase triage from `references/xenon_triage_playbook.md`:
+6. On complexity fail, apply two-phase triage from `references/xenon_triage_playbook.md`:
    - Phase 1: clear block-level offenders (C/D blocks first).
    - Phase 2: clear module-rank offenders (B modules -> A) without behavior drift.
-6. Summarize outputs using the report template below, keeping non-test and test diffs separate.
-7. Call out net code growth and missing tests; prefer deletion-first actions.
-8. If the task includes repository navigation/localization comparison, report efficiency metrics:
+7. In remediation mode, build an intent-cluster table before proposing edits. Keep a merge/consolidation candidate only when all three gates pass:
+   - behavioral: required outputs, side effects, and error boundaries remain stable
+   - conceptual: the result represents one durable domain concept, not a generic common-code bucket
+   - physical: the change removes executable duplication, branches, wrappers, or normalization sites
+   Reject relabeling without compression. Do not use a fixed deletion quota; stop when no safe, evidence-backed candidate remains.
+8. Apply the balanced acceptance gate to each remediation cycle:
+   - offending complexity blocks and minimum required CC do not regress
+   - xenon status does not regress
+   - working non-test net delta stays `<= 0`, unless the user explicitly approved a behavior change whose minimal implementation requires growth
+   - targeted behavior tests pass
+   Use verdicts `balance_ok`, `loc_guardrail_breach`, `complexity_regression`, `xenon_regression`, or `balance_blocked`. Two consecutive failures with the same cause stop the loop.
+9. Summarize outputs using the report template below, keeping non-test and test diffs separate.
+10. Call out net code growth and missing tests; prefer deletion-first actions. If implementation was requested, hand broad or cross-module cleanup to `ultraclean` with the confirmed clusters and gates rather than duplicating an execution workflow here.
+11. If the task includes repository navigation/localization comparison, report efficiency metrics:
    - `steps` (average tool or reasoning steps)
    - `cost_usd` (if available from logs)
    - `efficiency = Acc@5 / cost_usd` (or mark unavailable when no cost metric exists)
@@ -63,6 +84,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - Live status metadata (when applicable): sibling `status_json` file with `phase`, `current_step`, heartbeat updates, and artifact paths for long-running checks.
 - Navigation efficiency (optional): steps/cost/efficiency when localization workflows are in scope.
 - Actions: 3-5 concrete follow-ups, prioritize deletions and simplifications.
+- Remediation mode: intent cluster, three-gate verdict, projected removal, behavior lock, balance verdict, and exact validation commands.
 
 ## Heuristics
 - Flag duplication > 5% or large clone clusters.
@@ -70,6 +92,7 @@ Always split diff reporting into non-test vs test. Minimize non-test diff; do no
 - If cyclomatic complexity is C or worse, or MI is low, suggest refactors or tests.
 - If non-test diff shows net growth without tests, call it out explicitly.
 - Never imply that `code-health` coverage satisfies `make test-full`; full-dataset verification requires an explicit separate run.
+- Never force a line-count target. Safe stop conditions and behavior preservation outrank volume reduction.
 
 ## Bundled resources
 - `scripts/run_code_health.py`: orchestrate tool execution and write global reports (not in repo).

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Harness Docs Alignment Audit"
-  short_description: "Audit and fix docs integrity drift"
-  default_prompt: "Use $docs-codebase-alignment-audit to run docs integrity audits and minimal fixes for links, paths, targets, AGENTS chains, and docs-check guardrails."
+  display_name: "Docs Codebase Alignment Audit"
+  short_description: "Audit full or branch-scoped docs drift"
+  default_prompt: "Use $docs-codebase-alignment-audit in full or branch mode to map doc impact, repair evidence-backed drift, and verify mechanical guards."

@@ -16,22 +16,27 @@ find src -type f -name AGENTS.md | sort
 
 ## Checks
 
-1. Root -> Local entrypoint check
-- Root `AGENTS.md` should reference at least the major local entrypoints used in active work.
+1. Discovery-contract check
+- Read root `AGENTS.md` and the docs contract before deciding whether navigation is explicit-list or command-discovery based.
+- Treat the repository's declared mechanism as SSOT. Do not invent a second inventory.
+
+2. Root -> Local entrypoint check
+- Root `AGENTS.md` should explain how local instructions are discovered.
 - Root `AGENTS.md` should stay map-like and point to deeper docs instead of duplicating full policy text.
 
-2. Docs index -> Local AGENTS inventory check
-- `docs/index.md` Local AGENTS section should include every discovered local AGENTS path.
+3. Docs index check
+- If the contract requires explicit inventory, `docs/index.md` should include every discovered local AGENTS path.
+- If the contract names `find src -name AGENTS.md` or equivalent as SSOT, verify that discoverability contract instead of copying paths into the index.
 
-3. Parent -> Child AGENTS check
-- Parent AGENTS files should list relevant direct child AGENTS where child-specific rules exist.
+4. Parent -> Child AGENTS check
+- Require parent-child links only when the repository contract or established local pattern requires them.
 
-4. SSOT contract check
+5. SSOT contract check
 - `docs/_meta/docs-contract.md` (or equivalent) should include `src/**/AGENTS.md` in As-Is SSOT when local AGENTS are active.
 
-5. Progressive disclosure continuity
+6. Progressive disclosure continuity
 - `AGENTS.md` should point to `docs/index.md`.
-- `docs/index.md` should expose guides/reference/specs plus Local AGENTS inventory.
+- `docs/index.md` should expose guides/reference/specs and the repository's chosen local-AGENTS discovery route.
 
 ## Fix Scope
 

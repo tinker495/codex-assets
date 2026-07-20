@@ -264,7 +264,7 @@ Include in the final handoff:
 ## Cross-skill usage
 
 - `branch-onboarding-brief`: mandatory before any rewrite.
-- `main-merge`: do not call for this workflow; this skill performs rebase, not merge.
+- `branch-context-merge`: do not call for this workflow; this skill performs rebase, not merge.
 - `code-health`: use only when regrouping exposes unusually large or risky non-test churn.
 
 ## Resources

@@ -1,6 +1,6 @@
 ---
 name: docs-codebase-alignment-audit
-description: "Audit and minimally repair Markdown docs for broken links, stale paths, make targets, and SSOT rules."
+description: "Audit and minimally repair repository docs in full or branch mode for broken links, stale paths, changed symbols, make targets, AGENTS navigation, and As-Is/To-Be SSOT rules."
 ---
 
 # Docs Codebase Alignment Audit
@@ -9,6 +9,12 @@ description: "Audit and minimally repair Markdown docs for broken links, stale p
 
 Run deterministic docs alignment checks and apply minimal, evidence-based fixes.
 Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-facing when boundary text is explicit.
+
+## Modes
+
+- **full**: audit tracked repository docs and mechanical guards. This is the default.
+- **branch**: start from the branch fork point, map changed paths and symbols to affected docs, then run the same integrity gates over that impact set.
+- **check-only**: report findings without editing.
 
 ## Operational Noise Guardrails
 - Before direct file access (`sed`/`cat`/`rg` on explicit paths), run `test -f` or `rg --files -g` preflight.
@@ -45,8 +51,11 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 ## Workflow
 
 1. Inventory scope
-- Default target is tracked docs: `git ls-files docs`
-- Limit edits to files explicitly in scope.
+- Full-mode default is tracked docs: `git ls-files docs` plus repository map files such as `AGENTS.md`.
+- In branch mode, run `branch-onboarding-brief` when available, resolve the fork point, and collect changed files and numstat with `git diff <fork-point>..HEAD --name-only` and `--numstat`.
+- Build the branch impact set from docs already changed, docs that mention changed paths or symbols, map/contract docs affected by navigation changes, and repo-native design/quality/reliability/security artifacts whose status changed.
+- Do not use a global hardcoded project-path matrix. Prefer the current repository's maps, local AGENTS, imports, tests, docs indexes, and exact `rg -n` evidence.
+- Limit edits to files explicitly in the selected impact set.
 
 2. Read repository map and contracts first
 - Prioritize: `AGENTS.md`, `docs/index.md`, `docs/_meta/docs-contract.md`, then local `src/**/AGENTS.md`.
@@ -82,17 +91,14 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
   - old path does not exist
   - new path exists and is the canonical replacement
 - Run a focused `rg` on docs/AGENTS files for the stale path before editing.
-- Explicit recurring guard: treat `src/stowage/planner/spp/types.py` -> `src/stowage/planner/spp/domain/types.py` as a known relocation; fix stale references immediately when found.
 - If evidence is ambiguous (multiple valid targets), keep-with-note instead of guessing.
 
 6. Verify AGENTS reference chain (when AGENTS files exist)
 - Detect local AGENTS: `find src -type f -name AGENTS.md | sort`.
-- Check hub/index references:
-  - root `AGENTS.md` should reference key local AGENTS entry points.
-  - `docs/index.md` Local AGENTS section should include discovered local AGENTS paths.
-- Check parent-child references:
-  - parent AGENTS files (for example `src/stowage/AGENTS.md`) should list direct child-context AGENTS where applicable.
-- Classify missing AGENTS references as `fix-now` unless the doc explicitly states a temporary exception.
+- Read the repository's own AGENTS discovery contract before changing navigation.
+- If the contract uses generated discovery such as `find src -name AGENTS.md` as SSOT, verify that command and its documentation instead of duplicating every path in indexes.
+- If the contract requires explicit hub or parent-child links, validate only those required links.
+- Classify a navigation gap as `fix-now` only when it violates the repository's declared contract.
 
 7. Verify harness mechanical guards
 - Check `Makefile` for `docs-check` (or equivalent) target.
@@ -102,7 +108,7 @@ Keep As-Is runtime docs aligned to code. Keep To-Be docs intentionally future-fa
 
 8. Classify findings
 - `fix-now`: broken path, missing make target, broken relative link, stale direct code reference.
-- `fix-now`: missing AGENTS chain reference (index or parent-child), missing docs mechanical guard.
+- `fix-now`: AGENTS navigation that violates the repository's declared discovery contract, or a missing docs mechanical guard.
 - `keep-with-note`: intentional To-Be mismatch with explicit boundary text, or ambiguous relocation targets.
 - `ignore`: examples/placeholders that are explicitly marked as template syntax.
 - `doc-gardening`: stale but non-blocking drift candidates safe for follow-up PR.

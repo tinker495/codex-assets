@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ultraclean"
+  short_description: "Adaptive deletion-first codebase cleanup"
+  default_prompt: "Use $ultraclean to clean the current branch or full repository with adaptive partitioning, behavior locks, and independent review."

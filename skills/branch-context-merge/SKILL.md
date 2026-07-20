@@ -1,6 +1,6 @@
 ---
 name: branch-context-merge
-description: "Merge origin/main into current branch while preserving branch intent, context, and ownership decisions."
+description: "Sync or merge origin/main into the current branch while preserving branch intent, resolving conflicts by semantic ownership, validating both parents, and refreshing affected docs when needed."
 ---
 
 # Branch Context Merge
@@ -27,7 +27,7 @@ Do not use blanket `--ours` / `--theirs` resolution.
 1. **Load context before merging**
    - Run `branch-onboarding-brief` first. Use its collector when available: `collect_branch_info.py --base origin/main --format json`.
    - Run `codebase-recon` when the user names it or when the merge touches high-risk/core areas.
-   - Inspect actual changed files, not just commit titles. Use Probe/`omx explore` for symbols and ownership boundaries.
+   - Inspect actual changed files, not just commit titles. Use repository-native search, Probe when installed, and `rg -n` for exact symbols and ownership boundaries.
    - Record: branch name, fork point, commit list, changed files, top churn, code-grounded branch intent.
 
 2. **Preflight safety**
@@ -63,7 +63,12 @@ Do not use blanket `--ours` / `--theirs` resolution.
    - Run docs checks when docs/AGENTS/specs changed.
    - Run full tests only when risk or user request justifies the cost.
 
-7. **Post-merge evidence**
+7. **Refresh affected docs when the merge changes documented behavior**
+   - Invoke `docs-codebase-alignment-audit` in branch mode after runtime behavior is stable.
+   - Refresh only docs affected by changed paths, symbols, contracts, commands, or AGENTS navigation.
+   - Skip doc edits when evidence shows no documented contract changed; report that decision instead of forcing churn.
+
+8. **Post-merge evidence**
    - Confirm `origin/main` is an ancestor of `HEAD`.
    - Confirm the pre-merge branch HEAD is an ancestor of `HEAD`.
    - Confirm no conflict markers remain.
@@ -89,3 +94,9 @@ Put the merge outcome first, then include:
 - open risks and explicitly not-run checks
 
 Ask the user only for destructive choices, dirty pre-merge state, or genuinely ambiguous branch intent.
+
+## Consolidated ownership
+
+- `branch-onboarding-brief` owns fork-point and branch-intent collection.
+- `docs-codebase-alignment-audit` owns branch-aware documentation impact mapping and repair.
+- This skill owns preflight, merge execution, semantic conflict resolution, parent proof, and integration reporting.

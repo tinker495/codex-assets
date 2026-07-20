@@ -49,6 +49,14 @@ nobody sets, layer with one caller) · `shrink:` (same logic, fewer lines). Thes
 
 ## SAFE vs RISKY — the cleanup gate
 
+Before consolidating multiple implementations, require all three intent gates:
+
+1. **Behavioral** — required outputs, side effects, error boundaries, and valid-input behavior remain stable.
+2. **Conceptual** — the result names one durable domain concept with a real invariant; it is not a generic common-code container.
+3. **Physical** — the change removes executable duplication, branches, wrappers, mapping tables, or normalization sites. Moving or renaming code without compression fails.
+
+Keep variants separate when they encode distinct domain invariants, lifecycle timing, consistency guarantees, or incompatible public contracts. Do not force a consolidation or line-count target when these gates fail.
+
 | | **SAFE -> fix now** | **RISKY -> reduce risk, then fix or report only** |
 |---|---|---|
 | Scope | local to the partition, single file | crosses files / modules / partitions |
@@ -88,6 +96,6 @@ Compute per partition; the overall score is the codebase/branch roll-up over all
 (cleaner + scavenger), Critical first, with a one-line recommended fix order when > 5 findings.
 
 Report the ponytail volume metric beside the score: **`net: -<N> lines, -<M> deps`** — what this pass
-actually removed (and what a deferred finding *would* remove). Volume reduction is a first-class
+actually removed. Estimates for deferred findings stay separate and must not count as delivered reduction. Volume reduction is a first-class
 outcome, not a side effect. A partition with nothing left to cut reports **`Lean already. Ship.`**
 instead of inventing findings.

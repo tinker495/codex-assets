@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Health"
-  short_description: "Run code health checks and summarize hotspots"
-  default_prompt: "Use $code-health to run repo code health and summarize risks."
+  short_description: "Diagnose health and gate safe remediation"
+  default_prompt: "Use $code-health to diagnose repository or branch health, rank hotspots, and define safe complexity and LOC gates."

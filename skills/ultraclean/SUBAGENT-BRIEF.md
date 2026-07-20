@@ -1,6 +1,6 @@
 # Ultraclean — Subagent Briefs
 
-Fill the `{{…}}` slots before dispatching. All three are Codex native subagents (frontier tier — never spark/mini/nano). If native subagents are unavailable, execute the same lanes sequentially under the same contracts.
+Fill the `{{…}}` slots before dispatching. Use the installed role that matches each bounded lane. If native subagents are unavailable, keep one writer pass and use the strongest independent verification surface available.
 
 ---
 
@@ -128,7 +128,7 @@ Verdict (return raw):
 - **Synthesized fix-list (ALWAYS produce this).** Consolidate everything that must change into ONE
   per-file list (Iron Law form): deferred findings promoted to fix-now, scavenger findings routed
   to fix-now, pre-report removals, and any CHANGES-REQUIRED follow-ups. The orchestrator
-  **ALWAYS** runs a fresh single-threaded writer pass over this list before the report — synthesizing
+  **ALWAYS** runs a single-threaded writer pass over this list before the report — synthesizing
   the review results into code is mandatory, not conditional. You do NOT edit. Only an honestly-empty
   list makes that pass a no-op.
 - **Deferred remainder**: report-only findings that cannot be safely fixed in this cleanup pass even

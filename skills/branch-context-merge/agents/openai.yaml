@@ -1,0 +1,4 @@
+interface:
+  display_name: "Branch Context Merge"
+  short_description: "Merge main while preserving branch intent"
+  default_prompt: "Use $branch-context-merge to merge origin/main safely, resolve conflicts by ownership, validate the result, and refresh affected docs."
