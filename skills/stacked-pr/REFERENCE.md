@@ -78,14 +78,14 @@ gh stack trunk
 ## Submit And Edit PRs
 
 ```bash
-gh stack submit --auto
-gh stack submit --auto --remote origin
 gh stack submit --auto --open
+gh stack submit --auto --open --remote origin
 gh stack view --json
 gh pr edit <number> --title "<title>" --body-file <file>
 ```
 
-Use `--open` only when the user wants PRs ready for review. Without that request, preserve the default PR readiness behavior.
+Use `--open` by default so stacked PRs are ready for review. Omit it only
+when the user explicitly requests draft PRs.
 
 `--auto` title behavior:
 

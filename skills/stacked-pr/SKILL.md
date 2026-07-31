@@ -17,7 +17,7 @@ gh stack init --base main -p feat data-models service api
 gh stack checkout feat/data-models  # edit, test, commit
 gh stack checkout feat/service      # edit, test, commit
 gh stack checkout feat/api          # edit, test, commit
-gh stack submit --auto --remote origin
+gh stack submit --auto --open --remote origin
 gh stack view --json
 ```
 
@@ -48,16 +48,23 @@ Prefer one normal PR for a small bug fix, a narrow feature, or unrelated changes
 6. Work one layer at a time: `gh stack checkout <branch>`, edit only that layer, run targeted validation, then commit.
 7. Submit/update PRs only when publishing is in scope:
    ```bash
-   gh stack submit --auto --remote origin
+   gh stack submit --auto --open --remote origin
    gh stack view --json
    ```
-8. After lower-layer review changes, rebase and push the affected upper stack:
+8. Check CI once without waiting:
+   ```bash
+   gh pr view <number> --json statusCheckRollup
+   ```
+   Treat pending checks as a normal handoff state: report them and stop. Use
+   `gh pr checks --watch` only when the user explicitly asks to monitor, wait,
+   or babysit CI.
+9. After lower-layer review changes, rebase and push the affected upper stack:
    ```bash
    gh stack rebase --upstack --remote origin
    gh stack push --remote origin
    gh stack view --json
    ```
-9. After merges, use `gh stack sync --remote origin`; use `--prune` only when deleting merged local stack branches is in scope.
+10. After merges, use `gh stack sync --remote origin`; use `--prune` only when deleting merged local stack branches is in scope.
 
 ## Existing Branches Or PRs
 
@@ -72,7 +79,9 @@ gh stack link 101 102 103
 
 - Always provide branch names or PR numbers to `init`, `add`, and `checkout`; omitted arguments can prompt.
 - Prefer prefix stacks, but pass only the suffix to `gh stack add` when a prefix is set.
-- Always use `gh stack submit --auto` and `gh stack view --json`; plain `submit` or `view` can prompt or open a TUI.
+- Always use `gh stack submit --auto --open` and `gh stack view --json`; stacked PRs are ready by default. Omit `--open` only when the user explicitly requests drafts.
+- Never wait on pending CI by default. Run one bounded status query, report
+  pending checks, and finish the publish handoff.
 - Use `--remote <name>` for `push`, `submit`, `sync`, and `link` when multiple remotes exist; also set `git config remote.pushDefault origin`.
 - Avoid `gh stack modify` and argument-less `gh stack checkout` in non-interactive agent sessions because they open interactive UIs.
 - Prefer `gh stack push` over manual force pushes; it pushes the whole stack with stack-aware safety.
