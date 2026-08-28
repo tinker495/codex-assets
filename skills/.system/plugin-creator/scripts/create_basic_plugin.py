@@ -6,13 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from identifier_validation import validate_marketplace_name
 
 
 MAX_PLUGIN_NAME_LENGTH = 64
@@ -42,6 +37,15 @@ def validate_plugin_name(plugin_name: str) -> None:
         raise ValueError(
             f"Plugin name '{plugin_name}' is too long ({len(plugin_name)} characters). "
             f"Maximum is {MAX_PLUGIN_NAME_LENGTH} characters."
+        )
+
+
+def validate_marketplace_name(marketplace_name: str) -> None:
+    if not marketplace_name:
+        raise ValueError("Marketplace name must include at least one letter or digit.")
+    if re.fullmatch(r"[A-Za-z0-9_-]+", marketplace_name) is None:
+        raise ValueError(
+            "Marketplace name may only contain ASCII letters, digits, `_`, and `-`."
         )
 
 
@@ -117,12 +121,15 @@ def validate_marketplace_interface(payload: dict[str, Any]) -> None:
         raise ValueError("marketplace.json field 'interface' must be an object.")
 
 
-def load_validated_marketplace(
+def update_marketplace_json(
     marketplace_path: Path,
     marketplace_name: str | None,
     plugin_name: str,
+    install_policy: str,
+    auth_policy: str,
+    category: str,
     force: bool,
-) -> dict[str, Any]:
+) -> None:
     if marketplace_path.exists():
         payload = load_json(marketplace_path)
     else:
@@ -134,11 +141,9 @@ def load_validated_marketplace(
     validate_marketplace_interface(payload)
 
     existing_marketplace_name = payload.get("name")
-    if not isinstance(existing_marketplace_name, str) or not existing_marketplace_name.strip():
-        raise ValueError(f"{marketplace_path} must contain a non-empty string 'name'.")
-    validate_marketplace_name(existing_marketplace_name)
-
     if marketplace_name is not None:
+        if not isinstance(existing_marketplace_name, str) or not existing_marketplace_name.strip():
+            raise ValueError(f"{marketplace_path} must contain a non-empty string 'name'.")
         if existing_marketplace_name != marketplace_name:
             raise ValueError(
                 f"{marketplace_path} already uses marketplace name "
@@ -149,33 +154,16 @@ def load_validated_marketplace(
     plugins = payload.setdefault("plugins", [])
     if not isinstance(plugins, list):
         raise ValueError(f"{marketplace_path} field 'plugins' must be an array.")
-    if not force and any(
-        isinstance(entry, dict) and entry.get("name") == plugin_name for entry in plugins
-    ):
-        raise FileExistsError(
-            f"Marketplace entry '{plugin_name}' already exists in {marketplace_path}. "
-            "Use --force to overwrite that entry."
-        )
-
-    return payload
-
-
-def update_marketplace_json(
-    marketplace_path: Path,
-    marketplace_name: str | None,
-    plugin_name: str,
-    install_policy: str,
-    auth_policy: str,
-    category: str,
-    force: bool,
-) -> None:
-    payload = load_validated_marketplace(marketplace_path, marketplace_name, plugin_name, force)
-    plugins = payload["plugins"]
 
     new_entry = build_marketplace_entry(plugin_name, install_policy, auth_policy, category)
 
     for index, entry in enumerate(plugins):
         if isinstance(entry, dict) and entry.get("name") == plugin_name:
+            if not force:
+                raise FileExistsError(
+                    f"Marketplace entry '{plugin_name}' already exists in {marketplace_path}. "
+                    "Use --force to overwrite that entry."
+                )
             plugins[index] = new_entry
             break
     else:
@@ -278,10 +266,6 @@ def main() -> None:
         marketplace_name = args.marketplace_name.strip()
         validate_marketplace_name(marketplace_name)
 
-    if args.with_marketplace:
-        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
-        load_validated_marketplace(marketplace_path, marketplace_name, plugin_name, args.force)
-
     plugin_root = (Path(args.path).expanduser().resolve() / plugin_name)
     plugin_root.mkdir(parents=True, exist_ok=True)
 
@@ -319,6 +303,7 @@ def main() -> None:
         )
 
     if args.with_marketplace:
+        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
         update_marketplace_json(
             marketplace_path,
             marketplace_name,
