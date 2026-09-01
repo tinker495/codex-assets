@@ -6,16 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
 
 import yaml
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from identifier_validation import validate_plugin_identifier
 
 
 TODO_MARKER = "[TODO:"
@@ -116,12 +111,7 @@ def validate_manifest_shape(
         errors.append(f"plugin.json field `{key}` is not accepted by plugin validation")
 
     validate_optional_non_empty_string(manifest, "id", errors)
-    plugin_name = require_non_empty_string(manifest, "name", errors)
-    if plugin_name is not None:
-        try:
-            validate_plugin_identifier(plugin_name)
-        except ValueError as error:
-            errors.append(f"plugin.json field `name` is invalid: {error}")
+    require_non_empty_string(manifest, "name", errors)
     version = require_non_empty_string(manifest, "version", errors)
     if version is not None and SEMVER_RE.fullmatch(version) is None:
         errors.append("plugin.json field `version` must be strict semver")

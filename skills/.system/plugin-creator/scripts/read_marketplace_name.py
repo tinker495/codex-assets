@@ -8,10 +8,6 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from identifier_validation import validate_marketplace_name
-
 
 def default_marketplace_path() -> Path:
     return Path.home() / ".agents" / "plugins" / "marketplace.json"
@@ -41,8 +37,7 @@ def main() -> None:
     name = payload.get("name")
     if not isinstance(name, str) or not name.strip():
         raise ValueError(f"{marketplace_path} must contain a non-empty string 'name'.")
-    validate_marketplace_name(name)
-    print(name)
+    print(name.strip())
 
 
 if __name__ == "__main__":
