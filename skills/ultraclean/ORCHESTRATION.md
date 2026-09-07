@@ -87,8 +87,7 @@ formula in `CHECKLIST.md`. Report sections:
 - Verification matrix (gate → PASS/FAIL)
 - Residual risks + recommended fix order
 
-**Write to** the first that applies: `report/ultraclean-<YYYY-MM-DD>.md` (if `report/` exists) →
-`.omc/reports/ultraclean-<YYYY-MM-DD>.md` (if `.omc/` exists) → else print inline. Stamp the date
+**Write to** `report/ultraclean-<YYYY-MM-DD>.md` if `report/` exists; otherwise print inline. Stamp the date
 with `date +%F`.
 
 ## Failure handling
