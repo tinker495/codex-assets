@@ -88,6 +88,10 @@ gh stack link 101 102 103
 - Treat `gh stack submit` failure for unavailable stacked PRs as a capability blocker; do not silently fall back to unstacked PRs.
 - Do not use destructive git commands to reshape a stack unless the user explicitly requested that exact operation.
 - Keep PR layers small enough that each reviewer can understand the delta against the branch below.
+- PR body: after drafting it (or after `submit --auto` filled it from a commit body), run two passes on the prose, then publish with `gh pr edit <number> --body-file <file>`:
+  1. `caveman` skill at `lite`: no filler or hedging, full sentences. This is a deliberate exception to caveman's Boundaries (PR text); apply it to the body only and do not leave caveman mode on.
+  2. `korean-humanizer` skill on the compressed body; publish the text it returns.
+  Keep code blocks, commands, paths, identifiers, numbers, headings, tables, and checklists verbatim in both passes.
 - Verify completion with `gh stack view --json`, `git status --short`, and relevant tests before reporting done.
 
 ## Reference
