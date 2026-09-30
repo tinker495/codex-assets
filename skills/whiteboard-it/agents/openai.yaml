@@ -1,0 +1,9 @@
+interface:
+  display_name: "Whiteboard it"
+  short_description: "요청한 내용을 Whiteboard로 풀어 쓰고 간결하고 자연스러운 한국어로 설명"
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "whiteboard"
+      description: "Whiteboard 문서와 도식을 작성하고 갱신하는 도구"
